@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<addon id="plugin.video.movistarplus"
+       name="Movistar+"
+       version="0.3.11"
+       provider-name="Paco8">
+  <requires>
+  <!--- <import addon="xbmc.python" version="2.25.0"/> -->
+  <import addon="script.module.requests"/>
+  <import addon="script.module.inputstreamhelper" version="0.5.2" />
+  <import addon="script.module.pytz"/>
+  <import addon="script.module.ttml2ssa" version="0.1.16" />
+  </requires>
+  <extension point="xbmc.python.pluginsource" library="default.py">
+  <provides>video</provides>
+  </extension>
+  <extension point="xbmc.service" library="service.py" />
+
+  <extension point="xbmc.addon.metadata">
+    <summary lang="en_GB">Movistar+</summary>
+    <description lang="en_GB">Movistar+</description>
+    <description lang="en_GB">Watch live channels, recordings and video on demand content from Movistar+ in Kodi. Requires a subscription.</description>
+    <description lang="es_ES">Vea canales en directo, grabaciones, U7D y TV a la carta de Movistar+ en Kodi. Se necesita estar abonado.</description>
+    <disclaimer lang="en_GB">This addon is not officially commissioned/supported by Movistar+. All product names, logos, and trademarks mentioned in this project are property of their respective owners.</disclaimer>
+    <disclaimer lang="es_ES">Este addon no ha sido realizado ni apoyado por Movistar+. Todos los nombres de productos, logotipos y marcas registradas mencionados en este proyecto son propiedad de sus respectivos dueños.</disclaimer>
+    <platform>all</platform>
+    <license>LGPL-2.1-or-later</license>
+    <website></website>
+    <source></source>
+    <assets>
+      <icon>icon.png</icon>
+      <fanart></fanart>
+      <screenshot></screenshot>
+      <screenshot></screenshot>
+    </assets>
+  </extension>
+</addon>
