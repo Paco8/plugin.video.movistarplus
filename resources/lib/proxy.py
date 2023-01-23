@@ -161,7 +161,7 @@ class RequestHandler(BaseHTTPRequestHandler):
             global previous_token, reregister_needed
             while True:
               LOG('reregister_needed: {}'.format(reregister_needed))
-              if reregister_needed:
+              if reregister_needed and xbmcaddon.Addon().getSettingBool('reregister'):
                 mvs().unregister_device()
                 mvs().register_device()
 

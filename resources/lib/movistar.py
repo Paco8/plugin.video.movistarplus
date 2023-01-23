@@ -80,6 +80,8 @@ class Movistar(object):
 
       # Device ID
       self.account['device_id'] = self.cache.load_file('device_id.conf')
+      if self.account['device_id']:
+        self.account['device_id'] = self.account['device_id'].strip('"')
       if not reuse_devices:
         LOG('not reusing devices')
         if not self.account['device_id']:
@@ -326,6 +328,7 @@ class Movistar(object):
       return self.delete_device(self.account['device_id'])
 
     def new_device_id(self):
+      """
       headers = self.net.headers.copy()
       headers['Content-Type'] = 'application/json'
       headers['x-movistarplus-ui'] = '2.36.30'
@@ -334,7 +337,12 @@ class Movistar(object):
       url = 'https://auth.dof6.com/movistarplus/webplayer/accounts/'+ self.account['id'] + '/devices/?qspVersion=ssp'
       response = self.net.session.post(url, headers=headers)
       content = response.content.decode('utf-8')
-      return content.replace('"', '')
+      return content.strip('"')
+      """
+      import random
+      s = ''
+      for _ in range(0, 32): s += random.choice('abcdef0123456789')
+      return s
 
     def delete_device(self, device_id):
       headers = self.net.headers.copy()
