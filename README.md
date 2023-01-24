@@ -39,3 +39,8 @@ Lamentablemente en estos momentos no es posible iniciar sesión introduciendo no
 - **`Usar proxy para la licencia`**: necesario para que se puedan reproducir los contenidos en determinados dispositivos.
 - **`Intentar solucionar el error 4027`**: activa un truco para solucionar el error 4027 que se produce en determinadas ocasiones al intentar reproducir vídeos.
 - **Experimental: `Tipo de DRM`**: déjalo en `Widevine`. `Playready` de momento no funciona.
+
+## Capturas de pantalla
+<img src="https://github.com/Paco8/plugin.video.movistarplus/raw/main/resources/screen1.jpg" width="600"/>
+<img src="https://github.com/Paco8/plugin.video.movistarplus/raw/main/resources/screen2.jpg" width="600"/>
+<img src="https://github.com/Paco8/plugin.video.movistarplus/raw/main/resources/screen3.jpg" width="600"/>
