@@ -12,7 +12,7 @@
     <category label="30002">
         <setting label="30011" type="bool" id="manifest_modification" default="true"/>
         <setting label="30012" type="bool" id="use_proxy_for_license" default="true"/>
-        <setting id="reregister" type="bool" label="30024" default="false" enable="eq(-1,true)"/>
+        <setting id="reregister" type="bool" label="30024" default="true" enable="eq(-1,true)"/>
     </category>
     <category label="30003">
         <setting label="30010" type="labelenum" id="drm_type" values="Widevine|Playready"/>
