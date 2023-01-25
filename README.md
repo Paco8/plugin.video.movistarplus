@@ -17,8 +17,11 @@ You may also need to install (or activate) the addon inputstream.adaptive.
 Con este addon puedes ver los canales en directo, grabaciones, últimos 7 días y TV a la carta de Movistarplus España en Kodi. Es necesario estar abonado.
 El addon es compatible con Kodi 18, 19 y 20.
 
+### Descatado:
 * Sin publicidad antes de ver los contenidos.
 * Se pueden ver los canales de deportes en Android TV y similares.
+
+**NOTA: este plugin no está terminado, la persona que compartía su abono conmigo para que pudiera desarrollarlo se ha dado de baja, por lo que ya no puedo continuar con su desarrollo. No obstante hago publico el código actual, porque a pesar de todo pienso que puede ser útil para muchos.**
 
 ## Instalación
 Descarga `script.module.ttml2ssa-x.x.x.zip` y `plugin.video.movistarplus-x.x.x.zip` de [la página Releases](https://github.com/Paco8/plugin.video.movistarplus/releases) e instálalos en Kodi en ese orden.
