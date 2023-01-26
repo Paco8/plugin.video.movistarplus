@@ -29,7 +29,7 @@ Descarga `script.module.ttml2ssa-x.x.x.zip` y `plugin.video.movistarplus-x.x.x.z
 También es posible que tengas que instalar (o activar) el addon inputstream.adaptive.
 
 ## Inicio de sesión
-Lamentablemente en estos momentos no es posible iniciar sesión introduciendo nombre de usuario y clave. Hay que utilizar un programa externo que extraerá un token de la web de movistarplus.
+Lamentablemente en estos momentos no es posible iniciar sesión introduciendo nombre de usuario y clave. Hay que utilizar un programa externo para PC que extraerá un token de la web de movistarplus, con el que podrás iniciar sesión usando la opción `Iniciar sesión con fichero key`. Visita la web [MSAuthenticationKey](https://github.com/Paco8/MSAuthenticationKey), ahí encontrarás instrucciones detalladas.
 
 ## Configuración
 
