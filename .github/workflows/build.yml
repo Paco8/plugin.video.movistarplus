@@ -1,0 +1,35 @@
+name: Build package
+
+on:
+  workflow_dispatch:
+  release:
+    types: [published]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Install sources
+        uses: actions/checkout@v3
+      
+      - name: Build package
+        run: |
+          make
+          wget https://github.com/Paco8/plugin.video.orange.spain/releases/download/v0.4.0/script.module.ttml2ssa-0.3.8.zip
+
+      - name: Create artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: package
+          path: ./*.zip
+
+      - name: Upload package to release
+        if: github.event_name == 'release'
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: ./*.zip
+          tag: ${{ github.ref }}
+          overwrite: true
+          file_glob: true
