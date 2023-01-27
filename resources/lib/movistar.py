@@ -48,6 +48,9 @@ class Movistar(object):
       # Cache
       self.cache = Cache(config_directory)
 
+      # Endpoints
+      self.endpoints = self.get_endpoints()
+
       # Access token
       self.load_key_file() # Default access_token
       content = self.cache.load_file('access_token.conf')
@@ -55,9 +58,6 @@ class Movistar(object):
         self.account['access_token'] = content
       #LOG('access_token: {}'.format(self.account['access_token']))
       if not self.account['access_token']: return
-
-      # Endpoints
-      self.endpoints = self.get_endpoints()
 
       # Account
       data = None
@@ -155,19 +155,6 @@ class Movistar(object):
         #print_json(self.entitlements)
         self.logged = True
 
-    def install_key_file(self, filename):
-      import shutil
-      if sys.version_info[0] > 2:
-        filename = bytes(filename, 'utf-8')
-      shutil.copyfile(filename, self.cache.config_directory + 'auth.key')
-
-    def load_key_file(self):
-      content = self.cache.load_file('auth.key')
-      if content:
-        data = json.loads(content)
-        data = json.loads(data['data'])
-        self.account['access_token'] = data['response']['access_token']
-
     def get_token(self):
       data = {"accountNumber": self.account['id'],
               "userProfile": self.account['profile_id'],
@@ -224,28 +211,33 @@ class Movistar(object):
       #LOG("**** open_session response: {}".format(d))
       return d
 
-    def login(self):
+    def login(self, username, password):
       headers = self.net.headers.copy()
-      headers['x-movistarplus-deviceid'] = self.account['device_id']
+      if self.account['device_id']:
+        headers['x-movistarplus-deviceid'] = self.account['device_id']
       headers['x-movistarplus-ui'] = '2.36.30'
       headers['x-movistarplus-os'] = 'Linux88'
-
-      if sys.version_info[0] < 3:
-        p = base64.b64decode(bytes(self.account['password']))
-      else:
-        p = base64.b64decode(bytes(self.account['password'], encoding='ascii')).decode('ascii')
 
       data = {
           'grant_type': 'password',
           'deviceClass': 'webplayer',
-          'username': self.account['username'],
-          'password': p,
-          'captchaResult': '',
+          'username': username,
+          'password': password,
       }
 
       url = self.endpoints['token']
       response = self.net.session.post(url, headers=headers, data=data)
-      print(response.content)
+      content = response.content.decode('utf-8')
+      LOG(content)
+      success = False
+      try:
+        d = json.loads(content)
+        if 'access_token' in d:
+          success = True
+          self.save_key_file(d)
+      except:
+        pass
+      return success, content
 
     def authenticate(self):
       headers = self.net.headers.copy()
@@ -749,3 +741,23 @@ class Movistar(object):
         url += '&topic=IN'
       #LOG('vod url: {}'.format(url))
       return url
+
+    def install_key_file(self, filename):
+      import shutil
+      if sys.version_info[0] > 2:
+        filename = bytes(filename, 'utf-8')
+      shutil.copyfile(filename, self.cache.config_directory + 'auth.key')
+
+    def load_key_file(self):
+      content = self.cache.load_file('auth.key')
+      if content:
+        data = json.loads(content)
+        if 'response' in data:
+          self.account['access_token'] = data['response']['access_token']
+        elif 'data' in data:
+          data = json.loads(data['data'])
+          self.account['access_token'] = data['response']['access_token']
+
+    def save_key_file(self, d):
+      data = {'timestamp': int(time.time()*1000), 'response': d}
+      self.cache.save_file('auth.key', json.dumps(data, ensure_ascii=False))

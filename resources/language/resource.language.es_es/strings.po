@@ -241,6 +241,10 @@ msgctxt "#30182"
 msgid "Select the key file"
 msgstr "Selecciona el fichero key"
 
+msgctxt "#30183"
+msgid "Login with username"
+msgstr "Iniciar sesión con nombre y clave"
+
 msgctxt "#30200"
 msgid "Error"
 msgstr "Error"

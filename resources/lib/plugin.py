@@ -369,16 +369,47 @@ def list_vod():
   add_menu_option(name, get_url(action='listing', name=name, url=m.get_vod_list_url(cat='kids'))) # Kids
   close_folder()
 
+def clear_session():
+  m.cache.remove_file('access_token.conf')
+  m.cache.remove_file('account.json')
+  m.cache.remove_file('device_id.conf')
+  m.cache.remove_file('devices.json')
+  m.cache.remove_file('profile_id.conf')
+  m.cache.remove_file('tokens.json')
+
+def logout():
+  clear_session()
+  m.cache.remove_file('auth.key')
+
+def login():
+  def ask_credentials(username=''):
+    username = input_window(addon.getLocalizedString(30163), username) # Username
+    if username:
+      password = input_window(addon.getLocalizedString(30164), hidden=True) # Password
+      if password:
+        return username, password
+    return None, None
+
+  username, password = ask_credentials()
+  if username:
+    success, _ = m.login(username, password)
+    if success:
+      clear_session()
+    else:
+      show_notification(addon.getLocalizedString(30166)) # Failed
+
 def login_with_key():
   filename = xbmcgui.Dialog().browseSingle(1, addon.getLocalizedString(30182), '', '.key')
   if filename:
     m.install_key_file(filename)
-    m.cache.remove_file('access_token.conf')
-    m.cache.remove_file('account.json')
-    m.cache.remove_file('device_id.conf')
-    m.cache.remove_file('devices.json')
-    m.cache.remove_file('profile_id.conf')
-    m.cache.remove_file('tokens.json')
+    clear_session()
+
+def list_users():
+  open_folder(addon.getLocalizedString(30160)) # Change user
+  add_menu_option(addon.getLocalizedString(30183), get_url(action='login')) # Login with username
+  add_menu_option(addon.getLocalizedString(30181), get_url(action='login_with_key')) # Login with key
+  add_menu_option(addon.getLocalizedString(30150), get_url(action='logout')) # Close session
+  close_folder()
 
 def router(paramstring):
   """
@@ -405,8 +436,12 @@ def router(paramstring):
       list_profiles(params)
     elif params['action'] == 'login_with_key':
       login_with_key()
+    elif params['action'] == 'login':
+      login()
+    elif params['action'] == 'user':
+      list_users()
     elif params['action'] == 'logout':
-      pass
+      logout()
     elif params['action'] == 'epg':
       list_epg(params)
     elif params['action'] == 'wishlist':
@@ -438,9 +473,8 @@ def router(paramstring):
       add_menu_option(addon.getLocalizedString(30111), get_url(action='vod')) # VOD
       add_menu_option(addon.getLocalizedString(30180), get_url(action='profiles')) # Profiles
       add_menu_option(addon.getLocalizedString(30108), get_url(action='devices')) # Devices
-      #add_menu_option(addon.getLocalizedString(30150), get_url(action='logout')) # Close session
 
-    add_menu_option(addon.getLocalizedString(30181), get_url(action='login_with_key')) # Login with key
+    add_menu_option(addon.getLocalizedString(30160), get_url(action='user')) # Accounts
     close_folder(cacheToDisc=False)
 
 
