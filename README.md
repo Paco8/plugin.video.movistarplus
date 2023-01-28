@@ -26,10 +26,15 @@ El addon es compatible con Kodi 18, 19 y 20.
 ## Instalación
 Descarga `script.module.ttml2ssa-x.x.x.zip` y `plugin.video.movistarplus-x.x.x.zip` de [la página Releases](https://github.com/Paco8/plugin.video.movistarplus/releases) e instálalos en Kodi en ese orden.
 
-También es posible que tengas que instalar (o activar) el addon inputstream.adaptive.
+También puedes instalarlo más fácilmente usando [este repositorio](https://github.com/Paco8/kodi-repo/raw/master/mini-repo/repository.spain/repository.spain-1.0.0.zip).
 
 ## Inicio de sesión
 Tras la instalación, la primera vez que entres en el addon tienes que ir a la opción `Cuentas` y seleccionar la opción `Iniciar sesión con nombre y clave`. Después vuelve al menú principal, y si las credenciales son correctas ya podrás empezar a disfrutar Movistarplus en Kodi.
+
+### Otras opciones
+- `Iniciar sesión con fichero key`: en lugar de introducir nombre de usuario y clave, puedes iniciar sesión cargando un fichero key, creado previamente con la siguente opción.
+- `Exportar token de acceso a fichero key`: guarda el token de acceso en la carpeta especificada con el nombre `movistarplus.key`. Este fichero puede usarse para iniciar sesión en otro dispositivo sin tener que introducir nombre de usuario y clave.
+- `Cerrar sesión`: borra todos los datos de la sesión.
 
 ## Configuración
 
