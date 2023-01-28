@@ -404,10 +404,17 @@ def login_with_key():
     m.install_key_file(filename)
     clear_session()
 
+def export_key():
+  directory = xbmcgui.Dialog().browseSingle(0, addon.getLocalizedString(30185), '')
+  if directory:
+    m.export_key_file(directory + 'movistarplus.key')
+
 def list_users():
   open_folder(addon.getLocalizedString(30160)) # Change user
   add_menu_option(addon.getLocalizedString(30183), get_url(action='login')) # Login with username
   add_menu_option(addon.getLocalizedString(30181), get_url(action='login_with_key')) # Login with key
+  if os.path.exists(profile_dir + 'auth.key'):
+    add_menu_option(addon.getLocalizedString(30184), get_url(action='export_key')) # Export key
   add_menu_option(addon.getLocalizedString(30150), get_url(action='logout')) # Close session
   close_folder()
 
@@ -438,6 +445,8 @@ def router(paramstring):
       login_with_key()
     elif params['action'] == 'login':
       login()
+    elif params['action'] == 'export_key':
+      export_key()
     elif params['action'] == 'user':
       list_users()
     elif params['action'] == 'logout':

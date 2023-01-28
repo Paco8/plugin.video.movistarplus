@@ -245,6 +245,14 @@ msgctxt "#30183"
 msgid "Login with username"
 msgstr "Iniciar sesión con nombre y clave"
 
+msgctxt "#30184"
+msgid "Export access token to key file"
+msgstr "Exportar token de acceso a fichero key"
+
+msgctxt "#30185"
+msgid "Select a folder to save the key file"
+msgstr "Seleccion una carpeta donde guardar el fichero key"
+
 msgctxt "#30200"
 msgid "Error"
 msgstr "Error"

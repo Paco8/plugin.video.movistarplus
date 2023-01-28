@@ -748,6 +748,12 @@ class Movistar(object):
         filename = bytes(filename, 'utf-8')
       shutil.copyfile(filename, self.cache.config_directory + 'auth.key')
 
+    def export_key_file(self, filename):
+      import shutil
+      if sys.version_info[0] > 2:
+        filename = bytes(filename, 'utf-8')
+      shutil.copyfile(self.cache.config_directory + 'auth.key', filename)
+
     def load_key_file(self):
       content = self.cache.load_file('auth.key')
       if content:
