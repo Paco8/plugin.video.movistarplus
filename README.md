@@ -36,6 +36,12 @@ Tras la instalación, la primera vez que entres en el addon tienes que ir a la o
 - `Exportar token de acceso a fichero key`: guarda el token de acceso en la carpeta especificada con el nombre `movistarplus.key`. Este fichero puede usarse para iniciar sesión en otro dispositivo sin tener que introducir nombre de usuario y clave.
 - `Cerrar sesión`: borra todos los datos de la sesión.
 
+## Subtítulos
+El plugin modifica los subtítulos de la TV a la carta para que aparezcan correctamente en Kodi. Sin embargo dicha modificación no se hace todavía en la TV en directo, y los subtítulos son mostrados directamente por Kodi, con este resultado:
+ - en Kodi 18 no van
+ - en Kodi 19 aparecen correctamente
+ - en Kodi 20 aparecen con varios segundos de adelanto
+
 ## Configuración
 
 - **`Solo mostrar el contenido incluido en la suscripción`**: si está activada esta opcion el contenido fuera de tu abono no aparecerá en los listados. Si está desactivada sí aparecerá pero marcado en gris, y aunque te dejará intentar reproducirlo seguramente dará un error.
