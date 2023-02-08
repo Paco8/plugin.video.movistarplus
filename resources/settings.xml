@@ -7,7 +7,7 @@
         <setting id="ssa_settings" type="action" label="$ADDON[script.module.ttml2ssa 32201]" option="close" action="Addon.OpenSettings(script.module.ttml2ssa)" enable="eq(-1,true)"/>
         <setting label="30019" type="action" id="is_settings" action="Addon.OpenSettings(inputstream.adaptive)" enable="System.HasAddon(inputstream.adaptive)" option="close"/>
         <setting id="reuse_devices" type="bool" label="30023" default="false" visible="false"/>
-        <setting id="open_session" type="bool" label="30022" default="true" visible="false"/>
+        <setting id="open_session" type="bool" label="30022" default="true" visible="true"/>
     </category>
     <category label="30002">
         <setting label="30011" type="bool" id="manifest_modification" default="true"/>
