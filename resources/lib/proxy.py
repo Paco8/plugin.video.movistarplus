@@ -38,9 +38,10 @@ import json
 import requests
 import threading
 import socket
-import base64
 from contextlib import closing
 import xbmcaddon
+
+from .b64 import encode_base64
 from .log import LOG
 from .addon import profile_dir
 
@@ -92,16 +93,16 @@ class RequestHandler(BaseHTTPRequestHandler):
               baseurl = os.path.dirname(response.url)
               LOG('baseurl: {}'.format(baseurl))
               content = response.content.decode('utf-8')
-              pos = content.find('<Period id')
-              if pos > -1:
-                content = content[:pos] + '<BaseURL>' + baseurl + '/</BaseURL>' + content[pos:]
-              content = content.replace('lang="qaa"', 'lang="eng"')
               if not xbmcaddon.Addon().getSettingBool('use_ttml2ssa'):
                 LOG(self.headers.get('Host'))
                 my_address = 'http://' + self.headers.get('Host')
                 LOG('my_address: {}'.format(my_address))
                 content = content.replace('mimeType="application/ttml+xml"', 'mimeType="text/vtt"')
                 content = re.sub(r'<BaseURL>(.*?)\.ttml<\/BaseURL>', r'<BaseURL>{}/?subtitle={}/\1.ttml</BaseURL>'.format(my_address, baseurl), content)
+              pos = content.find('<Period id')
+              if pos > -1:
+                content = content[:pos] + '<BaseURL>' + baseurl + '/</BaseURL>' + content[pos:]
+              content = content.replace('lang="qaa"', 'lang="eng"')
               #LOG('content: {}'.format(content))
               manifest_data = content
               self.send_response(200)
@@ -153,7 +154,7 @@ class RequestHandler(BaseHTTPRequestHandler):
             length = int(self.headers.get('content-length', 0))
             isa_data = self.rfile.read(length)
             LOG('isa_data length: {}'.format(length))
-            LOG('isa_data: {}'.format(base64.b64encode(isa_data)))
+            LOG('isa_data: {}'.format(encode_base64(isa_data)))
 
             token = params['token']
             LOG('token: {}'.format(token))
@@ -196,11 +197,10 @@ class RequestHandler(BaseHTTPRequestHandler):
                   if d['errorCode'] == 4027:
                     if not reregister_needed and xbmcaddon.Addon().getSettingBool('reregister'):
                       reregister_needed = True
-                    else:
-                      break
+                      continue
               else:
-                LOG('license response: {}'.format(base64.b64encode(license_data)))
-                break
+                LOG('license response: {}'.format(encode_base64(license_data)))
+              break
 
             self.send_response(response.status_code)
             self.end_headers()
