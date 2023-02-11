@@ -5,7 +5,6 @@
 from __future__ import unicode_literals, absolute_import, division
 
 import sys
-import base64
 import json
 import requests
 import io
@@ -30,6 +29,8 @@ class Movistar(object):
                'session_token': '',
                'ssp_token': '',
                'demarcation': 0}
+
+    add_extra_info = True
 
     def __init__(self, config_directory, reuse_devices=False):
       self.logged = False
@@ -69,9 +70,10 @@ class Movistar(object):
         if not data or 'ofertas' not in data: return
         self.cache.save_file('account.json', json.dumps(data, ensure_ascii=False))
       self.account['id'] = data['ofertas'][0]['accountNumber']
-      self.account['pid'] = data['ofertas'][0]['cod_persona']
+      #self.account['pid'] = data['ofertas'][0]['cod_persona']
       self.account['encoded_user'] = data['cod_usuario_cifrado']
       self.account['platform'] = data['ofertas'][0]['@id_perfil']
+      #self.account['platform'] = 'OTT'
 
       # Profile ID
       content = self.cache.load_file('profile_id.conf')
@@ -145,6 +147,7 @@ class Movistar(object):
         self.account['session_token'] = data['token']
         self.account['ssp_token'] = data['sspToken']
         self.account['demarcation'] = data['demarcation']
+        self.account['pid'] = data['pid']
 
         self.entitlements['activePurchases'] = data['activePurchases']
         self.entitlements['partners'] = data['partners']
@@ -154,6 +157,10 @@ class Movistar(object):
         self.entitlements['suscripcion'] = data['suscripcion']
         #print_json(self.entitlements)
         self.logged = True
+
+      # Search
+      data = self.cache.load_file('searchs.json')
+      self.search_list = json.loads(data) if data else []
 
     def get_token(self):
       data = {"accountNumber": self.account['id'],
@@ -197,7 +204,7 @@ class Movistar(object):
       headers = self.net.headers.copy()
       headers['Content-Type'] = 'application/json'
       headers['X-Hzid'] = session_token
-      url = self.endpoints['setUpStream'].format(PID=self.account['id'], deviceCode='WP_OTT', PLAYREADYID=self.account['device_id'])
+      url = self.endpoints['setUpStream'].format(PID=self.account['pid'], deviceCode='WP_OTT', PLAYREADYID=self.account['device_id'])
       if session_id != None:
          url += '/' + session_id
       #LOG('open_session: url: {}'.format(url))
@@ -407,8 +414,9 @@ class Movistar(object):
         data = json.loads(content)
       else:
         today = datetime.today()
-        str_now = today.strftime('%Y-%m-%dT%H:00:00')
+        str_now = today.strftime('%Y-%m-%dT00:00:00')
         url = self.endpoints['rejilla'].format(deviceType='webplayer', profile=self.account['platform'], UTCDATETIME=str_now, DURATION=2, CHANNELS='', NETWORK='movistarplus', mdrm='true', demarcation=self.account['demarcation'])
+        #print(url)
         data = self.net.load_data(url)
         self.cache.save_file('epg2.json', json.dumps(data, ensure_ascii=False))
 
@@ -422,10 +430,13 @@ class Movistar(object):
           pr['end'] = int(p['FechaHoraFin'])
           pr['start_str'] = timestamp2str(pr['start'])
           pr['end_str'] = timestamp2str(pr['end'])
+          pr['date_str'] = timestamp2str(pr['start'], '%a %d %H:%M')
           pr['desc1'] = p['Titulo']
           pr['desc2'] = ''
           if 'TituloHorLinea2' in p:
             pr['desc2'] = p['TituloHorLinea2']
+          pr['show_id'] = p['ShowId']
+          if 'links' in p: pr['links'] = p['links']
           epg[id].append(pr)
 
       return epg
@@ -451,13 +462,23 @@ class Movistar(object):
       if stype == 'u7d': s += ' (U7D)'
       elif stype == 'rec': s += ' (REC)'
 
-      if title['subscribed'] == True:
-        color1 = 'yellow'
-        color2 = 'red'
-      else:
+      color1 = 'yellow'
+      color2 = 'red'
+
+      available = True
+      if 'subscribed' in title and title['subscribed'] == False: available = False
+      if 'url' in title and title['url'] == '': available = False
+
+      if not available:
         color1 = 'gray'
         color2 = 'gray'
         s = '[COLOR gray]' + s +'[/COLOR]'
+      elif 'start' in title:
+        aired = (title['start'] <= (time.time() * 1000))
+        if not aired:
+          color1 = 'blue'
+          color2 = 'blue'
+          s = '[COLOR blue]' + s +'[/COLOR]'
       if title.get('desc1', '') != '':
         s += ' - [COLOR {}]{}[/COLOR]'.format(color1, title['desc1'])
       if title.get('desc2', '') != '':
@@ -467,14 +488,21 @@ class Movistar(object):
     def add_epg_info(self, channels, epg, timestamp):
       for ch in channels:
         programs = self.find_program_epg(epg, ch['id'], timestamp)
-        ch['info']['plot'] = ''
+        plot = ''
         for i in range(len(programs)):
           desc1 = programs[i]['desc1']
           desc2 = programs[i]['desc2']
           if i == 0:
             ch['desc1'] = desc1
             ch['desc2'] = desc2
-          ch['info']['plot'] += "[B]{}[/B] {} {}\n".format(programs[i]['start_str'], desc1, desc2)
+          plot += "[B]{}[/B] {} {}\n".format(programs[i]['start_str'], desc1, desc2)
+          if self.add_extra_info:
+            ch['art'] = {'poster': None, 'fanart': None}
+            self.add_video_extra_info(programs[i]['show_id'], ch, catalog='events')
+            if 'plot' in ch['info']:
+              plot = plot + ch['info']['plot']
+            break
+        ch['info']['plot'] = plot
 
     def is_subscribed_channel(self, products):
       for e in self.entitlements['activePackages']:
@@ -519,9 +547,7 @@ class Movistar(object):
           t['desc2'] = ''
         t['dial'] = c['Dial']
         t['url'] = c['PuntoReproduccion']
-        t['art']['icon'] = c['Logo']
-        t['art']['thumb'] = c['Logo']
-        t['art']['poster'] = c['Logo']
+        t['art']['icon'] = t['art']['thumb'] = t['art']['poster'] = c['Logo']
         t['session_request'] = '{"contentID":"'+ t['id'] +'", "streamType":"CHN"}'
         t['subscribed'] = self.is_subscribed_channel(c['Productos'])
         t['info']['playcount'] = 1 # Set as watched
@@ -571,8 +597,27 @@ class Movistar(object):
       url = self.endpoints['grabaciones'].format(
               deviceType='webplayer', DIGITALPLUSUSERIDC=self.account['encoded_user'], PROFILE=self.account['platform'],
               idsOnly='false', start=1, end=30, mdrm='true', demarcation=self.account['demarcation'])
-      url += '&state=Completed&_='+ str(int(time.time()*1000))
+      #url += '&state=Completed&_='+ str(int(time.time()*1000))
+      url += '&_='+ str(int(time.time()*1000))
       return url
+
+    def get_search_url(self, search_term):
+      url = self.endpoints['buscar_best'].format(
+                 ACCOUNTNUMBER=self.account['id'],
+                 profile=self.account['platform'],
+                 texto=search_term,
+                 linearSubscription=','.join(self.entitlements['linearSubscription']),
+                 vodSubscription=','.join(self.entitlements['vodSubscription']),
+                 mdrm='true', demarcation=self.account['demarcation'])
+      return url
+
+    def add_search(self, search_term):
+      self.search_list.append(search_term)
+      self.cache.save_file('searchs.json', json.dumps(self.search_list, ensure_ascii=False))
+
+    def delete_search(self, search_term):
+      self.search_list = [s for s in self.search_list if s != search_term]
+      self.cache.save_file('searchs.json', json.dumps(self.search_list, ensure_ascii=False))
 
     def get_title(self, data):
       t = {}
@@ -584,6 +629,7 @@ class Movistar(object):
       t['art']['poster'] = ed['Imagen'].replace('ywcatalogov', 'dispficha')
       t['art']['thumb'] = t['art']['poster']
       t['info']['genre'] = ed['GeneroComAntena']
+      if ed.get('TipoComercial') == 'Impulsivo': return None # Alquiler
       if ed['TipoContenido'] in ['Individual', 'Episodio']:
         t['type'] = 'movie'
         t['stream_type'] = 'vod'
@@ -604,6 +650,16 @@ class Movistar(object):
           elif video['AssetType'] == 'NPVR':
             t['stream_type'] = 'rec'
             t['session_request'] = '{"contentID":' + str(t['id']) + ', "streamType":"NPVR"}'
+          if self.add_extra_info:
+            self.add_video_extra_info(t['id'], t)
+        if 'Recording' in data:
+          t['stream_type'] = 'rec'
+          t['rec'] = {'id': data['Recording']['id'],
+                      'name': data['Recording']['name'],
+                      'start': data['Recording']['beginTime'],
+                      'end': data['Recording']['endTime']}
+          if t['url'] == '': t['info']['title'] += ' (' + isodate2str(t['rec']['start']) + ')'
+        if t['url'] == '' and t['stream_type'] == 'vod': t['subscribed'] = False
       if ed['TipoContenido'] == 'Serie':
         t['type'] = 'series'
         t['info']['mediatype'] = 'tvshow'
@@ -623,6 +679,39 @@ class Movistar(object):
         if t and t['id'] != '':
           res.append(t)
       return res
+
+    def add_video_extra_info(self, id, t, catalog=''):
+      try:
+        url = self.endpoints['ficha'].format(deviceType='webplayer', id=id, profile=self.account['platform'], mediatype='FOTOV', version='7.1', mode='GLOBAL', catalog=catalog, channels='', state='', mdrm='true', demarcation=self.account['demarcation'], legacyBoxOffice='')
+        #print(url)
+        data = self.net.load_data(url)
+        if data.get('Sinopsis'):
+          t['info']['plot'] = data['Sinopsis']
+        if data.get('Actores'):
+          t['info']['cast'] = data['Actores'].split(', ')
+        if data.get('Directores'):
+          t['info']['director'] = data['Directores'].split(', ')
+        if data.get('Anno'):
+          t['info']['year'] = data['Anno']
+        if data.get('Nacionalidad'):
+          t['info']['country'] = data['Nacionalidad']
+        im_thumb = im_default = im_season = im_fanart = None
+        for im in data['Imagenes']:
+          if im['id'] == 'horizontal': im_thumb = im['uri']
+          elif im['id'] == 'default': im_default = im['uri']
+          elif im['id'] == 'watch2tgr-end': im_fanart = im['uri']
+          elif im['id'] == 'temporada': im_season = im['uri']
+        if im_thumb and not t['art'].get('thumb'): t['art']['thumb'] = im_thumb
+        if im_season:
+          if not t['art'].get('poster'): t['art']['poster'] = im_season
+        if im_fanart:
+          if not t['art'].get('fanart'): t['art']['fanart'] = im_fanart
+        if im_default:
+          if not t['art'].get('poster'): t['art']['poster'] = im_default
+          if not t['art'].get('icon'): t['art']['icon'] = im_default
+          if not t['art'].get('fanart'): t['art']['fanart'] = im_default
+      except:
+        pass
 
     def get_seasons(self, id):
       url = self.endpoints['ficha'].format(deviceType='webplayer', id=id, profile=self.account['platform'], mediatype='FOTOV', version='7.1', mode='GLOBAL', catalog='', channels='', state='', mdrm='true', demarcation=self.account['demarcation'], legacyBoxOffice='')
@@ -653,6 +742,7 @@ class Movistar(object):
       #print(url)
       data = self.net.load_data(url)
       #print_json(data)
+      #self.cache.save_file('episodes.json', json.dumps(data, ensure_ascii=False))
       res = []
       for d in data['Episodios']:
         ed = d['DatosEditoriales']
@@ -666,7 +756,8 @@ class Movistar(object):
         t['info']['title'] = ed['TituloEpisodio']
         t['info']['episode'] = ed['NumeroEpisodio']
         t['info']['duration'] = ed['DuracionEnSegundos']
-        t['art']['thumb'] = ed['Imagen']
+        t['info']['tvshowtitle'] = data.get('TituloSerie', '')
+        t['art']['poster'] = data['Imagen']
         for im in ed['Imagenes']:
           if im['id'] == 'horizontal': t['art']['thumb'] = im['uri']
         m = re.search(r'T(\d+)', ed['Temporada'])
@@ -682,7 +773,8 @@ class Movistar(object):
           elif video['AssetType'] == 'U7D':
             t['stream_type'] = 'u7d'
             t['session_request'] = '{"contentID":' + str(t['id']) + ', "streamType":"CUTV"}'
-
+        if self.add_extra_info:
+          self.add_video_extra_info(t['id'], t)
         res.append(t)
 
       return res
@@ -693,6 +785,65 @@ class Movistar(object):
       headers['X-HZId'] = self.account['session_token']
       data = self.net.load_data(url, headers)
       return data
+
+    def order_recording(self, program_id):
+      headers = self.net.headers.copy()
+      headers['Content-Type'] = 'application/json'
+      headers['X-Hzid'] = self.account['session_token']
+      url = self.endpoints['grabarprograma']
+      data = '{"tvProgramID":"' + str(program_id) +'"}'
+      response = self.net.session.post(url, data=data, headers=headers)
+      content = response.content.decode('utf-8')
+      try:
+        data = json.loads(content)
+        return data
+      except:
+        return None
+
+    def delete_recording(self, program_id):
+      headers = self.net.headers.copy()
+      headers['Content-Type'] = 'application/json'
+      headers['X-Hzid'] = self.account['session_token']
+      url = self.endpoints['borrargrabacionindividual'].format(showId=program_id)
+      response = self.net.session.delete(url, headers=headers)
+      content = response.content.decode('utf-8')
+      try:
+        data = json.loads(content)
+        return data
+      except:
+        return None
+
+    def epg_to_movies(self, channel_id):
+      epg = self.get_epg()
+      res = []
+      for p in epg[channel_id]:
+        if sys.version_info[0] < 3:
+          p['date_str'] = unicode(p['date_str'], 'utf-8')
+        name = '[B]' + p['date_str'] + '[/B] ' + p['desc1']
+        if p['desc2']: name += ' - '+ p['desc2']
+        plot = name +"\n" + p['desc2']
+        t = {'info': {}, 'art': {}}
+        t['info']['title'] = name
+        t['info']['plot'] = plot
+        t['type'] = 'movie'
+        t['stream_type'] = 'u7d'
+        t['info']['mediatype'] = 'movie'
+        t['url'] = ''
+        t['id'] = p['show_id']
+        t['session_request'] = '{"contentID":' + str(t['id']) +',"streamType":"CUTV"}'
+        t['info']['playcount'] = 1 # Set as watched
+        t['start'] = p['start']
+        t['end'] = p['end']
+        t['aired'] = (p['end'] <= (time.time() * 1000))
+        t['subscribed'] = True # Fix me
+        if 'links' in p:
+          for link in p['links']:
+            if link['rel'] == 'start-over':
+              t['url'] = link['href']
+        if self.add_extra_info:
+          self.add_video_extra_info(t['id'], t, catalog='events')
+        res.append(t)
+      return res
 
     def get_subtitles(self, manifest_url):
       base_url = os.path.dirname(manifest_url)
@@ -730,6 +881,7 @@ class Movistar(object):
       sort = 'MA'
       url = self.endpoints['consultar'].format(deviceType='webplayer', profile=self.account['platform'], sort=sort, start=1, end=50, mdrm='true', demarcation=self.account['demarcation'])
       filter = '&filter=AC-OM,AC-MA,MA-GBLCICLO59,TD-CUP,RG-SINCAT,AC-PREPUB,' + self.entitlements['suscripcion']
+      #filter = '&filter=AC-OM,AC-MA,MA-GBLCICLO59,TD-CUP,RG-SINCAT,AC-PREPUB'
       url += '&mode=VOD' + filter
       if cat == 'tvshows':
         url += '&topic=SR&showSeries=series'
@@ -767,3 +919,19 @@ class Movistar(object):
     def save_key_file(self, d):
       data = {'timestamp': int(time.time()*1000), 'response': d}
       self.cache.save_file('auth.key', json.dumps(data, ensure_ascii=False))
+
+    def get_profile_image_url(self, img_id):
+      content = self.cache.load_file('avatars.json')
+      if content:
+        data = json.loads(content)
+      else:
+        url = self.endpoints['avatares']
+        data = self.net.load_data(url)
+        self.cache.save_file('avatars.json', json.dumps(data, ensure_ascii=False))
+      #print_json(data)
+      for avatar in data:
+        if avatar['id'] == img_id:
+          for link in avatar['links']:
+            if link['sizes'] == '512x512':
+              return link['href']
+      return None

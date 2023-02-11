@@ -33,19 +33,18 @@ _url = sys.argv[0]
 # Get the plugin handle as an integer number.
 _handle = int(sys.argv[1])
 
-try:  # Kodi >= 19
-  from xbmcvfs import translatePath
-except ImportError:  # Kodi 18
-  from xbmc import translatePath
-
-
 def get_url(**kwargs):
+  for key, value in kwargs.items():
+    if isinstance(value, unicode):
+      kwargs[key] = value.encode('utf-8')
   return '{0}?{1}'.format(_url, urlencode(kwargs))
 
 def play(params):
   LOG('play - params: {}'.format(params))
 
-  if not 'url' in params: return
+  if not 'url' in params:
+    show_notification(addon.getLocalizedString(30204))
+    return
 
   url = params['url']
   channel_id = params['id']
@@ -70,7 +69,7 @@ def play(params):
     d = m.open_session(params['session_request'], session_token)
     LOG('Open session: d: {}'.format(d))
     if d['resultCode'] != 0:
-      dialog = xbmcgui.Dialog().notification('Error', d['resultText'], xbmcgui.NOTIFICATION_ERROR, 5000)
+      show_notification(d['resultText'])
       return
     if 'resultData' in d and 'cToken' in d['resultData']:
       token = d['resultData']['cToken']
@@ -85,7 +84,11 @@ def play(params):
 
   if stype in ['u7d', 'rec']:
     d = m.get_u7d_url(url)
-    url = d['url']
+    if 'resultText' in d:
+      show_notification(d['resultText'])
+      return
+    else:
+      url = d['url']
 
   proxy = m.cache.load_file('proxy.conf')
   if addon.getSettingBool('manifest_modification') and proxy:
@@ -135,6 +138,9 @@ def play(params):
   play_item.setProperty('inputstream.adaptive.server_certificate', certificate)
   #play_item.setProperty('inputstream.adaptive.license_flags', 'persistent_storage')
   #play_item.setProperty('inputstream.adaptive.license_flags', 'force_secure_decoder')
+
+  if stype == 'u7d':
+    play_item.setProperty('inputstream.adaptive.play_timeshift_buffer', 'true')
 
   if sys.version_info[0] < 3:
     play_item.setProperty('inputstreamaddon', 'inputstream.adaptive')
@@ -214,20 +220,25 @@ def add_videos(category, ctype, videos, ref=None, url_next=None, url_prev=None):
     #LOG("*** TEST t: {}".format(t))
     if 'subscribed' in t:
       if addon.getSettingBool('only_subscribed') and t['subscribed'] == False: continue
-      t['info']['title'] = m.colorize_title(t)
-    title_name = t['info']['title'].encode('utf-8')
+    t['info']['title'] = m.colorize_title(t)
+    title_name = t['info']['title']
     if not 'type' in t: continue
     if t['type'] == 'movie':
       list_item = xbmcgui.ListItem(label = title_name)
-      #if t['stream_type'] == 'tv':
-      #  action = get_url(action='epg', id=t['id'], name=t['name'].encode('utf-8'))
-      #  LOG('action: {}'.format(action))
-      #  list_item.addContextMenuItems([('EPG', "RunPlugin(" + action + ")")])
-      if t['url'] == '':
-         t['info']['title'] = '[COLOR gray]' + t['info']['title'] +'[/COLOR]'
+      #if t['url'] == '':
+      #   t['info']['title'] = '[COLOR gray]' + t['info']['title'] +'[/COLOR]'
       list_item.setProperty('IsPlayable', 'true')
       list_item.setInfo('video', t['info'])
       list_item.setArt(t['art'])
+
+      if t.get('stream_type') == 'u7d' and not t.get('aired', False):
+        record_program_action = (addon.getLocalizedString(30171), "RunPlugin(" + get_url(action='add_recording', id=t['id']) + ")")
+        list_item.addContextMenuItems([record_program_action])
+
+      if 'rec' in t:
+        action = get_url(action='delete_recording', id=t['rec']['id'], name=t['rec']['name'])
+        list_item.addContextMenuItems([(addon.getLocalizedString(30173), "RunPlugin(" + action + ")")])
+
       url = get_url(action='play', id=t['id'], url=t['url'], session_request=t['session_request'], stype=t['stream_type'])
       xbmcplugin.addDirectoryItem(_handle, url, list_item, False)
     elif t['type'] == 'series':
@@ -314,24 +325,16 @@ def list_profiles(params):
     name = p['name']
     if p['id'] == m.account['profile_id']:
       name = '[B][COLOR blue]' + name + '[/COLOR][/B]'
+    img_url = m.get_profile_image_url(p['image_id'])
+    art = {'icon': img_url} if img_url else None
     select_action = get_url(action='profiles', id=p['id'], name='select')
-    add_menu_option(name, select_action)
+    add_menu_option(name, select_action, art=art)
   close_folder(cacheToDisc=False)
 
 def list_epg(params):
   LOG('list_epg: {}'.format(params))
   if 'id' in params:
-    epg = m.get_epg()
-    xbmcplugin.setPluginCategory(_handle, params['name'])
-    xbmcplugin.setContent(_handle, 'files')
-    for p in epg[params['id']]:
-      name = '[B]' + p['start_str'] + '[/B] ' + p['desc1']
-      if p['desc2']: name += ' - '+ p['desc2']
-      plot = name +"\n" + p['desc2']
-      list_item = xbmcgui.ListItem(label=name)
-      list_item.setInfo('video', {'name':name, 'plot':plot})
-      xbmcplugin.addDirectoryItem(_handle, '', list_item, False)
-    xbmcplugin.endOfDirectory(_handle)
+    add_videos(params['name'], 'movies', m.epg_to_movies(params['id']))
   else:
     channels = m.get_channels()
     open_folder(addon.getLocalizedString(30107)) # EPG
@@ -368,6 +371,53 @@ def list_vod():
   name = addon.getLocalizedString(30121).encode('utf-8')
   add_menu_option(name, get_url(action='listing', name=name, url=m.get_vod_list_url(cat='kids'))) # Kids
   close_folder()
+
+def search(params):
+  search_term = params.get('search_term', None)
+  if search_term:
+    if sys.version_info[0] < 3:
+      search_term = search_term.decode('utf-8')
+    if params.get('name', None) == 'delete':
+      m.delete_search(search_term)
+      xbmc.executebuiltin("Container.Refresh")
+    else:
+      url = m.get_search_url(search_term)
+      listing_hz(addon.getLocalizedString(30117), url)
+    return
+
+  if params.get('name', None) == 'new':
+    search_term = input_window(addon.getLocalizedString(30116)) # Search term
+    if search_term:
+      if sys.version_info[0] < 3:
+        search_term = search_term.decode('utf-8')
+      m.add_search(search_term)
+    xbmc.executebuiltin("Container.Refresh")
+    return
+
+  open_folder(addon.getLocalizedString(30113)) # Search
+  add_menu_option(addon.getLocalizedString(30113), get_url(action='search', name='new')) # New search
+
+  for i in m.search_list:
+    remove_action = get_url(action='search', search_term=i, name='delete')
+    cm = [(addon.getLocalizedString(30114), "RunPlugin(" + remove_action + ")")]
+    add_menu_option(i.encode('utf-8'), get_url(action='search', search_term=i), cm)
+
+  close_folder(cacheToDisc=False)
+
+def order_recording(program_id):
+  data = m.order_recording(program_id)
+  if data and 'resultText' in data:
+    show_notification(data['resultText'])
+  else:
+    show_notification(addon.getLocalizedString(30172), xbmcgui.NOTIFICATION_INFO)
+
+def delete_recording(id, name):
+  if sys.version_info[0] < 3:
+    name = name.decode('utf-8')
+  res = xbmcgui.Dialog().yesno(addon.getLocalizedString(30173), addon.getLocalizedString(30174).format(name))
+  if res == True:
+    m.delete_recording(id)
+    xbmc.executebuiltin("Container.Refresh")
 
 def clear_session():
   m.cache.remove_file('access_token.conf')
@@ -453,6 +503,10 @@ def router(paramstring):
       logout()
     elif params['action'] == 'epg':
       list_epg(params)
+    elif params['action'] == 'add_recording':
+      order_recording(params['id'])
+    elif params['action'] == 'delete_recording':
+      delete_recording(params['id'], params['name'])
     elif params['action'] == 'wishlist':
       # Wishlist
       listing_hz(addon.getLocalizedString(30102), m.get_wishlist_url())
@@ -469,6 +523,8 @@ def router(paramstring):
       add_videos(params['name'], 'episodes', m.get_episodes(params['id']))
     elif params['action'] == 'vod':
       list_vod()
+    elif params['action'] == 'search':
+      search(params)
   else:
     # Main
     open_folder(addon.getLocalizedString(30101)) # Menu
@@ -480,6 +536,7 @@ def router(paramstring):
       add_menu_option(addon.getLocalizedString(30102), get_url(action='wishlist')) # My list
       add_menu_option(addon.getLocalizedString(30103), get_url(action='recordings')) # Recordings
       add_menu_option(addon.getLocalizedString(30111), get_url(action='vod')) # VOD
+      add_menu_option(addon.getLocalizedString(30112), get_url(action='search')) # Search
       add_menu_option(addon.getLocalizedString(30180), get_url(action='profiles')) # Profiles
       add_menu_option(addon.getLocalizedString(30108), get_url(action='devices')) # Devices
 
@@ -520,6 +577,7 @@ def run():
   LOG('profile_dir: {}'.format(profile_dir))
   LOG('reuse_devices: {}'.format(reuse_devices))
   m = Movistar(profile_dir, reuse_devices=reuse_devices)
+  m.add_extra_info = addon.getSettingBool('add_extra_info')
 
   global player
   player = Player()

@@ -268,3 +268,7 @@ msgstr "Inputstream.adaptive no está disponible"
 msgctxt "#30203"
 msgid "Format not supported"
 msgstr "Formato no soportado"
+
+msgctxt "#30204"
+msgid "Video not available"
+msgstr "Vídeo no disponible"

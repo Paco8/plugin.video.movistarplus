@@ -268,3 +268,7 @@ msgstr ""
 msgctxt "#30203"
 msgid "Format not supported"
 msgstr ""
+
+msgctxt "#30204"
+msgid "Video not available"
+msgstr ""
