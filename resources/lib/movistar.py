@@ -215,7 +215,7 @@ class Movistar(object):
         d = json.loads(content)
       except:
         d = None
-      #LOG("**** open_session response: {}".format(d))
+      #LOG("open_session: response: {}".format(d))
       return d
 
     def login(self, username, password):

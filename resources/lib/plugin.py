@@ -78,9 +78,7 @@ def play(params):
       d = m.delete_session()
       LOG('Delete session: d: {}'.format(d))
 
-  LOG("*** TEST token: {} session_token: {}".format(token, session_token))
-
-  #url = 'https://vamos-nmp-movistarplus.emisiondof6.com/hls/vamos.isml/index-02-spa.m3u8'
+  LOG("token: {} session_token: {}".format(token, session_token))
 
   if stype in ['u7d', 'rec']:
     d = m.get_u7d_url(url)
@@ -94,7 +92,7 @@ def play(params):
   if addon.getSettingBool('manifest_modification') and proxy:
     url = '{}/?manifest={}'.format(proxy, url)
 
-  LOG("*** TEST url: {}".format(url))
+  LOG("url: {}".format(url))
 
   headers = 'Content-Type=application/octet-stream'
   headers += '&User-Agent=Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:88.0) Gecko/20100101 Firefox/88.0'
@@ -196,7 +194,7 @@ def play(params):
 
 
 def add_videos(category, ctype, videos, ref=None, url_next=None, url_prev=None):
-  #LOG("*** TEST category: {} ctype: {}".format(category, ctype))
+  #LOG("category: {} ctype: {}".format(category, ctype))
   xbmcplugin.setPluginCategory(_handle, category)
   xbmcplugin.setContent(_handle, ctype)
 
@@ -217,7 +215,7 @@ def add_videos(category, ctype, videos, ref=None, url_next=None, url_prev=None):
   """
 
   for t in videos:
-    #LOG("*** TEST t: {}".format(t))
+    #LOG("t: {}".format(t))
     if 'subscribed' in t:
       if addon.getSettingBool('only_subscribed') and t['subscribed'] == False: continue
     t['info']['title'] = m.colorize_title(t)
@@ -578,6 +576,11 @@ def run():
   LOG('reuse_devices: {}'.format(reuse_devices))
   m = Movistar(profile_dir, reuse_devices=reuse_devices)
   m.add_extra_info = addon.getSettingBool('add_extra_info')
+
+  profile_id = addon.getSetting('profile_id')
+  LOG('profile_id: {}'.format(profile_id))
+  if profile_id in ['OTT', 'NODTH']:
+    m.account['platform'] = addon.getSetting('profile_id')
 
   global player
   player = Player()
