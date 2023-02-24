@@ -68,10 +68,22 @@ A continuación van las instrucciones para configurarlo, pero **todo esto es opc
 
 Es necesario instalar y configurar otros dos addons: ITPV Manager y IPTV Simple Client. El primero se ocupará de obtener periódicamente el listado de canales de Movistarplus y la programación de los canales, y se la proporcionará a IPTV Simple Client, que es el addon que se encarga de mostrar los canales y la guía en la sección TV de Kodi.
 
-- Abre los ajustes del addon y ve a la sección "IPTV Manager"
+- Abre los ajustes del addon y ve a la sección "IPTV Manager".
 - Selecciona la opción "Instalar IPTV Manager". Acepta el diálogo para instalar el addon y sus dependencias.
 - Vuelve a los ajustes Movistarplus, sección "IPTV Manager" y activa la opción "Habilitar integración con IPTV Manager".
-- Selecciona la opción "Opciones de IPTV Manager"
-- En la nueva ventana selecciona la sección "IPTV Simple" y dale a "Configure IPTV Simple automatically"
-- Ve a la sección "Channels" y selecciona "Refresh channels and guide now"
+- Selecciona la opción "Opciones de IPTV Manager".
+- En la nueva ventana selecciona la sección "IPTV Simple" y dale a "Configure IPTV Simple automatically".
+- Ve a la sección "Channels" y selecciona "Refresh channels and guide now".
 
+Si todo ha ido bien ahora en la sección TV de Kodi podrás acceder a los canales y a la guía de Movistarplus.
+
+**NOTA sobre Kodi 20**
+
+En el momento de escribir estas líneas la configuracfión automática de IPTV Simple no se realiza correctamente en Kodi 20, debidos a cambios en este addon. Y hay que realizarla a mano:
+
+- Entra en los ajustes del addon IPTV Manager y selecciona la opción "IPTV Simple".
+- Dale a la opción "Open IPTV Simple settings".
+- En la nueva ventana, en Ubicación seleciona "Ruta remota".
+- En la opción "URL a la lista M3U", introduce esto: `special://profile/addon_data/service.iptv.manager/playlist.m3u8`
+- En la sección "Opciones EPG", en Ubicación selecciona "Ruta remota".
+- En "URL XMLTV" introduce esto: `special://profile/addon_data/service.iptv.manager/epg.xml`
