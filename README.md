@@ -40,7 +40,7 @@ Tras la instalación, la primera vez que entres en el addon tienes que ir a la o
 El plugin modifica los subtítulos de la TV a la carta para que aparezcan correctamente en Kodi. Sin embargo dicha modificación no se hace todavía en la TV en directo, y los subtítulos son mostrados directamente por Kodi, con este resultado:
  - en Kodi 18 no van
  - en Kodi 19 aparecen correctamente
- - en Kodi 20 aparecen con varios segundos de adelanto
+ - en Kodi 20 aparecen con varios segundos de adelanto (solucionado en los Nightly Builds de Kodi 20)
 
 ## Configuración
 
@@ -52,7 +52,6 @@ El plugin modifica los subtítulos de la TV a la carta para que aparezcan correc
 
 - **`Usar proxy para la licencia`**: necesario para que se puedan reproducir los contenidos en determinados dispositivos.
 - **`Intentar solucionar el error 4027`**: activa un truco para solucionar el error 4027 que se produce en determinadas ocasiones al intentar reproducir vídeos.
-- **Experimental: `Tipo de DRM`**: déjalo en `Widevine`. `Playready` de momento no funciona.
 
 ## Capturas de pantalla
 <img src="https://github.com/Paco8/plugin.video.movistarplus/raw/main/resources/screen1.jpg" width="600"/>
