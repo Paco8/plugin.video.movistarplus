@@ -57,3 +57,21 @@ El plugin modifica los subtítulos de la TV a la carta para que aparezcan correc
 <img src="https://github.com/Paco8/plugin.video.movistarplus/raw/main/resources/screen1.jpg" width="600"/>
 <img src="https://github.com/Paco8/plugin.video.movistarplus/raw/main/resources/screen2.jpg" width="600"/>
 <img src="https://github.com/Paco8/plugin.video.movistarplus/raw/main/resources/screen3.jpg" width="600"/>
+
+## Soporte para IPTV
+Se ha añadido soporte para IPTV Manager. Esto permite ver los canales en un entorno más parecido a un receptor de TV, y hacer zapping con los botones arriba y abajo y OK. Unas capturas:
+
+<img src="https://github.com/Paco8/plugin.video.movistarplus/raw/main/resources/screen4.jpg" width="600"/>
+<img src="https://github.com/Paco8/plugin.video.movistarplus/raw/main/resources/screen5.jpg" width="600"/>
+
+A continuación van las instrucciones para configurarlo, pero **todo esto es opcional, el addon se puede usar perfectamente sin IPTV**.
+
+Es necesario instalar y configurar otros dos addons: ITPV Manager y IPTV Simple Client. El primero se ocupará de obtener periódicamente el listado de canales de Movistarplus y la programación de los canales, y se la proporcionará a IPTV Simple Client, que es el addon que se encarga de mostrar los canales y la guía en la sección TV de Kodi.
+
+- Abre los ajustes del addon y ve a la sección "IPTV Manager"
+- Selecciona la opción "Instalar IPTV Manager". Acepta el diálogo para instalar el addon y sus dependencias.
+- Vuelve a los ajustes Movistarplus, sección "IPTV Manager" y activa la opción "Habilitar integración con IPTV Manager".
+- Selecciona la opción "Opciones de IPTV Manager"
+- En la nueva ventana selecciona la sección "IPTV Simple" y dale a "Configure IPTV Simple automatically"
+- Ve a la sección "Channels" y selecciona "Refresh channels and guide now"
+
