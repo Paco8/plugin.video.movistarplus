@@ -148,6 +148,14 @@ def play(params):
   play_item.setMimeType('application/dash+xml')
   play_item.setContentLookup(False)
 
+  # Add info
+  if addon.getSettingBool('add_extra_info') and stype in ['vod', 'u7d', 'rec']:
+    t = {'id': params['id']}
+    if 'show_id' in params: t['show_id'] = params['show_id']
+    m.add_video_extra_info(t)
+    play_item.setInfo('video', t['info'])
+    play_item.setArt(t['art'])
+
   # Subtitles
   if stype == 'vod' and addon.getSettingBool('use_ttml2ssa'):
     # Convert subtitles
@@ -238,6 +246,7 @@ def add_videos(category, ctype, videos, ref=None, url_next=None, url_prev=None):
         list_item.addContextMenuItems([(addon.getLocalizedString(30173), "RunPlugin(" + action + ")")])
 
       url = get_url(action='play', id=t['id'], url=t['url'], session_request=t['session_request'], stype=t['stream_type'])
+      if 'show_id' in t: url += '&show_id={}'.format(t['show_id'])
       xbmcplugin.addDirectoryItem(_handle, url, list_item, False)
     elif t['type'] == 'series':
       list_item = xbmcgui.ListItem(label = title_name)
@@ -466,6 +475,19 @@ def list_users():
   add_menu_option(addon.getLocalizedString(30150), get_url(action='logout')) # Close session
   close_folder()
 
+def iptv(params):
+  LOG('iptv: params: {}'.format(params))
+  if m.logged:
+    try:
+      from .iptvmanager import IPTVManager
+      port = int(params['port'])
+      if params['action'] == 'iptv-channels':
+        IPTVManager(port).send_channels(m)
+      elif params['action'] == 'iptv-epg':
+        IPTVManager(port).send_epg(m)
+    except:
+      pass
+
 def router(paramstring):
   """
   Router function that calls other functions
@@ -523,6 +545,8 @@ def router(paramstring):
       list_vod()
     elif params['action'] == 'search':
       search(params)
+    elif 'iptv' in params['action']:
+      iptv(params)
   else:
     # Main
     open_folder(addon.getLocalizedString(30101)) # Menu
@@ -582,9 +606,15 @@ def run():
   if profile_id in ['OTT', 'NODTH']:
     m.account['platform'] = addon.getSetting('profile_id')
 
+  # Clear cache
+  LOG('Cleaning cache. {} files removed.'.format(m.cache.clear_cache()))
+
   global player
   player = Player()
 
   # Call the router function and pass the plugin call parameters to it.
   # We use string slicing to trim the leading '?' from the plugin call paramstring
-  router(sys.argv[2][1:])
+  params = sys.argv[2][1:]
+  if '/iptv/channels' in sys.argv[0]: params += '&action=iptv-channels'
+  elif '/iptv/epg' in sys.argv[0]: params += '&action=iptv-epg'
+  router(params)

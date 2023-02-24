@@ -11,6 +11,7 @@ import io
 import os
 import time
 import re
+from datetime import datetime
 
 from .log import LOG, print_json
 from .network import Network
@@ -48,6 +49,8 @@ class Movistar(object):
 
       # Cache
       self.cache = Cache(config_directory)
+      if not os.path.exists(config_directory + 'cache'):
+        os.makedirs(config_directory + 'cache')
 
       # Endpoints
       self.endpoints = self.get_endpoints()
@@ -297,9 +300,10 @@ class Movistar(object):
         data = self.net.load_data(url, headers)
         self.cache.save_file('devices.json', json.dumps(data, ensure_ascii=False))
       #print_json(data)
+      if not isinstance(data, list): return []
       res = []
       for d in data:
-        if d['Id'] != '-':
+        if d.get('Id') != '-':
           dev = {}
           dev['id'] = d['Id']
           dev['name'] = d['Name']
@@ -436,7 +440,8 @@ class Movistar(object):
           if 'TituloHorLinea2' in p:
             pr['desc2'] = p['TituloHorLinea2']
           pr['show_id'] = p['ShowId']
-          if 'links' in p: pr['links'] = p['links']
+          pr['id'] = p['Id']
+          #if 'links' in p: pr['links'] = p['links']
           epg[id].append(pr)
 
       return epg
@@ -497,8 +502,9 @@ class Movistar(object):
             ch['desc2'] = desc2
           plot += "[B]{}[/B] {} {}\n".format(programs[i]['start_str'], desc1, desc2)
           if self.add_extra_info:
-            ch['art'] = {'poster': None, 'fanart': None}
-            self.add_video_extra_info(programs[i]['show_id'], ch, catalog='events')
+            ch['art']['poster'] = ch['art']['fanart'] = None
+            ch['show_id'] = programs[i]['show_id']
+            self.add_video_extra_info(ch)
             if 'plot' in ch['info']:
               plot = plot + ch['info']['plot']
             break
@@ -541,6 +547,7 @@ class Movistar(object):
         t['stream_type'] = 'tv'
         t['info']['mediatype'] = 'movie'
         t['info']['title'] = str(c['Dial']) +'. ' + c['Nombre']
+        t['channel_name'] = c['Nombre']
         t['id'] = c['CodCadenaTv']
         if add_epg_info:
           t['desc1'] = c['Nombre']
@@ -650,8 +657,9 @@ class Movistar(object):
           elif video['AssetType'] == 'NPVR':
             t['stream_type'] = 'rec'
             t['session_request'] = '{"contentID":' + str(t['id']) + ', "streamType":"NPVR"}'
+          if 'ShowId' in video: t['show_id'] = video['ShowId']
           if self.add_extra_info:
-            self.add_video_extra_info(t['id'], t)
+            self.add_video_extra_info(t)
         if 'Recording' in data:
           t['stream_type'] = 'rec'
           t['rec'] = {'id': data['Recording']['id'],
@@ -680,11 +688,49 @@ class Movistar(object):
           res.append(t)
       return res
 
-    def add_video_extra_info(self, id, t, catalog=''):
+    def add_video_extra_info(self, t):
+      #LOG('add_video_extra_info: t: {}'.format(t))
       try:
-        url = self.endpoints['ficha'].format(deviceType='webplayer', id=id, profile=self.account['platform'], mediatype='FOTOV', version='7.1', mode='GLOBAL', catalog=catalog, channels='', state='', mdrm='true', demarcation=self.account['demarcation'], legacyBoxOffice='')
-        #print(url)
-        data = self.net.load_data(url)
+        if 'show_id' in t:
+          catalog = 'events'
+          id = t['show_id']
+        elif 'id' in t:
+          catalog = ''
+          id = t['id']
+        else:
+          return
+        #LOG('id: {} catalog: {}'.format(id, catalog))
+
+        prefix = 'event' if catalog=='events' else 'info'
+        cache_filename = 'cache/{}_{}.json'.format(prefix, id)
+        content = self.cache.load(cache_filename, 30*24*60)
+        if content:
+          data = json.loads(content)
+        else:
+          url = self.endpoints['ficha'].format(deviceType='webplayer', id=id, profile=self.account['platform'], mediatype='FOTOV', version='7.1', mode='GLOBAL', catalog=catalog, channels='', state='', mdrm='true', demarcation=self.account['demarcation'], legacyBoxOffice='')
+          #print(url)
+          data = self.net.load_data(url)
+          self.cache.save_file(cache_filename, json.dumps(data, ensure_ascii=False))
+
+        if not 'info' in t: t['info'] = {}
+        if not 'art' in t: t['art'] = {}
+
+        if not t['info'].get('title'):
+          if 'TituloEpisodio' in data:
+            t['info']['title'] = data['TituloEpisodio']
+          else:
+            t['info']['title'] = data['Titulo']
+
+        if 'Serie' in data:
+          if not t['info'].get('episode'): t['info']['episode'] = data['NumeroEpisodio']
+          if not t['info'].get('tvshowtitle'): t['info']['tvshowtitle'] = data['Serie']['TituloSerie']
+          if not t['info'].get('season') and data['Serie'].get('Temporada'):
+            m = re.search(r'T(\d+)', data['Serie']['Temporada'])
+            if m: t['info']['season'] = m.group(1)
+
+        if not 'duration' in t['info']:
+          t['info']['duration'] = data.get('Duracion', 0) * 60
+
         if data.get('Sinopsis'):
           t['info']['plot'] = data['Sinopsis']
         if data.get('Actores'):
@@ -774,7 +820,7 @@ class Movistar(object):
             t['stream_type'] = 'u7d'
             t['session_request'] = '{"contentID":' + str(t['id']) + ', "streamType":"CUTV"}'
         if self.add_extra_info:
-          self.add_video_extra_info(t['id'], t)
+          self.add_video_extra_info(t)
         res.append(t)
 
       return res
@@ -829,19 +875,23 @@ class Movistar(object):
         t['stream_type'] = 'u7d'
         t['info']['mediatype'] = 'movie'
         t['url'] = ''
-        t['id'] = p['show_id']
+        t['id'] = p['id']
+        t['show_id'] = p['show_id']
         t['session_request'] = '{"contentID":' + str(t['id']) +',"streamType":"CUTV"}'
         t['info']['playcount'] = 1 # Set as watched
         t['start'] = p['start']
         t['end'] = p['end']
         t['aired'] = (p['end'] <= (time.time() * 1000))
         t['subscribed'] = True # Fix me
+        """
         if 'links' in p:
           for link in p['links']:
             if link['rel'] == 'start-over':
               t['url'] = link['href']
+        """
+        t['url'] = 'https://grmovistar.imagenio.telefonica.net/asfe/rest/tvMediaURLs?tvProgram.id='+ str(t['show_id']) +'&svc=startover'
         if self.add_extra_info:
-          self.add_video_extra_info(t['id'], t, catalog='events')
+          self.add_video_extra_info(t)
         res.append(t)
       return res
 
@@ -935,3 +985,111 @@ class Movistar(object):
             if link['sizes'] == '512x512':
               return link['href']
       return None
+
+    def export_channels(self):
+      if sys.version_info[0] >= 3:
+        from urllib.parse import urlencode
+      else:
+        from urllib import urlencode
+      channels = self.get_channels(False)
+      res = []
+      for c in channels:
+        if not c['subscribed']: continue
+        t = {}
+        t['name'] = c['channel_name']
+        t['id'] = c['id']
+        t['logo'] = c['art']['icon']
+        t['preset'] = c['dial']
+        args = urlencode({'action': 'play', 'stype': 'tv', 'id': c['id'], 'url': c['url'], 'session_request': c['session_request']})
+        t['stream'] = 'plugin://plugin.video.movistarplus/?' + args
+        res.append(t)
+      return res
+
+    def export_channels_to_m3u8(self, filename):
+      channels = self.export_channels()
+      items = []
+      for t in channels:
+        item = '#EXTINF:-1 tvg-name="{name}" tvg-id="{id}" tvg-logo="{logo}" tvg-chno="{preset}" group-title="Movistar+" catchup="vod",{name}\n{stream}\n\n'.format(
+            name=t['name'], id=t['id'], logo=t['logo'], preset=t['preset'], stream=t['stream'])
+        items.append(item)
+      res = '#EXTM3U\n## Movistar+\n{}'.format(''.join(items))
+      with io.open(filename, 'w', encoding='utf-8', newline='') as handle:
+        handle.write(res)
+
+    def export_epg(self):
+      if sys.version_info[0] >= 3:
+        from urllib.parse import urlencode
+      else:
+        from urllib import urlencode
+      now = time.time()*1000
+      res = {}
+      epg = self.get_epg()
+      channels = self.get_channels(False)
+      for channel in channels:
+        if not channel['subscribed']: continue
+        id = channel['id']
+        res[id] = []
+        for e in epg[id]:
+          t = {}
+          t['title'] = e['desc1']
+          t['subtitle'] = e['desc2']
+          t['start'] = datetime.utcfromtimestamp(e['start']/1000).strftime('%Y-%m-%dT%H:%M:%SZ')
+          t['stop'] = datetime.utcfromtimestamp(e['end']/1000).strftime('%Y-%m-%dT%H:%M:%SZ')
+
+          aired = (e['end'] <= now)
+          if aired:
+            program_id = str(e['show_id'])
+            url = 'https://grmovistar.imagenio.telefonica.net/asfe/rest/tvMediaURLs?tvProgram.id='+ program_id +'&svc=startover'
+            session_request = '{"contentID":' + program_id +',"streamType":"CUTV"}'
+            args = urlencode({'action': 'play', 'stype': 'u7d', 'id': program_id, 'url': url, 'session_request': session_request})
+            t['stream'] = 'plugin://plugin.video.movistarplus/?' + args
+
+          """
+          if self.add_extra_info and id in ['HOLLYW', 'TCM', 'AMC', 'MV3', 'MV2', 'CPSER', 'FOXGE', 'TNT']:
+            i = {'id': e['id'], 'show_id': e['show_id']}
+            self.add_video_extra_info(i)
+            #print(i)
+            t['description'] = i['info'].get('plot')
+            t['image'] = i['art'].get('poster')
+            t['credits'] = []
+            for text in i['info'].get('director', []):
+              t['credits'].append({'type': 'director', 'name': text})
+            for text in i['info'].get('cast', []):
+              t['credits'].append({'type': 'actor', 'name': text})
+          """
+
+          res[id].append(t)
+      return res
+
+    def export_epg_to_xml(self, filename):
+      channels = self.export_channels()
+      res = []
+      res.append('<?xml version="1.0" encoding="UTF-8"?>\n' + 
+                 '<!DOCTYPE tv SYSTEM "xmltv.dtd">\n' + 
+                 '<tv>\n')
+
+      for t in channels:
+        res.append('<channel id="{}">\n'.format(t['id']) + 
+                  '  <display-name>{}</display-name>\n'.format(t['name']) + 
+                  '  <icon src="{}"/>\n'.format(t['logo']) + 
+                  '</channel>\n')
+
+      epg = self.export_epg()
+      for ch in channels:
+        for e in epg[ch['id']]:
+          start = datetime.strptime(e['start'], "%Y-%m-%dT%H:%M:%SZ").strftime("%Y%m%d%H%M%S +0000")
+          stop = datetime.strptime(e['stop'], "%Y-%m-%dT%H:%M:%SZ").strftime("%Y%m%d%H%M%S +0000")
+          url = e.get('stream', None)
+          if url:
+              url = url.replace('&', '&amp;')
+          res.append('<programme start="{}" stop="{}" channel="{}"'.format(start, stop, ch['id']) + 
+                    (' catchup-id="{}"'.format(url) if url else "") + 
+                    '>\n' + 
+                    '  <title>{}</title>\n'.format(e['title']) + 
+                    '  <sub-title>{}</sub-title>'.format(e['subtitle']) + 
+                    '</programme>\n')
+
+      res.append('</tv>\n')
+      with io.open(filename, 'w', encoding='utf-8', newline='') as handle:
+        handle.write(''.join(res))
+

@@ -272,3 +272,19 @@ msgstr ""
 msgctxt "#30204"
 msgid "Video not available"
 msgstr ""
+
+msgctxt "#30300"
+msgid "IPTV Manager"
+msgstr ""
+
+msgctxt "#30301"
+msgid "Install IPTV Manager add-on"
+msgstr ""
+
+msgctxt "#30302"
+msgid "Enable IPTV Manager integration"
+msgstr ""
+
+msgctxt "#30303"
+msgid "IPTV Manager settings"
+msgstr ""

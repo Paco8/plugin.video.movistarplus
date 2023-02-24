@@ -48,3 +48,16 @@ class Cache(object):
       files.extend(glob.glob(self.config_directory + ext))
     for filename in files:
       os.remove(filename)
+
+  def clear_cache(self, days=10):
+    from datetime import datetime
+    deleted = 0
+    files = glob.glob(os.path.join(self.config_directory + 'cache', '*.json'))
+    now = datetime.now()
+    for filename in files:
+      modified_time = datetime.fromtimestamp(os.path.getmtime(filename))
+      time_diff = now - modified_time
+      if time_diff.days > days:
+        os.remove(filename)
+        deleted += 1
+    return deleted
