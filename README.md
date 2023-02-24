@@ -43,20 +43,30 @@ El plugin modifica los subtítulos de la TV a la carta para que aparezcan correc
  - en Kodi 20 aparecen con varios segundos de adelanto (solucionado en los Nightly Builds de Kodi 20)
 
 ## Configuración
+### Principal
 
 - **`Solo mostrar el contenido incluido en la suscripción`**: si está activada esta opcion el contenido fuera de tu abono no aparecerá en los listados. Si está desactivada sí aparecerá pero marcado en gris, y aunque te dejará intentar reproducirlo seguramente dará un error.
 
 - **`Mostrar el programa en emisión en los canales de TV`**: la lista de canales mostrará además el programa que se está emitiendo en esos momentos en cada canal.
 
+- **`Descargar información extra`**: se descargarán posters, lista de actores, directores, etc. Esta opción puede hacer que las listas de canales y de vídeos tarden mucho más en cargar.
+
+- **`Subtítulos mejorados`**: si se activa se usará para la TV a la carta la configuración proporcionada por el addon **Improved Subtitles**. En Kodi 18 y 19 esta opción no parece funcionar correctamente ya que los subtítulos se desincronizan. En Kodi 20 sí parece que funciona correctamente.
+
+### Proxy
+
 - **`Modificar manifiesto`**: arregla el nombre de los idiomas de audio y subtítulos, y modifica los subtítulos (TV a la carta) para que puedan mostrarse correctamente en Kodi.
 
 - **`Usar proxy para la licencia`**: necesario para que se puedan reproducir los contenidos en determinados dispositivos.
+
 - **`Intentar solucionar el error 4027`**: activa un truco para solucionar el error 4027 que se produce en determinadas ocasiones al intentar reproducir vídeos.
 
 ## Capturas de pantalla
 <img src="https://github.com/Paco8/plugin.video.movistarplus/raw/main/resources/screen1.jpg" width="600"/>
 <img src="https://github.com/Paco8/plugin.video.movistarplus/raw/main/resources/screen2.jpg" width="600"/>
 <img src="https://github.com/Paco8/plugin.video.movistarplus/raw/main/resources/screen3.jpg" width="600"/>
+
+---
 
 ## Soporte para IPTV
 Se ha añadido soporte para IPTV Manager. Esto permite ver los canales en un entorno más parecido a un receptor de TV, y hacer zapping con los botones arriba y abajo y OK. Unas capturas:
