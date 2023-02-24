@@ -89,7 +89,7 @@ Si todo ha ido bien ahora en la sección TV de Kodi podrás acceder a los canale
 
 **NOTA sobre Kodi 20**
 
-En el momento de escribir estas líneas la configuracfión automática de IPTV Simple no se realiza correctamente en Kodi 20, debidos a cambios en este addon. Y hay que realizarla a mano:
+En el momento de escribir estas líneas la configuración automática de **IPTV Simple** no se realiza correctamente en Kodi 20, debidos a cambios en este addon. Y hay que realizarla a mano:
 
 - Entra en los ajustes del addon IPTV Manager y selecciona la opción "IPTV Simple".
 - Dale a la opción "Open IPTV Simple settings".
