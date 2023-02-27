@@ -75,7 +75,7 @@ Opcionalmente es posible configurar el plugin para IPTV. Esto permite ver los ca
 <img src="https://github.com/Paco8/plugin.video.movistarplus/raw/main/resources/screen5.jpg" width="600"/>
 
 A continuación van las instrucciones para configurarlo. Es necesario instalar el plugin `IPTV Simple Client`. Se encargará de mostrar los canales y la guía en el apartado TV de Kodi.
-Este plugin lo puedes encontrar en Addons, Mis addons, Clientes PVR, con el nombre **PVR IPTV Simple Client**. En el caso de que ya estuviera instalado pero desactivarlo hay que activarlo.
+Este plugin lo puedes encontrar en Addons, Mis addons, Clientes PVR, con el nombre **PVR IPTV Simple Client**. En el caso de que ya estuviera instalado pero desactivado hay que activarlo.
 
 Una vez instalado IPTV Simple Client vamos a los ajustes de Movistarplus.
 
@@ -88,7 +88,7 @@ Una vez instalado IPTV Simple Client vamos a los ajustes de Movistarplus.
 - (**Kodi 20**) Seleccionamos "Añadir configuración de Addon". En nombre le ponemos por ejemplo `Movistarplus`.
 - En la nueva ventana que se abre seleccionamos en Ubicación "Local path".
 - En "Ruta a la lista M3U" nos vamos a la carpeta que habíamos elegido para exportar los datos de Movistarplus y seleccionamos el fichero `movistar-channels.m3u8`
-- Ahora vamos a la sección **EPG**, y en Ubucación seleccionamos "Local path".
+- Ahora vamos a la sección **EPG**, y en Ubicación seleccionamos "Local path".
 - En "Ruta XMLTV" nos vamos a la carpeta que habíamos elegido para exportar los datos de Movistarplus y seleccionamos el fichero `movistar-epg.xml`
 - (Opcionalmente) En la sección **Catchup** activamos la opción "Enable catchup".
 - Aceptamos los cambios.
