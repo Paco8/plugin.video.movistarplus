@@ -288,3 +288,31 @@ msgstr ""
 msgctxt "#30303"
 msgid "IPTV Manager settings"
 msgstr ""
+
+msgctxt "#30304"
+msgid "IPTV"
+msgstr ""
+
+msgctxt "#30305"
+msgid "Export channels and EPG for IPTV automatically"
+msgstr ""
+
+msgctxt "#30306"
+msgid "Save to this folder (requires restart)"
+msgstr ""
+
+msgctxt "#30307"
+msgid "Install IPTV Simple add-on"
+msgstr ""
+
+msgctxt "#30308"
+msgid "Open IPTV Simple settings"
+msgstr ""
+
+msgctxt "#30310"
+msgid "Exporting channels"
+msgstr ""
+
+msgctxt "#30311"
+msgid "Exporting EPG"
+msgstr ""

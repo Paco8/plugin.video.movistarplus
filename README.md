@@ -69,31 +69,31 @@ El plugin modifica los subtítulos de la TV a la carta para que aparezcan correc
 ---
 
 ## Soporte para IPTV
-Se ha añadido soporte para IPTV Manager. Esto permite ver los canales en un entorno más parecido a un receptor de TV, y hacer zapping con los botones arriba y abajo y OK. Unas capturas:
+Opcionalmente es posible configurar el plugin para IPTV. Esto permite ver los canales en un entorno más parecido a un receptor de TV, y hacer zapping con los botones arriba y abajo y OK. Unas capturas:
 
 <img src="https://github.com/Paco8/plugin.video.movistarplus/raw/main/resources/screen4.jpg" width="600"/>
 <img src="https://github.com/Paco8/plugin.video.movistarplus/raw/main/resources/screen5.jpg" width="600"/>
 
-A continuación van las instrucciones para configurarlo, pero **todo esto es opcional, el addon se puede usar perfectamente sin IPTV**.
+A continuación van las instrucciones para configurarlo. Es necesario instalar el plugin `IPTV Simple Client`. Se encargará de mostrar los canales y la guía en el apartado TV de Kodi.
+Este plugin lo puedes encontrar en Addons, Mis addons, Clientes PVR, con el nombre **PVR IPTV Simple Client**. En el caso de que ya estuviera instalado pero desactivarlo hay que activarlo.
 
-Es necesario instalar y configurar otros dos addons: ITPV Manager y IPTV Simple Client. El primero se ocupará de obtener periódicamente el listado de canales de Movistarplus y la programación de los canales, y se la proporcionará a IPTV Simple Client, que es el addon que se encarga de mostrar los canales y la guía en la sección TV de Kodi.
+Una vez instalado IPTV Simple Client vamos a los ajustes de Movistarplus.
 
-- Abre los ajustes del addon y ve a la sección "IPTV Manager".
-- Selecciona la opción "Instalar IPTV Manager". Acepta el diálogo para instalar el addon y sus dependencias.
-- Vuelve a los ajustes Movistarplus, sección "IPTV Manager" y activa la opción "Habilitar integración con IPTV Manager".
-- Selecciona la opción "Opciones de IPTV Manager".
-- En la nueva ventana selecciona la sección "IPTV Simple" y dale a "Configure IPTV Simple automatically".
-- Ve a la sección "Channels" y selecciona "Refresh channels and guide now".
+- En la sección **IPTV** activamos la opción **Exportar automáticamente canales y guía para IPTV**.
+- En la opción **Guardar en esta carpeta** tenemos que seleccionar una carpeta donde se guardará esa información. Puedes usar la carpeta `download` o cualquier otra, o crear una nueva.
+- Hecho esto salimos de Kodi y volvemos a entrar.
+- Esperamos unos segundos hasta que aparezca una notificación en la parte superior izquierda indicando que Movistarplus ha exportado los canales y la guía.
+- Entramos otra vez en los ajustes de Movistarplus.
+- En la sección **IPTV** seleccionamos **Abrir la configuración de IPTV Simple**.
+- (**Kodi 20**) Seleccionamos "Añadir configuración de Addon". En nombre le ponemos por ejemplo `Movistarplus`.
+- En la nueva ventana que se abre seleccionamos en Ubicación "Local path".
+- En "Ruta a la lista M3U" nos vamos a la carpeta que habíamos elegido para exportar los datos de Movistarplus y seleccionamos el fichero `movistar-channels.m3u8`
+- Ahora vamos a la sección **EPG**, y en Ubucación seleccionamos "Local path".
+- En "Ruta XMLTV" nos vamos a la carpeta que habíamos elegido para exportar los datos de Movistarplus y seleccionamos el fichero `movistar-epg.xml`
+- (Opcionalmente) En la sección **Catchup** activamos la opción "Enable catchup".
+- Aceptamos los cambios.
+- (**Kodi 20**) Cuando vuelva a salir otra vez la ventana "Ajustes y configuraciones de Addon" pulsamos en Cancelar.
+- Reiniciamos Kodi.
 
 Si todo ha ido bien ahora en la sección TV de Kodi podrás acceder a los canales y a la guía de Movistarplus.
 
-**NOTA sobre Kodi 20**
-
-En el momento de escribir estas líneas la configuración automática de **IPTV Simple** no se realiza correctamente en Kodi 20, debidos a cambios en este addon. Y hay que realizarla a mano:
-
-- Entra en los ajustes del addon IPTV Manager y selecciona la opción "IPTV Simple".
-- Dale a la opción "Open IPTV Simple settings".
-- En la nueva ventana, en Ubicación seleciona "Ruta remota".
-- En la opción "URL a la lista M3U", introduce esto: `special://profile/addon_data/service.iptv.manager/playlist.m3u8`
-- En la sección "Opciones EPG", en Ubicación selecciona "Ruta remota".
-- En "URL XMLTV" introduce esto: `special://profile/addon_data/service.iptv.manager/epg.xml`

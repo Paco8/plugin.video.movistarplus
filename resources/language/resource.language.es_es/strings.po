@@ -288,3 +288,27 @@ msgstr "Habilitar integración con IPTV Manager"
 msgctxt "#30303"
 msgid "IPTV Manager settings"
 msgstr "Opciones de IPTV Manager"
+
+msgctxt "#30305"
+msgid "Export channels and EPG for IPTV automatically"
+msgstr "Exportar automáticamente canales y guía para IPTV"
+
+msgctxt "#30306"
+msgid "Save to this folder (requires restart)"
+msgstr "Guardar en esta carpeta (requiere reinicio)"
+
+msgctxt "#30307"
+msgid "Install IPTV Simple add-on"
+msgstr "Instalar el addon IPTV Simple"
+
+msgctxt "#30308"
+msgid "Open IPTV Simple settings"
+msgstr "Abrir la configuración de IPTV Simple"
+
+msgctxt "#30310"
+msgid "Exporting channels"
+msgstr "Exportando canales"
+
+msgctxt "#30311"
+msgid "Exporting EPG"
+msgstr "Exportando guía"

@@ -237,8 +237,8 @@ def add_videos(category, ctype, videos, ref=None, url_next=None, url_prev=None):
       list_item.setInfo('video', t['info'])
       list_item.setArt(t['art'])
 
-      if t.get('stream_type') == 'u7d' and not t.get('aired', False):
-        record_program_action = (addon.getLocalizedString(30171), "RunPlugin(" + get_url(action='add_recording', id=t['id']) + ")")
+      if t.get('stream_type') == 'u7d' and 'show_id' in t and not t.get('aired', False):
+        record_program_action = (addon.getLocalizedString(30171), "RunPlugin(" + get_url(action='add_recording', id=t['show_id']) + ")")
         list_item.addContextMenuItems([record_program_action])
 
       if 'rec' in t:
@@ -478,15 +478,16 @@ def list_users():
 def iptv(params):
   LOG('iptv: params: {}'.format(params))
   if m.logged:
-    try:
+    #try:
+    if True:
       from .iptvmanager import IPTVManager
       port = int(params['port'])
       if params['action'] == 'iptv-channels':
         IPTVManager(port).send_channels(m)
       elif params['action'] == 'iptv-epg':
         IPTVManager(port).send_epg(m)
-    except:
-      pass
+    #except:
+    #  pass
 
 def router(paramstring):
   """

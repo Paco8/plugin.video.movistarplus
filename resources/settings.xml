@@ -6,8 +6,8 @@
         <setting id="use_ttml2ssa" type="bool" label="$ADDON[script.module.ttml2ssa 32202]" default="false"/>
         <setting id="ssa_settings" type="action" label="$ADDON[script.module.ttml2ssa 32201]" option="close" action="Addon.OpenSettings(script.module.ttml2ssa)" enable="eq(-1,true)" subsetting="true"/>
         <setting label="30019" type="action" id="is_settings" action="Addon.OpenSettings(inputstream.adaptive)" enable="System.HasAddon(inputstream.adaptive)" option="close"/>
-        <setting id="reuse_devices" type="bool" label="30023" default="false" visible="true"/>
-        <setting id="open_session" type="bool" label="30022" default="true" visible="true"/>
+        <setting id="reuse_devices" type="bool" label="30023" default="false" visible="false"/>
+        <setting id="open_session" type="bool" label="30022" default="true" visible="false"/>
         <setting type="sep"/>
         <setting id="profile_id" type="labelenum" label="Profile ID" values="Auto|OTT|NODTH"/>
     </category>
@@ -21,12 +21,21 @@
         <setting label="30010" type="labelenum" id="drm_type" values="Widevine|Playready"/>
     </category>
     -->
+    <!--
     <category label="30300">
+        <setting label="30300" type="lsep"/>
         <setting label="30301" type="action" action="InstallAddon(service.iptv.manager)" option="close" visible="!System.HasAddon(service.iptv.manager)"/>
         <setting label="30302" type="bool" id="iptv.enabled" default="true" visible="System.HasAddon(service.iptv.manager)" />
         <setting label="30303" type="action" action="Addon.OpenSettings(service.iptv.manager)" enable="eq(-1,true)" option="close" visible="System.HasAddon(service.iptv.manager)" subsetting="true"/>
         <setting id="iptv.channels_uri" default="plugin://plugin.video.movistarplus/iptv/channels" visible="false"/>
         <setting id="iptv.epg_uri" default="plugin://plugin.video.movistarplus/iptv/epg" visible="false"/>
+    </category>
+    -->
+    <category label="30304">
+        <setting label="30305" type="bool" id="export_epg" default="false"/>
+        <setting label="30306" type="folder" id="epg_folder" source="" default="" option="writeable" enable="eq(-1,true)" subsetting="true"/>
+        <setting label="30307" type="action" action="InstallAddon(pvr.iptvsimple)" option="close" visible="!System.HasAddon(pvr.iptvsimple)" enable="eq(-2,true)" subsetting="true"/>
+        <setting label="30308" type="action" action="Addon.OpenSettings(pvr.iptvsimple)" option="close" visible="System.HasAddon(pvr.iptvsimple)" enable="eq(-3,true)" subsetting="true"/>
     </category>
 </settings>
 

@@ -1021,13 +1021,13 @@ class Movistar(object):
         from urllib.parse import urlencode
       else:
         from urllib import urlencode
-      now = time.time()*1000
+      #now = time.time()*1000
       res = {}
       epg = self.get_epg()
       channels = self.get_channels(False)
       for channel in channels:
-        if not channel['subscribed']: continue
         id = channel['id']
+        if not channel['subscribed'] or not id in epg: continue
         res[id] = []
         for e in epg[id]:
           t = {}
@@ -1036,8 +1036,9 @@ class Movistar(object):
           t['start'] = datetime.utcfromtimestamp(e['start']/1000).strftime('%Y-%m-%dT%H:%M:%SZ')
           t['stop'] = datetime.utcfromtimestamp(e['end']/1000).strftime('%Y-%m-%dT%H:%M:%SZ')
 
-          aired = (e['end'] <= now)
-          if aired:
+          #aired = (e['end'] <= now)
+          #if aired:
+          if True:
             program_id = str(e['show_id'])
             url = 'https://grmovistar.imagenio.telefonica.net/asfe/rest/tvMediaURLs?tvProgram.id='+ program_id +'&svc=startover'
             session_request = '{"contentID":' + program_id +',"streamType":"CUTV"}'
@@ -1076,19 +1077,31 @@ class Movistar(object):
 
       epg = self.export_epg()
       for ch in channels:
+        if not ch['id'] in epg: continue
         for e in epg[ch['id']]:
           start = datetime.strptime(e['start'], "%Y-%m-%dT%H:%M:%SZ").strftime("%Y%m%d%H%M%S +0000")
           stop = datetime.strptime(e['stop'], "%Y-%m-%dT%H:%M:%SZ").strftime("%Y%m%d%H%M%S +0000")
           url = e.get('stream', None)
           if url:
-              url = url.replace('&', '&amp;')
-          res.append('<programme start="{}" stop="{}" channel="{}"'.format(start, stop, ch['id']) + 
-                    (' catchup-id="{}"'.format(url) if url else "") + 
-                    '>\n' + 
-                    '  <title>{}</title>\n'.format(e['title']) + 
-                    '  <sub-title>{}</sub-title>'.format(e['subtitle']) + 
-                    '</programme>\n')
-
+            url = url.replace('&', '&amp;')
+          res.append('<programme start="{}" stop="{}" channel="{}"'.format(start, stop, ch['id']) +
+                    (' catchup-id="{}"'.format(url) if url else "") +
+                    '>\n' +
+                    '  <title>{}</title>\n'.format(e['title']) +
+                    '  <sub-title>{}</sub-title>\n'.format(e['subtitle']))
+          if 'image' in e:
+            res.append('  <icon src="{}"/>\n'.format(e['image']))
+          if 'description' in e:
+            res.append('  <desc>{}</desc>\n'.format(e['description']))
+          if 'credits' in e and len(e['credits']) > 0:
+            res.append('  <credits>\n');
+            for c in e['credits']:
+              if c['type'] == 'director':
+                res.append('    <director>{}</director>\n'.format(c['name']))
+              elif c['type'] == 'actor':
+                res.append('    <actor>{}</actor>\n'.format(c['name']))
+            res.append('  </credits>\n');
+          res.append('</programme>\n')
       res.append('</tv>\n')
       with io.open(filename, 'w', encoding='utf-8', newline='') as handle:
         handle.write(''.join(res))
