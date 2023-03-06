@@ -156,7 +156,7 @@ class Movistar(object):
         self.entitlements['partners'] = data['partners']
         self.entitlements['activePackages'] = data['activePackages']
         self.entitlements['vodSubscription'] = data['vodSubscription'].split(',')
-        self.entitlements['linearSubscription'] = data['linearSubscription'].split(',')
+        self.entitlements['linearSubscription'] = data['linearSubscription'].split(',') if data['linearSubscription'] else []
         self.entitlements['suscripcion'] = data['suscripcion']
         #print_json(self.entitlements)
         self.logged = True

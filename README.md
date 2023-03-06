@@ -81,8 +81,7 @@ Una vez instalado IPTV Simple Client vamos a los ajustes de Movistarplus.
 
 - En la sección **IPTV** activamos la opción **Exportar automáticamente canales y guía para IPTV**.
 - En la opción **Guardar en esta carpeta** tenemos que seleccionar una carpeta donde se guardará esa información. Puedes usar la carpeta `download` o cualquier otra, o crear una nueva.
-- Hecho esto salimos de Kodi y volvemos a entrar.
-- Esperamos unos segundos hasta que aparezca una notificación en la parte superior izquierda indicando que Movistarplus ha exportado los canales y la guía.
+- Seleccionamos la opción **Exportar los canales y la guía ahora** y esperamos unos segundos hasta que aparezca una notificación en la parte superior izquierda indicando que se han exportado los canales y la guía.
 - Entramos otra vez en los ajustes de Movistarplus.
 - En la sección **IPTV** seleccionamos **Abrir la configuración de IPTV Simple**.
 - (**Kodi 20**) Seleccionamos "Añadir configuración de Addon". En la nueva ventana, en nombre le ponemos por ejemplo `Movistarplus`.

@@ -316,3 +316,15 @@ msgstr ""
 msgctxt "#30311"
 msgid "Exporting EPG"
 msgstr ""
+
+msgctxt "#30312"
+msgid "Export channels and EPG now"
+msgstr ""
+
+msgctxt "#30320"
+msgid "Rating: {}"
+msgstr ""
+
+msgctxt "#30321"
+msgid "Show age rating before playback"
+msgstr ""

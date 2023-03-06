@@ -34,8 +34,9 @@
     <category label="30304">
         <setting label="30305" type="bool" id="export_epg" default="false"/>
         <setting label="30306" type="folder" id="epg_folder" source="" default="" option="writeable" enable="eq(-1,true)" subsetting="true"/>
-        <setting label="30307" type="action" action="InstallAddon(pvr.iptvsimple)" option="close" visible="!System.HasAddon(pvr.iptvsimple)" enable="eq(-2,true)" subsetting="true"/>
-        <setting label="30308" type="action" action="Addon.OpenSettings(pvr.iptvsimple)" option="close" visible="System.HasAddon(pvr.iptvsimple)" enable="eq(-3,true)" subsetting="true"/>
+        <setting label="30312" type="action" id="export_epg_now" action="RunPlugin(plugin://plugin.video.movistarplus/?action=export_epg_now)" enable="eq(-2,true)" option="close" subsetting="true"/>
+        <setting label="30307" type="action" action="InstallAddon(pvr.iptvsimple)" option="close" visible="!System.HasAddon(pvr.iptvsimple)" enable="eq(-3,true)" subsetting="true"/>
+        <setting label="30308" type="action" action="Addon.OpenSettings(pvr.iptvsimple)" option="close" visible="System.HasAddon(pvr.iptvsimple)" enable="eq(-4,true)" subsetting="true"/>
     </category>
 </settings>
 

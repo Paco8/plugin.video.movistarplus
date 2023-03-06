@@ -352,17 +352,19 @@ def list_epg(params):
 
 def listing(name, url):
   data = m.download_list(url, use_hz=False)
-  l = m.get_list(data['Contenidos'])
-  url_next = data['next']['href'] if isinstance(data['next'], dict) and 'href' in data['next'] else None
-  url_prev = data['prev']['href'] if isinstance(data['next'], dict) and 'prev' in data['next'] else None
-  add_videos(name, 'movies', l, url_next=url_next, url_prev=url_prev, ref='listing')
+  if 'Contenidos' in data:
+    l = m.get_list(data['Contenidos'])
+    url_next = data['next']['href'] if isinstance(data['next'], dict) and 'href' in data['next'] else None
+    url_prev = data['prev']['href'] if isinstance(data['next'], dict) and 'prev' in data['next'] else None
+    add_videos(name, 'movies', l, url_next=url_next, url_prev=url_prev, ref='listing')
 
 def listing_hz(name, url):
   data = m.download_list(url, use_hz=True)
-  l = m.get_list(data['Contenidos'])
-  url_next = data['next']['href'] if isinstance(data['next'], dict) and 'href' in data['next'] else None
-  url_prev = data['prev']['href'] if isinstance(data['next'], dict) and 'prev' in data['next'] else None
-  add_videos(name, 'movies', l, url_next=url_next, url_prev=url_prev, ref='listing_hz')
+  if 'Contenidos' in data:
+    l = m.get_list(data['Contenidos'])
+    url_next = data['next']['href'] if isinstance(data['next'], dict) and 'href' in data['next'] else None
+    url_prev = data['prev']['href'] if isinstance(data['next'], dict) and 'prev' in data['next'] else None
+    add_videos(name, 'movies', l, url_next=url_next, url_prev=url_prev, ref='listing_hz')
 
 def list_vod():
   open_folder(addon.getLocalizedString(30111)) # VOD
@@ -489,6 +491,19 @@ def iptv(params):
     #except:
     #  pass
 
+def export_epg_now():
+  if not m.logged: return
+  folder = addon.getSetting('epg_folder')
+  if sys.version_info[0] > 2:
+    folder = bytes(folder, 'utf-8')
+  if not folder or not os.path.isdir(folder): return
+  channels_filename = os.path.join(folder, b"movistar-channels.m3u8")
+  epg_filename = os.path.join(folder, b"movistar-epg.xml")
+  show_notification(addon.getLocalizedString(30310), xbmcgui.NOTIFICATION_INFO)
+  m.export_channels_to_m3u8(channels_filename)
+  show_notification(addon.getLocalizedString(30311), xbmcgui.NOTIFICATION_INFO)
+  m.export_epg_to_xml(epg_filename)
+
 def router(paramstring):
   """
   Router function that calls other functions
@@ -546,6 +561,8 @@ def router(paramstring):
       list_vod()
     elif params['action'] == 'search':
       search(params)
+    elif params['action'] == 'export_epg_now':
+      export_epg_now()
     elif 'iptv' in params['action']:
       iptv(params)
   else:
