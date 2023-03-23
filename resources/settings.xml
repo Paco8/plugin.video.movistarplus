@@ -6,8 +6,8 @@
         <setting id="use_ttml2ssa" type="bool" label="$ADDON[script.module.ttml2ssa 32202]" default="false"/>
         <setting id="ssa_settings" type="action" label="$ADDON[script.module.ttml2ssa 32201]" option="close" action="Addon.OpenSettings(script.module.ttml2ssa)" enable="eq(-1,true)" subsetting="true"/>
         <setting label="30019" type="action" id="is_settings" action="Addon.OpenSettings(inputstream.adaptive)" enable="System.HasAddon(inputstream.adaptive)" option="close"/>
-        <setting id="reuse_devices" type="bool" label="30023" default="false" visible="false"/>
-        <setting id="open_session" type="bool" label="30022" default="true" visible="false"/>
+        <setting id="reuse_devices" type="bool" label="30023" default="false" visible="true"/>
+        <setting id="open_session" type="bool" label="30022" default="true" visible="true"/>
         <setting type="sep"/>
         <setting id="profile_id" type="labelenum" label="Profile ID" values="Auto|OTT|NODTH"/>
     </category>

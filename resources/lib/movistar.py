@@ -155,9 +155,11 @@ class Movistar(object):
         self.entitlements['activePurchases'] = data['activePurchases']
         self.entitlements['partners'] = data['partners']
         self.entitlements['activePackages'] = data['activePackages']
-        self.entitlements['vodSubscription'] = data['vodSubscription'].split(',')
+        self.entitlements['vodSubscription'] = data['vodSubscription'].split(',') if data['linearSubscription'] else []
         self.entitlements['linearSubscription'] = data['linearSubscription'].split(',') if data['linearSubscription'] else []
         self.entitlements['suscripcion'] = data['suscripcion']
+        self.entitlements['tvRights'] = data['tvRights']
+        self.entitlements['distilledTvRights'] = data['distilledTvRights']
         #print_json(self.entitlements)
         self.logged = True
 
@@ -517,13 +519,17 @@ class Movistar(object):
       for e in self.entitlements['activePurchases']:
         if e['name'] in products:
            return True
+      for e in self.entitlements['tvRights']:
+        if e in products:
+           return True
       return False
 
     def is_subscribed_vod(self, products):
-      for p in products:
-        if p['Nombre'] in self.entitlements['vodSubscription']:
-           return True
-      return False
+      #for p in products:
+      #  if p['Nombre'] in self.entitlements['vodSubscription']:
+      #     return True
+      #return False
+      return self.is_subscribed_channel(products)
 
     def get_channels(self, add_epg_info = False):
       if add_epg_info:
@@ -556,7 +562,7 @@ class Movistar(object):
         t['url'] = c['PuntoReproduccion']
         t['art']['icon'] = t['art']['thumb'] = t['art']['poster'] = c['Logo']
         t['session_request'] = '{"contentID":"'+ t['id'] +'", "streamType":"CHN"}'
-        t['subscribed'] = self.is_subscribed_channel(c['Productos'])
+        t['subscribed'] = self.is_subscribed_channel(c.get('tvProducts', []))
         t['info']['playcount'] = 1 # Set as watched
         # epg
         if add_epg_info:
@@ -613,8 +619,7 @@ class Movistar(object):
                  ACCOUNTNUMBER=self.account['id'],
                  profile=self.account['platform'],
                  texto=search_term,
-                 linearSubscription=','.join(self.entitlements['linearSubscription']),
-                 vodSubscription=','.join(self.entitlements['vodSubscription']),
+                 distilledTvRights=','.join(self.entitlements['distilledTvRights']),
                  mdrm='true', demarcation=self.account['demarcation'])
       return url
 
@@ -633,7 +638,7 @@ class Movistar(object):
       ed = data['DatosEditoriales']
       t['id'] = ed['Id']
       t['info']['title'] = ed['Titulo']
-      t['art']['poster'] = ed['Imagen'].replace('ywcatalogov', 'dispficha')
+      t['art']['poster'] = ed.get('Imagen', '').replace('ywcatalogov', 'dispficha')
       t['art']['thumb'] = t['art']['poster']
       t['info']['genre'] = ed['GeneroComAntena']
       if ed.get('TipoComercial') == 'Impulsivo': return None # Alquiler
@@ -646,7 +651,7 @@ class Movistar(object):
         t['session_request'] = ''
         if len(data['VodItems']) > 0:
           video = data['VodItems'][0]
-          t['subscribed'] = self.is_subscribed_vod(video['Productos'])
+          t['subscribed'] = self.is_subscribed_vod(video.get('tvProducts', []))
           if not 'UrlVideo' in video: return None
           t['url'] = video['UrlVideo']
           if video['AssetType'] == 'VOD':
@@ -671,11 +676,11 @@ class Movistar(object):
       if ed['TipoContenido'] == 'Serie':
         t['type'] = 'series'
         t['info']['mediatype'] = 'tvshow'
-        t['subscribed'] = self.is_subscribed_vod(data['Productos'])
+        t['subscribed'] = self.is_subscribed_vod(data.get('tvProducts', []))
       if ed['TipoContenido'] == 'Temporada':
         t['type'] = 'season'
         t['info']['mediatype'] = 'season'
-        t['subscribed'] = self.is_subscribed_vod(data['Productos'])
+        t['subscribed'] = self.is_subscribed_vod(data.get('tvProducts', []))
 
       return t
 
@@ -777,7 +782,7 @@ class Movistar(object):
         t['info']['plot'] = data['Descripcion']
         t['info']['season'] = c
         t['art']['poster'] = t['art']['thumb'] = data['Imagen']
-        t['subscribed'] = self.is_subscribed_vod(data['Productos'])
+        t['subscribed'] = self.is_subscribed_vod(data.get('tvProducts', []))
         c += 1
         res.append(t)
 
@@ -812,7 +817,7 @@ class Movistar(object):
         t['session_request'] = ''
         if len(d['VodItems']) > 0:
           video = d['VodItems'][0]
-          t['subscribed'] = self.is_subscribed_vod(video['Productos'])
+          t['subscribed'] = self.is_subscribed_vod(video.get('tvProducts', []))
           t['url'] = video['UrlVideo']
           if video['AssetType'] == 'VOD':
             t['session_request'] = '{"contentID":' + str(t['id']) + ',"drmMediaID":"' + video['CasId'] +'", "streamType":"AST"}'
