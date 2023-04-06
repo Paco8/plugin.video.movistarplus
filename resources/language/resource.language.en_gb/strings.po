@@ -1,7 +1,6 @@
 # XBMC Media Center language file
-# Addon Name: Orange
-# Addon id: plugin.video.orange
-# Addon version: 0.0.2
+# This file is used by 3 addons:
+# plugin.video.movistarplus, plugin.video.orange.spain and plugin.video.skyott
 # Addon Provider: Paco8
 #, fuzzy
 msgid ""
@@ -25,10 +24,12 @@ msgctxt "#30002"
 msgid "Proxy"
 msgstr ""
 
+# For Orange and Movistar only
 msgctxt "#30003"
 msgid "Experimental"
 msgstr ""
 
+# For Orange and Movistar only
 msgctxt "#30010"
 msgid "DRM type"
 msgstr ""
@@ -37,14 +38,17 @@ msgctxt "#30011"
 msgid "Manifest alteration"
 msgstr ""
 
+# For Orange and Movistar only
 msgctxt "#30012"
 msgid "Use proxy for license"
 msgstr ""
 
+# For Orange only
 msgctxt "#30013"
 msgid "Fix freezes in VOD content"
 msgstr ""
 
+# For Orange only
 msgctxt "#30016"
 msgid "Proxy timeout (ms)"
 msgstr ""
@@ -53,6 +57,7 @@ msgctxt "#30017"
 msgid "Show only subscribed content"
 msgstr ""
 
+# For Orange only
 msgctxt "#30018"
 msgid "Try to play HD in SD devices"
 msgstr ""
@@ -61,24 +66,64 @@ msgctxt "#30019"
 msgid "Configure InputStream Adaptive"
 msgstr ""
 
+# For Orange and Movistar only
 msgctxt "#30020"
 msgid "Add EPG info to TV channels"
 msgstr ""
 
+# For Orange and Movistar only
 msgctxt "#30021"
 msgid "Download extra info (like posters, actors...)"
 msgstr ""
 
+# For Movistar only
 msgctxt "#30022"
 msgid "Report sessions to servers"
 msgstr ""
 
+# For Movistar only
 msgctxt "#30023"
 msgid "Reuse devices"
 msgstr ""
 
+# For Movistar only
 msgctxt "#30024"
 msgid "Try to fix error 4027"
+msgstr ""
+
+# For SkyOTT only
+msgctxt "#30031"
+msgid "Streaming service"
+msgstr ""
+
+# For SkyOTT only
+msgctxt "#30032"
+msgid "Preferred server"
+msgstr ""
+
+# For SkyOTT only
+msgctxt "#30033"
+msgid "Enable 4K"
+msgstr ""
+
+# For SkyOTT only
+msgctxt "#30034"
+msgid "Fix audio and subtitle language names"
+msgstr ""
+
+# For SkyOTT only
+msgctxt "#30035"
+msgid "Exclude DD+ audio tracks"
+msgstr ""
+
+# For SkyOTT only
+msgctxt "#30036"
+msgid "Exclude AAC audio tracks"
+msgstr ""
+
+# For SkyOTT only
+msgctxt "#30040"
+msgid "Use only for these languages (e.g.: es en pt):"
 msgstr ""
 
 msgctxt "#30101"
@@ -89,6 +134,7 @@ msgctxt "#30102"
 msgid "My list"
 msgstr ""
 
+# For Orange and Movistar only
 msgctxt "#30103"
 msgid "Recordings"
 msgstr ""
@@ -105,6 +151,7 @@ msgctxt "#30106"
 msgid "TV shows"
 msgstr ""
 
+# For Orange and Movistar only
 msgctxt "#30107"
 msgid "EPG"
 msgstr ""
@@ -209,22 +256,27 @@ msgctxt "#30167"
 msgid "Edit account"
 msgstr ""
 
+# For Orange and Movistar only
 msgctxt "#30170"
 msgid "Play from the beginning"
 msgstr ""
 
+# For Orange and Movistar only
 msgctxt "#30171"
 msgid "Record program"
 msgstr ""
 
+# For Orange and Movistar only
 msgctxt "#30172"
 msgid "Recording scheduled"
 msgstr ""
 
+# For Orange and Movistar only
 msgctxt "#30173"
 msgid "Delete recording"
 msgstr ""
 
+# For Orange and Movistar only
 msgctxt "#30174"
 msgid "Do you want to delete {}?"
 msgstr ""
@@ -253,6 +305,14 @@ msgctxt "#30185"
 msgid "Select a folder to save the key file"
 msgstr ""
 
+msgctxt "#30186"
+msgid "Login with a cookie file"
+msgstr ""
+
+msgctxt "#30187"
+msgid "Select the cookie file"
+msgstr ""
+
 msgctxt "#30200"
 msgid "Error"
 msgstr ""
@@ -273,50 +333,62 @@ msgctxt "#30204"
 msgid "Video not available"
 msgstr ""
 
+# For Orange and Movistar only
 msgctxt "#30300"
 msgid "IPTV Manager"
 msgstr ""
 
+# For Orange and Movistar only
 msgctxt "#30301"
 msgid "Install IPTV Manager add-on"
 msgstr ""
 
+# For Orange and Movistar only
 msgctxt "#30302"
 msgid "Enable IPTV Manager integration"
 msgstr ""
 
+# For Orange and Movistar only
 msgctxt "#30303"
 msgid "IPTV Manager settings"
 msgstr ""
 
+# For Orange and Movistar only
 msgctxt "#30304"
 msgid "IPTV"
 msgstr ""
 
+# For Orange and Movistar only
 msgctxt "#30305"
 msgid "Export channels and EPG for IPTV automatically"
 msgstr ""
 
+# For Orange and Movistar only
 msgctxt "#30306"
 msgid "Save to this folder (requires restart)"
 msgstr ""
 
+# For Orange and Movistar only
 msgctxt "#30307"
 msgid "Install IPTV Simple add-on"
 msgstr ""
 
+# For Orange and Movistar only
 msgctxt "#30308"
 msgid "Open IPTV Simple settings"
 msgstr ""
 
+# For Orange and Movistar only
 msgctxt "#30310"
 msgid "Exporting channels"
 msgstr ""
 
+# For Orange and Movistar only
 msgctxt "#30311"
 msgid "Exporting EPG"
 msgstr ""
 
+# For Orange and Movistar only
 msgctxt "#30312"
 msgid "Export channels and EPG now"
 msgstr ""

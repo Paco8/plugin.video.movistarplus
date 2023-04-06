@@ -103,6 +103,7 @@ class RequestHandler(BaseHTTPRequestHandler):
               if pos > -1:
                 content = content[:pos] + '<BaseURL>' + baseurl + '/</BaseURL>' + content[pos:]
               content = content.replace('lang="qaa"', 'lang="eng"')
+              content = content.replace('lang="srd"', 'lang="es-[CC]"')
               #LOG('content: {}'.format(content))
               manifest_data = content
               self.send_response(200)
@@ -192,12 +193,12 @@ class RequestHandler(BaseHTTPRequestHandler):
                 LOG('license response: {}'.format(license_data))
                 d = try_load_json(license_data)
                 if d and 'errorCode' in d:
-                  from .gui import show_notification
-                  show_notification('Error {}: {}'.format(d['errorCode'], d['message']))
                   if d['errorCode'] == 4027:
                     if not reregister_needed and xbmcaddon.Addon().getSettingBool('reregister'):
                       reregister_needed = True
                       continue
+                  from .gui import show_notification
+                  show_notification('Error {}: {}'.format(d['errorCode'], d['message']))
               else:
                 LOG('license response: {}'.format(encode_base64(license_data)))
               break

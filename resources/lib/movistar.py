@@ -811,8 +811,10 @@ class Movistar(object):
         t['art']['poster'] = data['Imagen']
         for im in ed['Imagenes']:
           if im['id'] == 'horizontal': t['art']['thumb'] = im['uri']
-        m = re.search(r'T(\d+)', ed['Temporada'])
-        if m: t['info']['season'] = m.group(1)
+        t['info']['season'] = '0'
+        if ed.get('Temporada'):
+          m = re.search(r'T(\d+)', ed['Temporada'])
+          if m: t['info']['season'] = m.group(1)
         t['url'] = ''
         t['session_request'] = ''
         if len(d['VodItems']) > 0:

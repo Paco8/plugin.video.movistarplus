@@ -81,6 +81,34 @@ msgctxt "#30024"
 msgid "Try to fix error 4027"
 msgstr "Intentar solucionar el error 4027"
 
+msgctxt "#30031"
+msgid "Streaming service"
+msgstr "Plataforma"
+
+msgctxt "#30032"
+msgid "Preferred server"
+msgstr "Servidor preferido"
+
+msgctxt "#30033"
+msgid "Enable 4K"
+msgstr "Habilitar 4K"
+
+msgctxt "#30034"
+msgid "Fix audio and subtitle language names"
+msgstr "Arreglar los nombres de idiomas"
+
+msgctxt "#30035"
+msgid "Exclude DD+ audio tracks"
+msgstr "Excluir audio DD+"
+
+msgctxt "#30036"
+msgid "Exclude AAC audio tracks"
+msgstr "Excluir audio AAC"
+
+msgctxt "#30040"
+msgid "Use only for these languages (e.g.: es en pt):"
+msgstr "Usar solo para estos idiomas (ej: es en pt):"
+
 msgctxt "#30101"
 msgid "Menu"
 msgstr "Menú"
@@ -252,6 +280,14 @@ msgstr "Exportar token de acceso a fichero key"
 msgctxt "#30185"
 msgid "Select a folder to save the key file"
 msgstr "Seleccion una carpeta donde guardar el fichero key"
+
+msgctxt "#30186"
+msgid "Login with a cookie file"
+msgstr "Iniciar sesión con fichero cookie"
+
+msgctxt "#30187"
+msgid "Select the cookie file"
+msgstr "Selecciona el fichero cookie"
 
 msgctxt "#30200"
 msgid "Error"
