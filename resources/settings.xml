@@ -13,8 +13,9 @@
     </category>
     <category label="30002">
         <setting label="30011" type="bool" id="manifest_modification" default="true"/>
+        <setting label="30034" type="bool" id="fix_languages" default="true" enable="eq(-1,true)" subsetting="true"/>
         <setting label="30012" type="bool" id="use_proxy_for_license" default="true"/>
-        <setting id="reregister" type="bool" label="30024" default="true" enable="eq(-1,true)" subsetting="true"/>
+        <setting id="reregister" type="bool" label="30024" default="true" enable="eq(-1,true)" visible="false" subsetting="true"/>
     </category>
     <!--
     <category label="30003">

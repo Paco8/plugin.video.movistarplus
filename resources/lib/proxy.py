@@ -102,8 +102,12 @@ class RequestHandler(BaseHTTPRequestHandler):
               pos = content.find('<Period id')
               if pos > -1:
                 content = content[:pos] + '<BaseURL>' + baseurl + '/</BaseURL>' + content[pos:]
-              content = content.replace('lang="qaa"', 'lang="eng"')
-              content = content.replace('lang="srd"', 'lang="es-[CC]"')
+
+              if xbmcaddon.Addon().getSettingBool('fix_languages'):
+                replacements = {'qaa': 'eng', 'srd': 'es-[CC]', 'ads': 'es-[ADS]'}
+                for key, value in replacements.items():
+                  content = content.replace('lang="{}"'.format(key), 'lang="{}"'.format(value))
+
               #LOG('content: {}'.format(content))
               manifest_data = content
               self.send_response(200)
