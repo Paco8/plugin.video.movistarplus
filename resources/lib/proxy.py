@@ -107,6 +107,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                 replacements = {'qaa': 'eng', 'srd': 'es-[CC]', 'ads': 'es-[ADS]'}
                 for key, value in replacements.items():
                   content = content.replace('lang="{}"'.format(key), 'lang="{}"'.format(value))
+                content = re.sub(r'lang="q([^"]*)"', r'lang="es-[q\1]"', content)
 
               #LOG('content: {}'.format(content))
               manifest_data = content
