@@ -552,8 +552,8 @@ class Movistar(object):
         t['type'] = 'movie'
         t['stream_type'] = 'tv'
         t['info']['mediatype'] = 'movie'
-        t['info']['title'] = str(c['Dial']) +'. ' + c['Nombre']
-        t['channel_name'] = c['Nombre']
+        t['channel_name'] = c['Nombre'].strip()
+        t['info']['title'] = str(c['Dial']) +'. ' + t['channel_name']
         t['id'] = c['CodCadenaTv']
         if add_epg_info:
           t['desc1'] = c['Nombre']
