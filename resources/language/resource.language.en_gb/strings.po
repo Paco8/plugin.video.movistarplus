@@ -91,6 +91,10 @@ msgctxt "#30024"
 msgid "Try to fix error 4027"
 msgstr ""
 
+msgctxt "#30025"
+msgid "Send video progress to provider's server"
+msgstr ""
+
 # For SkyOTT only
 msgctxt "#30031"
 msgid "Streaming service"
@@ -204,6 +208,10 @@ msgctxt "#30121"
 msgid "Kids"
 msgstr ""
 
+msgctxt "#30122"
+msgid "Continue watching"
+msgstr ""
+
 msgctxt "#30150"
 msgid "Close session"
 msgstr ""
@@ -281,6 +289,22 @@ msgctxt "#30174"
 msgid "Do you want to delete {}?"
 msgstr ""
 
+msgctxt "#30175"
+msgid "Add to my list"
+msgstr ""
+
+msgctxt "#30176"
+msgid "Remove from my list"
+msgstr ""
+
+msgctxt "#30177"
+msgid "Title added to my list"
+msgstr ""
+
+msgctxt "#30178"
+msgid "Title removed from my list"
+msgstr ""
+
 msgctxt "#30180"
 msgid "Profiles"
 msgstr ""
@@ -331,6 +355,14 @@ msgstr ""
 
 msgctxt "#30204"
 msgid "Video not available"
+msgstr ""
+
+msgctxt "#30205"
+msgid "No playback URL"
+msgstr ""
+
+msgctxt "#30206"
+msgid "Proxy is not running"
 msgstr ""
 
 # For Orange and Movistar only

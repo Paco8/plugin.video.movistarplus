@@ -65,8 +65,10 @@ def play(params):
     m.register_device()
   """
 
+  session_opened = False
   if addon.getSettingBool('open_session') or stype == 'vod':
     d = m.open_session(params['session_request'], session_token)
+    session_opened = True
     LOG('Open session: d: {}'.format(d))
     if d['resultCode'] != 0:
       show_notification(d['resultText'])
@@ -76,6 +78,7 @@ def play(params):
 
     if not addon.getSettingBool('open_session'):
       d = m.delete_session()
+      session_opened = False
       LOG('Delete session: d: {}'.format(d))
 
   LOG("token: {} session_token: {}".format(token, session_token))
@@ -193,15 +196,20 @@ def play(params):
 
   xbmcplugin.setResolvedUrl(_handle, True, listitem=play_item)
 
-  player.running = True
-  monitor = xbmc.Monitor()
-  while not monitor.abortRequested() and player.running:
-    if monitor.waitForAbort(1):
-      break
-  LOG('Exiting play')
+  LOG('**** session_opened: {}'.format(session_opened))
+  if session_opened:
+    from .player import MyPlayer
+    player = MyPlayer()
+    monitor = xbmc.Monitor()
+    while not monitor.abortRequested() and player.running:
+      monitor.waitForAbort(10)
+      #LOG('**** waiting')
+    d = m.delete_session()
+    LOG('Delete session: d: {}'.format(d))
+    LOG('Playback finished')
 
 
-def add_videos(category, ctype, videos, ref=None, url_next=None, url_prev=None):
+def add_videos(category, ctype, videos, ref=None, url_next=None, url_prev=None, from_wishlist=False):
   #LOG("category: {} ctype: {}".format(category, ctype))
   xbmcplugin.setPluginCategory(_handle, category)
   xbmcplugin.setContent(_handle, ctype)
@@ -229,6 +237,33 @@ def add_videos(category, ctype, videos, ref=None, url_next=None, url_prev=None):
     t['info']['title'] = m.colorize_title(t)
     title_name = t['info']['title']
     if not 'type' in t: continue
+
+    wishlist_action = None
+    if t['type'] in ['movie', 'series', 'season']:
+      id = t['id']
+      stype = 'vod'
+      possible_to_add = False
+
+      if t['type'] in ['series', 'season']:
+        possible_to_add = t.get('seguible', False)
+
+      if t['type'] == 'movie':
+        if t.get('stream_type') == 'vod':
+          possible_to_add = t['url'] != ''
+        if 'show_id' in t:
+          possible_to_add = t['url'] != ''
+          stype = 'tv'
+          id = t['show_id']
+
+      if possible_to_add:
+        if not from_wishlist:
+          op = 'add'
+          message = 30175
+        else:
+          op = 'delete'
+          message = 30176
+        wishlist_action = (addon.getLocalizedString(message), "RunPlugin(" + get_url(action='to_wishlist', id=id, op=op, stype=stype) + ")")
+
     if t['type'] == 'movie':
       list_item = xbmcgui.ListItem(label = title_name)
       #if t['url'] == '':
@@ -245,6 +280,9 @@ def add_videos(category, ctype, videos, ref=None, url_next=None, url_prev=None):
         action = get_url(action='delete_recording', id=t['rec']['id'], name=t['rec']['name'])
         list_item.addContextMenuItems([(addon.getLocalizedString(30173), "RunPlugin(" + action + ")")])
 
+      if wishlist_action:
+        list_item.addContextMenuItems([wishlist_action])
+
       url = get_url(action='play', id=t['id'], url=t['url'], session_request=t['session_request'], stype=t['stream_type'])
       if 'show_id' in t: url += '&show_id={}'.format(t['show_id'])
       xbmcplugin.addDirectoryItem(_handle, url, list_item, False)
@@ -252,11 +290,15 @@ def add_videos(category, ctype, videos, ref=None, url_next=None, url_prev=None):
       list_item = xbmcgui.ListItem(label = title_name)
       list_item.setInfo('video', t['info'])
       list_item.setArt(t['art'])
+      if wishlist_action:
+        list_item.addContextMenuItems([wishlist_action])
       xbmcplugin.addDirectoryItem(_handle, get_url(action='series', id=t['id'], name=title_name), list_item, True)
     elif t['type'] == 'season':
       list_item = xbmcgui.ListItem(label = title_name)
       list_item.setInfo('video', t['info'])
       list_item.setArt(t['art'])
+      if wishlist_action:
+        list_item.addContextMenuItems([wishlist_action])
       xbmcplugin.addDirectoryItem(_handle, get_url(action='season', id=t['id'], name=title_name), list_item, True)
     elif t['type'] == 'category':
       list_item = xbmcgui.ListItem(label = title_name)
@@ -358,13 +400,13 @@ def listing(name, url):
     url_prev = data['prev']['href'] if isinstance(data['next'], dict) and 'prev' in data['next'] else None
     add_videos(name, 'movies', l, url_next=url_next, url_prev=url_prev, ref='listing')
 
-def listing_hz(name, url):
+def listing_hz(name, url, from_wishlist=False):
   data = m.download_list(url, use_hz=True)
   if 'Contenidos' in data:
     l = m.get_list(data['Contenidos'])
     url_next = data['next']['href'] if isinstance(data['next'], dict) and 'href' in data['next'] else None
     url_prev = data['prev']['href'] if isinstance(data['next'], dict) and 'prev' in data['next'] else None
-    add_videos(name, 'movies', l, url_next=url_next, url_prev=url_prev, ref='listing_hz')
+    add_videos(name, 'movies', l, url_next=url_next, url_prev=url_prev, ref='listing_hz', from_wishlist=from_wishlist)
 
 def list_vod():
   open_folder(addon.getLocalizedString(30111)) # VOD
@@ -429,12 +471,7 @@ def delete_recording(id, name):
     xbmc.executebuiltin("Container.Refresh")
 
 def clear_session():
-  m.cache.remove_file('access_token.conf')
-  m.cache.remove_file('account.json')
-  m.cache.remove_file('device_id.conf')
-  m.cache.remove_file('devices.json')
-  m.cache.remove_file('profile_id.conf')
-  m.cache.remove_file('tokens.json')
+  m.delete_session_files()
 
 def logout():
   clear_session()
@@ -504,6 +541,21 @@ def export_epg_now():
   show_notification(addon.getLocalizedString(30311), xbmcgui.NOTIFICATION_INFO)
   m.export_epg_to_xml(epg_filename)
 
+def to_wishlist(params):
+  stype = params['stype']
+  if params['op'] == 'add':
+    retcode, message = m.add_to_wishlist(params['id'], stype)
+  else:
+    retcode, message = m.delete_from_wishlist(params['id'], stype)
+  if retcode in [201, 204]:
+    message = 30177 if params['op'] == 'add' else 30178
+    show_notification(addon.getLocalizedString(message), xbmcgui.NOTIFICATION_INFO)
+    if params['op'] == 'delete':
+      xbmc.executebuiltin("Container.Refresh")
+  else:
+    show_notification(str(retcode) +': '+ message)
+
+
 def router(paramstring):
   """
   Router function that calls other functions
@@ -545,7 +597,7 @@ def router(paramstring):
       delete_recording(params['id'], params['name'])
     elif params['action'] == 'wishlist':
       # Wishlist
-      listing_hz(addon.getLocalizedString(30102), m.get_wishlist_url())
+      listing_hz(addon.getLocalizedString(30102), m.get_wishlist_url(), from_wishlist=True)
     elif params['action'] == 'recordings':
       # Recordings
       listing_hz(addon.getLocalizedString(30103), m.get_recordings_url())
@@ -563,6 +615,8 @@ def router(paramstring):
       search(params)
     elif params['action'] == 'export_epg_now':
       export_epg_now()
+    elif params['action'] == 'to_wishlist':
+      to_wishlist(params)
     elif 'iptv' in params['action']:
       iptv(params)
   else:
@@ -584,33 +638,6 @@ def router(paramstring):
     close_folder(cacheToDisc=False)
 
 
-class Player(xbmc.Player):
-  running = False
-
-  def onAVStarted(self):
-    LOG('Playback started')
-
-  def onPlayBackPaused(self):
-    LOG('Playback paused')
-
-  def onPlayBackResumed(self):
-    LOG('Playback resumed')
-
-  def onPlayBackEnded(self):
-    LOG('Playback ended')
-    self.close_session()
-
-  def onPlayBackStopped(self):
-    LOG('Playback stopped')
-    self.close_session()
-
-  def close_session(self):
-    if self.running:
-      LOG('Closing session')
-      d = m.delete_session()
-      LOG('delete_session: {}'.format(d))
-      self.running = False
-
 def run():
   global m
   reuse_devices = addon.getSettingBool('reuse_devices')
@@ -626,9 +653,6 @@ def run():
 
   # Clear cache
   LOG('Cleaning cache. {} files removed.'.format(m.cache.clear_cache()))
-
-  global player
-  player = Player()
 
   # Call the router function and pass the plugin call parameters to it.
   # We use string slicing to trim the leading '?' from the plugin call paramstring

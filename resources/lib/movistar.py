@@ -333,7 +333,6 @@ class Movistar(object):
       return self.delete_device(self.account['device_id'])
 
     def new_device_id(self):
-      """
       headers = self.net.headers.copy()
       headers['Content-Type'] = 'application/json'
       headers['x-movistarplus-ui'] = '2.36.30'
@@ -343,11 +342,11 @@ class Movistar(object):
       response = self.net.session.post(url, headers=headers)
       content = response.content.decode('utf-8')
       return content.strip('"')
-      """
-      import random
-      s = ''
-      for _ in range(0, 32): s += random.choice('abcdef0123456789')
-      return s
+
+      #import random
+      #s = ''
+      #for _ in range(0, 32): s += random.choice('abcdef0123456789')
+      #return s
 
     def delete_device(self, device_id):
       headers = self.net.headers.copy()
@@ -595,8 +594,37 @@ class Movistar(object):
       if use_hz:
         headers['Authorization'] = 'Bearer ' + self.account['access_token']
         headers['X-Hzid'] = self.account['session_token']
-
       return self.net.load_data(url, headers)
+
+    def add_to_wishlist(self, id, stype='vod'):
+      LOG('add_to_wishlist: {} {}'.format(id, stype))
+      url = self.endpoints['marcadofavoritos2'].format(family=stype)
+      headers = self.net.headers.copy()
+      headers['Accept'] = 'application/vnd.miviewtv.v1+json'
+      headers['Content-Type'] = 'application/json'
+      headers['X-Hzid'] = self.account['session_token']
+      post_data = {'objectID': id}
+      response = self.net.session.post(url, data=json.dumps(post_data), headers=headers)
+      content = response.content.decode('utf-8')
+      if response.status_code != 201:
+        data = json.loads(content)
+        if 'resultCode' in data:
+          return data['resultCode'], data['resultText']
+      return response.status_code, ''
+
+    def delete_from_wishlist(self, id, stype='vod'):
+      url = self.endpoints['borradofavoritos'].format(family=stype, contentId=id)
+      headers = self.net.headers.copy()
+      headers['Accept'] = 'application/vnd.miviewtv.v1+json'
+      headers['Content-Type'] = 'application/json'
+      headers['X-Hzid'] = self.account['session_token']
+      response = self.net.session.delete(url, headers=headers)
+      content = response.content.decode('utf-8')
+      if response.status_code != 204:
+        data = json.loads(content)
+        if 'resultCode' in data:
+          return data['resultCode'], data['resultText']
+      return response.status_code, ''
 
     def get_wishlist_url(self):
       url = self.endpoints['favoritos'].format(
@@ -642,6 +670,8 @@ class Movistar(object):
       t['art']['thumb'] = t['art']['poster']
       t['info']['genre'] = ed['GeneroComAntena']
       if ed.get('TipoComercial') == 'Impulsivo': return None # Alquiler
+      if 'Seguible' in ed: t['seguible'] = ed['Seguible']
+      if 'links' in data: t['links'] = data['links']
       if ed['TipoContenido'] in ['Individual', 'Episodio']:
         t['type'] = 'movie'
         t['stream_type'] = 'vod'
@@ -681,7 +711,13 @@ class Movistar(object):
         t['type'] = 'season'
         t['info']['mediatype'] = 'season'
         t['subscribed'] = self.is_subscribed_vod(data.get('tvProducts', []))
-
+      if 'DatosAccesoAnonimo' in data:
+        da = data['DatosAccesoAnonimo']
+        if 'HoraInicio' in da and da['HoraInicio'] != None:
+          t['start'] = int(da['HoraInicio'])
+          t['start_str'] = timestamp2str(t['start'])
+          t['date_str'] = timestamp2str(t['start'], '%a %d %H:%M')
+          if t['url'] == '': t['info']['title'] += ' (' + t['date_str'] +')'
       return t
 
     def get_list(self, data):
@@ -766,6 +802,7 @@ class Movistar(object):
 
     def get_seasons(self, id):
       url = self.endpoints['ficha'].format(deviceType='webplayer', id=id, profile=self.account['platform'], mediatype='FOTOV', version='7.1', mode='GLOBAL', catalog='', channels='', state='', mdrm='true', demarcation=self.account['demarcation'], legacyBoxOffice='')
+      #print(url)
       data = self.net.load_data(url)
       #print_json(data)
       res = []
@@ -783,6 +820,7 @@ class Movistar(object):
         t['info']['season'] = c
         t['art']['poster'] = t['art']['thumb'] = data['Imagen']
         t['subscribed'] = self.is_subscribed_vod(data.get('tvProducts', []))
+        if 'Seguible' in data: t['seguible'] = data['Seguible']
         c += 1
         res.append(t)
 
@@ -826,6 +864,14 @@ class Movistar(object):
           elif video['AssetType'] == 'U7D':
             t['stream_type'] = 'u7d'
             t['session_request'] = '{"contentID":' + str(t['id']) + ', "streamType":"CUTV"}'
+          if 'ShowId' in video: t['show_id'] = video['ShowId']
+        if 'DatosAccesoAnonimo' in d:
+          da = d['DatosAccesoAnonimo']
+          if 'HoraInicio' in da and da['HoraInicio'] != None:
+            t['start'] = int(da['HoraInicio'])
+            t['start_str'] = timestamp2str(t['start'])
+            t['date_str'] = timestamp2str(t['start'], '%a %d %H:%M')
+            if t['url'] == '': t['info']['title'] += ' (' + t['date_str'] +')'
         if self.add_extra_info:
           self.add_video_extra_info(t)
         res.append(t)
@@ -976,6 +1022,10 @@ class Movistar(object):
     def save_key_file(self, d):
       data = {'timestamp': int(time.time()*1000), 'response': d}
       self.cache.save_file('auth.key', json.dumps(data, ensure_ascii=False))
+
+    def delete_session_files(self):
+      for f in ['access_token.conf', 'account.json', 'device_id.conf', 'devices.json', 'profile_id.conf', 'tokens.json']:
+        self.cache.remove_file(f)
 
     def get_profile_image_url(self, img_id):
       content = self.cache.load_file('avatars.json')
