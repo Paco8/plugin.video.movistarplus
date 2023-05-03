@@ -659,6 +659,17 @@ class Movistar(object):
       self.search_list = [s for s in self.search_list if s != search_term]
       self.cache.save_file('searchs.json', json.dumps(self.search_list, ensure_ascii=False))
 
+    def get_favorite_data(self, links):
+      res = {}
+      for link in links:
+        name = link['rel']
+        if 'favorites' in name:
+          d = {}
+          d['id'] = link['id']
+          d['family'] = link.get('href', '').split("/")[-2]
+          res[name] = d
+      return res
+
     def get_title(self, data):
       t = {}
       t['info'] = {}
@@ -671,7 +682,9 @@ class Movistar(object):
       t['info']['genre'] = ed['GeneroComAntena']
       if ed.get('TipoComercial') == 'Impulsivo': return None # Alquiler
       if 'Seguible' in ed: t['seguible'] = ed['Seguible']
-      if 'links' in data: t['links'] = data['links']
+      if 'links' in data:
+        #t['links'] = data['links']
+        t['favorite_data'] = self.get_favorite_data(data['links'])
       if ed['TipoContenido'] in ['Individual', 'Episodio']:
         t['type'] = 'movie'
         t['stream_type'] = 'vod'

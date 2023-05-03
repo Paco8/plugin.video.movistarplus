@@ -126,8 +126,18 @@ msgid "Exclude AAC audio tracks"
 msgstr ""
 
 # For SkyOTT only
+msgctxt "#30037"
+msgid "Enable HDCP"
+msgstr ""
+
+# For SkyOTT only
 msgctxt "#30040"
 msgid "Use only for these languages (e.g.: es en pt):"
+msgstr ""
+
+# For SkyOTT only
+msgctxt "#30041"
+msgid "Subscription country (two letter code):"
 msgstr ""
 
 msgctxt "#30101"
@@ -357,12 +367,18 @@ msgctxt "#30204"
 msgid "Video not available"
 msgstr ""
 
+# For SkyOTT only
 msgctxt "#30205"
 msgid "No playback URL"
 msgstr ""
 
 msgctxt "#30206"
 msgid "Proxy is not running"
+msgstr ""
+
+# For SkyOTT only
+msgctxt "#30207"
+msgid "No user token"
 msgstr ""
 
 # For Orange and Movistar only
@@ -397,7 +413,7 @@ msgstr ""
 
 # For Orange and Movistar only
 msgctxt "#30306"
-msgid "Save to this folder (requires restart)"
+msgid "Save channels and EPG to this folder"
 msgstr ""
 
 # For Orange and Movistar only

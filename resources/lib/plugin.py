@@ -244,16 +244,29 @@ def add_videos(category, ctype, videos, ref=None, url_next=None, url_prev=None, 
       stype = 'vod'
       possible_to_add = False
 
-      if t['type'] in ['series', 'season']:
-        possible_to_add = t.get('seguible', False)
+      if from_wishlist:
+        # Remove from wishlist
+        if 'favorite_data' in t:
+          if 'favorites2' in t['favorite_data']:
+            id = t['favorite_data']['favorites2']['id']
+            stype = t['favorite_data']['favorites2']['family']
+            possible_to_add = True
+          elif t['type'] == 'season' and 'favorites2.season' in t['favorite_data']:
+            id = t['favorite_data']['favorites2.season']['id']
+            stype = t['favorite_data']['favorites2.season']['family']
+            possible_to_add = True
+      else:
+        # Add to wishlist
+        if t['type'] in ['series', 'season']:
+          possible_to_add = t.get('seguible', False)
 
-      if t['type'] == 'movie':
-        if t.get('stream_type') == 'vod':
-          possible_to_add = t['url'] != ''
-        if 'show_id' in t:
-          possible_to_add = t['url'] != ''
-          stype = 'tv'
-          id = t['show_id']
+        if t['type'] == 'movie':
+          if t.get('stream_type') == 'vod':
+            possible_to_add = t['url'] != ''
+          if 'show_id' in t:
+            possible_to_add = t['url'] != ''
+            stype = 'tv'
+            id = t['show_id']
 
       if possible_to_add:
         if not from_wishlist:

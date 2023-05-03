@@ -109,9 +109,19 @@ msgctxt "#30036"
 msgid "Exclude AAC audio tracks"
 msgstr "Excluir audio AAC"
 
+# For SkyOTT only
+msgctxt "#30037"
+msgid "Enable HDCP"
+msgstr "Habilitar HDCP"
+
 msgctxt "#30040"
 msgid "Use only for these languages (e.g.: es en pt):"
 msgstr "Usar solo para estos idiomas (ej: es en pt):"
+
+# For SkyOTT only
+msgctxt "#30041"
+msgid "Subscription country (two letter code):"
+msgstr "País de la suscripción (código de dos letras):"
 
 msgctxt "#30101"
 msgid "Menu"
@@ -341,6 +351,11 @@ msgctxt "#30206"
 msgid "Proxy is not running"
 msgstr "El proxy no está funcionando"
 
+# For SkyOTT only
+msgctxt "#30207"
+msgid "No user token"
+msgstr "No hay token de usuario"
+
 msgctxt "#30300"
 msgid "IPTV Manager"
 msgstr "IPTV Manager"
@@ -362,8 +377,8 @@ msgid "Export channels and EPG for IPTV automatically"
 msgstr "Exportar automáticamente canales y guía para IPTV"
 
 msgctxt "#30306"
-msgid "Save to this folder (requires restart)"
-msgstr "Guardar en esta carpeta (requiere reinicio)"
+msgid "Save channels and EPG to this folder"
+msgstr "Guardar canales y EPG en esta carpeta"
 
 msgctxt "#30307"
 msgid "Install IPTV Simple add-on"
