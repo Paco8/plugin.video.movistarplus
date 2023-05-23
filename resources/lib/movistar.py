@@ -670,6 +670,12 @@ class Movistar(object):
           res[name] = d
       return res
 
+    def get_ficha_url(self, id, mode='GLOBAL', catalog=''):
+      url = self.endpoints['ficha'].format(deviceType='webplayer', id=id, profile=self.account['platform'], mediatype='FOTOV', version='7.1', mode=mode, catalog=catalog, channels='', state='', mdrm='true', demarcation=self.account['demarcation'], legacyBoxOffice='')
+      url = url.replace('state=&', '')
+      #print(url)
+      return url
+
     def get_title(self, data):
       t = {}
       t['info'] = {}
@@ -761,7 +767,7 @@ class Movistar(object):
         if content:
           data = json.loads(content)
         else:
-          url = self.endpoints['ficha'].format(deviceType='webplayer', id=id, profile=self.account['platform'], mediatype='FOTOV', version='7.1', mode='GLOBAL', catalog=catalog, channels='', state='', mdrm='true', demarcation=self.account['demarcation'], legacyBoxOffice='')
+          url = self.get_ficha_url(id=id, catalog=catalog)
           #print(url)
           data = self.net.load_data(url)
           self.cache.save_file(cache_filename, json.dumps(data, ensure_ascii=False))
@@ -814,7 +820,7 @@ class Movistar(object):
         pass
 
     def get_seasons(self, id):
-      url = self.endpoints['ficha'].format(deviceType='webplayer', id=id, profile=self.account['platform'], mediatype='FOTOV', version='7.1', mode='GLOBAL', catalog='', channels='', state='', mdrm='true', demarcation=self.account['demarcation'], legacyBoxOffice='')
+      url = self.get_ficha_url(id)
       #print(url)
       data = self.net.load_data(url)
       #print_json(data)
@@ -840,7 +846,7 @@ class Movistar(object):
       return res
 
     def get_episodes(self, id):
-      url = self.endpoints['ficha'].format(deviceType='webplayer', id=str(id), profile=self.account['platform'], mediatype='FOTOV', version='7.1', mode='GLOBAL', catalog='', channels='', state='', mdrm='true', demarcation=self.account['demarcation'], legacyBoxOffice='')
+      url = self.get_ficha_url(id=str(id))
       #print(url)
       data = self.net.load_data(url)
       #print_json(data)
