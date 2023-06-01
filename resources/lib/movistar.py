@@ -451,6 +451,7 @@ class Movistar(object):
       found = False
       c = 0
       programs = []
+      if not id in epg: return programs
       for p in epg[id]:
         #print(p)
         if (p['start'] <= timestamp) and (timestamp <= p['end']):
@@ -671,8 +672,10 @@ class Movistar(object):
       return res
 
     def get_ficha_url(self, id, mode='GLOBAL', catalog=''):
-      url = self.endpoints['ficha'].format(deviceType='webplayer', id=id, profile=self.account['platform'], mediatype='FOTOV', version='7.1', mode=mode, catalog=catalog, channels='', state='', mdrm='true', demarcation=self.account['demarcation'], legacyBoxOffice='')
-      url = url.replace('state=&', '')
+      #url = self.endpoints['ficha'].format(deviceType='webplayer', id=id, profile=self.account['platform'], mediatype='FOTOV', version='7.1', mode=mode, catalog=catalog, channels='', state='', mdrm='true', demarcation=self.account['demarcation'], legacyBoxOffice='')
+      #url = url.replace('state=&', '')
+      e = 'https://ottcache.dof6.com/movistarplus/webplayer/contents/{id}/details?profile={profile}&mediaType=FOTOV&version=8&mode={mode}&catalog={catalog}&mdrm=true&tlsstream=true&demarcation={demarcation}'
+      url = e.format(id=id, profile=self.account['platform'], mode=mode, catalog=catalog, demarcation=self.account['demarcation'])
       #print(url)
       return url
 
@@ -934,6 +937,7 @@ class Movistar(object):
     def epg_to_movies(self, channel_id):
       epg = self.get_epg()
       res = []
+      if not channel_id in epg: return res
       for p in epg[channel_id]:
         if sys.version_info[0] < 3:
           p['date_str'] = unicode(p['date_str'], 'utf-8')
@@ -1043,7 +1047,7 @@ class Movistar(object):
       self.cache.save_file('auth.key', json.dumps(data, ensure_ascii=False))
 
     def delete_session_files(self):
-      for f in ['access_token.conf', 'account.json', 'device_id.conf', 'devices.json', 'profile_id.conf', 'tokens.json']:
+      for f in ['access_token.conf', 'account.json', 'device_id.conf', 'devices.json', 'profile_id.conf', 'tokens.json', 'channels2.json', 'epg2.json']:
         self.cache.remove_file(f)
 
     def get_profile_image_url(self, img_id):
