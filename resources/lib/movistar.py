@@ -13,6 +13,7 @@ import time
 import re
 from datetime import datetime
 
+from .endpoints import endpoints
 from .log import LOG, print_json
 from .network import Network
 from .cache import Cache
@@ -53,7 +54,8 @@ class Movistar(object):
         os.makedirs(config_directory + 'cache')
 
       # Endpoints
-      self.endpoints = self.get_endpoints()
+      #self.endpoints = self.get_endpoints()
+      self.endpoints = endpoints
 
       # Access token
       self.load_key_file() # Default access_token

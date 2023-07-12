@@ -407,19 +407,25 @@ def list_epg(params):
 
 def listing(name, url):
   data = m.download_list(url, use_hz=False)
+  l = []
+  url_next = None
+  url_prev = None
   if 'Contenidos' in data:
     l = m.get_list(data['Contenidos'])
     url_next = data['next']['href'] if isinstance(data['next'], dict) and 'href' in data['next'] else None
     url_prev = data['prev']['href'] if isinstance(data['next'], dict) and 'prev' in data['next'] else None
-    add_videos(name, 'movies', l, url_next=url_next, url_prev=url_prev, ref='listing')
+  add_videos(name, 'movies', l, url_next=url_next, url_prev=url_prev, ref='listing')
 
 def listing_hz(name, url, from_wishlist=False):
   data = m.download_list(url, use_hz=True)
+  l = []
+  url_next = None
+  url_prev = None
   if 'Contenidos' in data:
     l = m.get_list(data['Contenidos'])
     url_next = data['next']['href'] if isinstance(data['next'], dict) and 'href' in data['next'] else None
     url_prev = data['prev']['href'] if isinstance(data['next'], dict) and 'prev' in data['next'] else None
-    add_videos(name, 'movies', l, url_next=url_next, url_prev=url_prev, ref='listing_hz', from_wishlist=from_wishlist)
+  add_videos(name, 'movies', l, url_next=url_next, url_prev=url_prev, ref='listing_hz', from_wishlist=from_wishlist)
 
 def list_vod():
   open_folder(addon.getLocalizedString(30111)) # VOD
