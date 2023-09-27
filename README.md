@@ -41,7 +41,7 @@ Tras la instalación, la primera vez que entres en el addon tienes que ir a la o
 El plugin modifica los subtítulos de la TV a la carta para que aparezcan correctamente en Kodi. Sin embargo dicha modificación no se hace todavía en la TV en directo, y los subtítulos son mostrados directamente por Kodi, con este resultado:
  - en Kodi 18 no van
  - en Kodi 19 aparecen correctamente
- - en Kodi 20 aparecen con varios segundos de adelanto (solucionado en los Nightly Builds de Kodi 20)
+ - en Kodi 20 aparecen con varios segundos de adelanto (solucionado en Kodi 20.1)
 
 ## Configuración
 ### Principal
