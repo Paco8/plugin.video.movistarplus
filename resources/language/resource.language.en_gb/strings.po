@@ -29,6 +29,10 @@ msgctxt "#30003"
 msgid "Experimental"
 msgstr ""
 
+msgctxt "#30004"
+msgid "Subtitles"
+msgstr ""
+
 # For Orange and Movistar only
 msgctxt "#30010"
 msgid "DRM type"
@@ -95,6 +99,10 @@ msgctxt "#30025"
 msgid "Send video progress to provider's server"
 msgstr ""
 
+msgctxt "#30026"
+msgid "Update interval (in seconds)"
+msgstr ""
+
 # For SkyOTT only
 msgctxt "#30031"
 msgid "Streaming service"
@@ -132,12 +140,17 @@ msgstr ""
 
 # For SkyOTT only
 msgctxt "#30040"
-msgid "Use only for these languages (e.g.: es en pt):"
+msgid "Use for these languages (e.g.: es en pt):"
 msgstr ""
 
 # For SkyOTT only
 msgctxt "#30041"
 msgid "Subscription country (two letter code):"
+msgstr ""
+
+# For SkyOTT only
+msgctxt "#30050"
+msgid "Remember username and password"
 msgstr ""
 
 msgctxt "#30101"
@@ -274,6 +287,15 @@ msgctxt "#30167"
 msgid "Edit account"
 msgstr ""
 
+msgctxt "#30168"
+msgid "Login successful"
+msgstr ""
+
+# For Orange and Movistar only
+msgctxt "#30169"
+msgid "Record season"
+msgstr ""
+
 # For Orange and Movistar only
 msgctxt "#30170"
 msgid "Play from the beginning"
@@ -315,6 +337,10 @@ msgctxt "#30178"
 msgid "Title removed from my list"
 msgstr ""
 
+msgctxt "#30179"
+msgid "Remove from continue watching"
+msgstr ""
+
 msgctxt "#30180"
 msgid "Profiles"
 msgstr ""
@@ -345,6 +371,18 @@ msgstr ""
 
 msgctxt "#30187"
 msgid "Select the cookie file"
+msgstr ""
+
+msgctxt "#30190"
+msgid "Login to {} with a key file"
+msgstr ""
+
+msgctxt "#30191"
+msgid "Login to {} with username"
+msgstr ""
+
+msgctxt "#30192"
+msgid "Use a {} account"
 msgstr ""
 
 msgctxt "#30200"
@@ -447,4 +485,20 @@ msgstr ""
 
 msgctxt "#30321"
 msgid "Show age rating before playback"
+msgstr ""
+
+msgctxt "#30400"
+msgid "{} days remaining"
+msgstr ""
+
+msgctxt "#30401"
+msgid "{} hours remaining"
+msgstr ""
+
+msgctxt "#30450"
+msgid "Buy the developer a coffee"
+msgstr ""
+
+msgctxt "#30451"
+msgid "If you find this addon useful you can buy the developer a coffee:"
 msgstr ""

@@ -7,7 +7,7 @@ import xbmc
 import xbmcgui
 import xbmcplugin
 from .log import LOG
-from .addon import addon
+from .addon import addon,translatePath
 
 def handle():
   try:
@@ -34,12 +34,16 @@ def open_folder(name, content_type = 'videos'):
 def close_folder(updateListing=False, cacheToDisc=True):
   xbmcplugin.endOfDirectory(handle(), updateListing=updateListing, cacheToDisc=cacheToDisc)
 
-def add_menu_option(title, url, context_menu = None, info = None, art = None):
+def add_menu_option(title, url, context_menu = None, info = None, art = None, icon=None):
   list_item = xbmcgui.ListItem(label=title)
   if not info:
     info = {'title': title, 'plot': '[B][/B]'}
   if not art:
     art = {'icon': addon.getAddonInfo('icon'), 'poster': addon.getAddonInfo('icon')}
+  if icon:
+    path = addon.getAddonInfo('path')
+    icon_path = translatePath(path + '/resources/icons/' + icon)
+    art = {'icon': icon_path, 'poster': icon_path}
   list_item.setInfo('video', info)
   list_item.setArt(art)
   if context_menu:

@@ -1145,6 +1145,13 @@ class Movistar(object):
       return res
 
     def export_epg_to_xml(self, filename):
+      if sys.version_info[0] < 3:
+        # Python 2
+        from cgi import escape as html_escape
+      else:
+        # Python 3
+        from html import escape as html_escape
+
       channels = self.export_channels()
       res = []
       res.append('<?xml version="1.0" encoding="UTF-8"?>\n' + 
@@ -1169,12 +1176,12 @@ class Movistar(object):
           res.append('<programme start="{}" stop="{}" channel="{}"'.format(start, stop, ch['id']) +
                     (' catchup-id="{}"'.format(url) if url else "") +
                     '>\n' +
-                    '  <title>{}</title>\n'.format(e['title']) +
-                    '  <sub-title>{}</sub-title>\n'.format(e['subtitle']))
+                    '  <title>{}</title>\n'.format(html_escape(e['title'])) +
+                    '  <sub-title>{}</sub-title>\n'.format(html_escape(e['subtitle'])))
           if 'image' in e:
             res.append('  <icon src="{}"/>\n'.format(e['image']))
           if 'description' in e:
-            res.append('  <desc>{}</desc>\n'.format(e['description']))
+            res.append('  <desc>{}</desc>\n'.format(html_escape(e['description'])))
           if 'credits' in e and len(e['credits']) > 0:
             res.append('  <credits>\n');
             for c in e['credits']:

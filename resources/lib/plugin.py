@@ -641,23 +641,31 @@ def router(paramstring):
   else:
     # Main
     open_folder(addon.getLocalizedString(30101)) # Menu
-    xbmcplugin.setContent(_handle, 'files')
 
     if m.logged:
-      add_menu_option(addon.getLocalizedString(30104), get_url(action='tv')) # TV
-      add_menu_option(addon.getLocalizedString(30107), get_url(action='epg')) # EGP
-      add_menu_option(addon.getLocalizedString(30102), get_url(action='wishlist')) # My list
-      add_menu_option(addon.getLocalizedString(30103), get_url(action='recordings')) # Recordings
-      add_menu_option(addon.getLocalizedString(30111), get_url(action='vod')) # VOD
-      add_menu_option(addon.getLocalizedString(30112), get_url(action='search')) # Search
-      add_menu_option(addon.getLocalizedString(30180), get_url(action='profiles')) # Profiles
-      add_menu_option(addon.getLocalizedString(30108), get_url(action='devices')) # Devices
+      add_menu_option(addon.getLocalizedString(30104), get_url(action='tv'), icon='tv.png') # TV
+      add_menu_option(addon.getLocalizedString(30107), get_url(action='epg'), icon='epg.png') # EGP
+      add_menu_option(addon.getLocalizedString(30102), get_url(action='wishlist'), icon='mylist.png') # My list
+      add_menu_option(addon.getLocalizedString(30103), get_url(action='recordings'), icon='recording.png') # Recordings
+      add_menu_option(addon.getLocalizedString(30111), get_url(action='vod'), icon='vod.png') # VOD
+      add_menu_option(addon.getLocalizedString(30112), get_url(action='search'), icon='search.png') # Search
+      add_menu_option(addon.getLocalizedString(30180), get_url(action='profiles'), icon='profiles.png') # Profiles
+      add_menu_option(addon.getLocalizedString(30108), get_url(action='devices'), icon='devices.png') # Devices
 
-    add_menu_option(addon.getLocalizedString(30160), get_url(action='user')) # Accounts
+    add_menu_option(addon.getLocalizedString(30160), get_url(action='user'), icon='account.png') # Accounts
     close_folder(cacheToDisc=False)
 
 
 def run():
+  # Call the router function and pass the plugin call parameters to it.
+  # We use string slicing to trim the leading '?' from the plugin call paramstring
+  params = sys.argv[2][1:]
+
+  if 'show_donation_dialog' in params:
+    from .customdialog import show_donation_dialog
+    show_donation_dialog()
+    return
+
   global m
   reuse_devices = addon.getSettingBool('reuse_devices')
   LOG('profile_dir: {}'.format(profile_dir))
@@ -673,9 +681,6 @@ def run():
   # Clear cache
   LOG('Cleaning cache. {} files removed.'.format(m.cache.clear_cache()))
 
-  # Call the router function and pass the plugin call parameters to it.
-  # We use string slicing to trim the leading '?' from the plugin call paramstring
-  params = sys.argv[2][1:]
   if '/iptv/channels' in sys.argv[0]: params += '&action=iptv-channels'
   elif '/iptv/epg' in sys.argv[0]: params += '&action=iptv-epg'
   router(params)

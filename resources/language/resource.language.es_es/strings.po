@@ -12,7 +12,7 @@ msgstr ""
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE\n"
-"Language: en\n"
+"Language: es\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -28,6 +28,10 @@ msgstr "Proxy"
 msgctxt "#30003"
 msgid "Experimental"
 msgstr "Experimental"
+
+msgctxt "#30004"
+msgid "Subtitles"
+msgstr "Subtítulos"
 
 msgctxt "#30010"
 msgid "DRM type"
@@ -85,6 +89,10 @@ msgctxt "#30025"
 msgid "Send video progress to provider's server"
 msgstr "Enviar progreso al servidor de la plataforma"
 
+msgctxt "#30026"
+msgid "Update interval (in seconds)"
+msgstr "Tiempo entre actualizaciones (en segundos)"
+
 msgctxt "#30031"
 msgid "Streaming service"
 msgstr "Plataforma"
@@ -114,14 +122,20 @@ msgctxt "#30037"
 msgid "Enable HDCP"
 msgstr "Habilitar HDCP"
 
+# For SkyOTT only
 msgctxt "#30040"
-msgid "Use only for these languages (e.g.: es en pt):"
-msgstr "Usar solo para estos idiomas (ej: es en pt):"
+msgid "Use for these languages (e.g.: es en pt):"
+msgstr "Usar para estos idiomas (ej: es en pt):"
 
 # For SkyOTT only
 msgctxt "#30041"
 msgid "Subscription country (two letter code):"
 msgstr "País de la suscripción (código de dos letras):"
+
+# For SkyOTT only
+msgctxt "#30050"
+msgid "Remember username and password"
+msgstr "Recordar usuario y clave"
 
 msgctxt "#30101"
 msgid "Menu"
@@ -255,6 +269,15 @@ msgctxt "#30167"
 msgid "Edit account"
 msgstr "Editar cuenta"
 
+msgctxt "#30168"
+msgid "Login successful"
+msgstr "Se ha iniciado sesión"
+
+# For Orange and Movistar only
+msgctxt "#30169"
+msgid "Record season"
+msgstr "Grabar temporada"
+
 msgctxt "#30170"
 msgid "Play from the beginning"
 msgstr "Ver desde el principio"
@@ -291,6 +314,10 @@ msgctxt "#30178"
 msgid "Title removed from my list"
 msgstr "Título quitado de mi lista"
 
+msgctxt "#30179"
+msgid "Remove from continue watching"
+msgstr "Quitar de seguir viendo"
+
 msgctxt "#30180"
 msgid "Profiles"
 msgstr "Perfiles"
@@ -322,6 +349,18 @@ msgstr "Iniciar sesión con fichero cookie"
 msgctxt "#30187"
 msgid "Select the cookie file"
 msgstr "Selecciona el fichero cookie"
+
+msgctxt "#30190"
+msgid "Login to {} with a key file"
+msgstr "Iniciar sesión en {} con fichero key"
+
+msgctxt "#30191"
+msgid "Login to {} with username"
+msgstr "Iniciar sesión en {} con nombre y clave"
+
+msgctxt "#30192"
+msgid "Use a {} account"
+msgstr "Usar una cuenta de {}"
 
 msgctxt "#30200"
 msgid "Error"
@@ -372,6 +411,11 @@ msgctxt "#30303"
 msgid "IPTV Manager settings"
 msgstr "Opciones de IPTV Manager"
 
+# For Orange and Movistar only
+msgctxt "#30304"
+msgid "IPTV"
+msgstr "IPTV"
+
 msgctxt "#30305"
 msgid "Export channels and EPG for IPTV automatically"
 msgstr "Exportar automáticamente canales y guía para IPTV"
@@ -407,3 +451,23 @@ msgstr "Calificación: {}"
 msgctxt "#30321"
 msgid "Show age rating before playback"
 msgstr "Mostrar la calificación de edades al empezar la reproducción"
+
+msgctxt "#30400"
+msgid "{} days remaining"
+msgstr "quedan {} días"
+
+msgctxt "#30401"
+msgid "{} hours remaining"
+msgstr "quedan {} horas"
+
+msgctxt "#30450"
+msgid "Buy the developer a coffee"
+msgstr "Invita al programador a un café"
+
+msgctxt "#30451"
+msgid "If you find this addon useful you can buy the developer a coffee:"
+msgstr "Si este addon es útil para ti puedes invitar al programador a un café:"
+
+#~ msgctxt "#30040"
+#~ msgid "Use only for these languages (e.g.: es en pt):"
+#~ msgstr "Usar solo para estos idiomas (ej: es en pt):"
