@@ -534,15 +534,18 @@ class Movistar(object):
       return self.is_subscribed_channel(products)
 
     def get_channels(self, add_epg_info = False):
+      demarcation = self.account['demarcation']
       if add_epg_info:
-        url = self.endpoints['guiaTV'].format(deviceType='webplayer', profile=self.account['platform'], preOffset=0, postOffset=0, mdrm='true', demarcation=self.account['demarcation'])
+        url = self.endpoints['guiaTV'].format(deviceType='webplayer', profile=self.account['platform'], preOffset=0, postOffset=0, mdrm='true', demarcation=demarcation)
+        url += '&filterQuality=UHD'
         data = self.net.load_data(url)
       else:
         content = self.cache.load('channels2.json')
         if content:
           data = json.loads(content)
         else:
-          url = self.endpoints['canales'].format(deviceType='webplayer', profile=self.account['platform'], mdrm='true', demarcation=self.account['demarcation'])
+          url = self.endpoints['canales'].format(deviceType='webplayer', profile=self.account['platform'], mdrm='true', demarcation=demarcation)
+          url += '&filterQuality=UHD'
           data = self.net.load_data(url)
           self.cache.save_file('channels2.json', json.dumps(data, ensure_ascii=False))
 
