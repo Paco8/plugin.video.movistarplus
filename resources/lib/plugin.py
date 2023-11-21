@@ -104,6 +104,12 @@ def play(params):
   headers += '&Origin=https://ver.movistarplus.es&Connection=keep-alive'
   headers += '&Host=wv-ottlic-f3.imagenio.telefonica.net'
 
+  manifest_headers = 'User-Agent=Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:88.0) Gecko/20100101 Firefox/88.0'
+  if stype == 'tv':
+    cdn_token = m.get_cdntoken()
+    LOG('cdn_token: {}'.format(cdn_token))
+    manifest_headers += '&x-tcdn-token=' + cdn_token
+
   license_url = 'https://wv-ottlic-f3.imagenio.telefonica.net/TFAESP/wvls/contentlicenseservice/v1/licenses'
   certificate = (
      'CsECCAMSEBcFuRfMEgSGiwYzOi93KowYgrSCkgUijgIwggEKAoIBAQCZ7Vs7Mn2rXiTvw7YqlbWY'
@@ -135,7 +141,8 @@ def play(params):
     play_item.setProperty('inputstream.adaptive.license_key', license_url)
   else:
     play_item.setProperty('inputstream.adaptive.license_key', '{}|{}&nv-authorizations={}|R{{SSM}}|'.format(license_url, headers, token))
-  play_item.setProperty('inputstream.adaptive.stream_headers', 'User-Agent=Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:88.0) Gecko/20100101 Firefox/88.0')
+  play_item.setProperty('inputstream.adaptive.stream_headers', manifest_headers)
+  play_item.setProperty('inputstream.adaptive.manifest_headers', manifest_headers) # Kodi 21
   play_item.setProperty('inputstream.adaptive.server_certificate', certificate)
   #play_item.setProperty('inputstream.adaptive.license_flags', 'persistent_storage')
   #play_item.setProperty('inputstream.adaptive.license_flags', 'force_secure_decoder')

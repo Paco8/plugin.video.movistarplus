@@ -394,6 +394,13 @@ class Movistar(object):
       content = response.content.decode('utf-8')
       return content
 
+    def get_cdntoken(self):
+      headers = self.net.headers.copy()
+      headers['Authorization'] = 'Bearer ' + self.account['access_token']
+      url = self.endpoints['renovacion_cdntoken2'].format(ACCOUNTNUMBER=self.account['id'])
+      data = self.net.post_data(url, None, headers)
+      return data.get('access_token')
+
     def get_profiles(self):
       headers = self.net.headers.copy()
       headers['X-HZId'] = self.account['session_token']

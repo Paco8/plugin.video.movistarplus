@@ -87,6 +87,7 @@ endpoints = {
     "renovacion_hztoken": "https://clientservices.dof6.com/movistarplus/{deviceType}/mediaPlayers/{DEVICEID}/hz-token", 
     "keepAliveStream": "https://alkasvaspub.imagenio.telefonica.net/asvas/ccs/{PID}/{deviceCode}/{PLAYREADYID}/Session/{SessionID}", 
     "renovacion_ssptoken": "https://clientservices.dof6.com/movistarplus/{deviceType}/accounts/{ACCOUNTNUMBER}/ssp-token?mediaPlayerId={DEVICEID}", 
+    "renovacion_cdntoken2": "https://lite.dof6.com/tcdnidserver/{ACCOUNTNUMBER}/devices/webplayer/cdn/token/refresh",
     "config": "https://ottcache.dof6.com/movistarplus/{origin}/webplayer/{profile}/configuration/config?format=json&uisegment={uisegment}", 
     "registro": "https://www.movistar.es/particulares/ver-tv/contenidos/yomvi?origen=activar", 
     "consulta_producto": "https://clientservices.dof6.com/movistarplus/upselling/{deviceType}/{PLAYREADYID}/contents/{contents}/{contentId}/subscription?mdrm={mdrm}", 

@@ -88,7 +88,12 @@ class RequestHandler(BaseHTTPRequestHandler):
               pos = path.find('=')
               url = path[pos+1:]
               LOG('url: {}'.format(url))
-              response = session.get(url, allow_redirects=True)
+              #LOG('request headers: {}'.format(self.headers))
+              additional_headers = {}
+              if 'x-tcdn-token' in self.headers:
+                additional_headers['x-tcdn-token'] = self.headers['x-tcdn-token']
+              #LOG('additional_headers: {}'.format(additional_headers))
+              response = session.get(url, allow_redirects=True, headers=additional_headers)
               LOG('headers: {}'.format(response.headers))
               baseurl = os.path.dirname(response.url)
               LOG('baseurl: {}'.format(baseurl))
