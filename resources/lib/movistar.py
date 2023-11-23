@@ -48,6 +48,8 @@ class Movistar(object):
       self.net = Network()
       self.net.headers = headers
 
+      self.quality = 'HD' # or UHD
+
       # Cache
       self.cache = Cache(config_directory)
       if not os.path.exists(config_directory + 'cache'):
@@ -423,16 +425,18 @@ class Movistar(object):
       self.cache.remove_file('tokens.json')
 
     def get_epg(self):
-      content = self.cache.load('epg2.json', 6*60)
+      cache_filename = 'epg_{}.json'.format(self.quality)
+      content = self.cache.load(cache_filename, 6*60)
       if content:
         data = json.loads(content)
       else:
         today = datetime.today()
         str_now = today.strftime('%Y-%m-%dT00:00:00')
         url = self.endpoints['rejilla'].format(deviceType='webplayer', profile=self.account['platform'], UTCDATETIME=str_now, DURATION=2, CHANNELS='', NETWORK='movistarplus', mdrm='true', demarcation=self.account['demarcation'])
+        if self.quality == 'UHD': url += '&filterQuality=UHD'
         #print(url)
         data = self.net.load_data(url)
-        self.cache.save_file('epg2.json', json.dumps(data, ensure_ascii=False))
+        self.cache.save_file(cache_filename, json.dumps(data, ensure_ascii=False))
 
       epg = {}
       for ch in data:
@@ -477,6 +481,7 @@ class Movistar(object):
       stype = title.get('stream_type')
       if stype == 'u7d': s += ' (U7D)'
       elif stype == 'rec': s += ' (REC)'
+      if title.get('video_format') == '4K': s += " (4K)"
 
       color1 = 'yellow'
       color2 = 'red'
@@ -540,21 +545,17 @@ class Movistar(object):
       #return False
       return self.is_subscribed_channel(products)
 
-    def get_channels(self, add_epg_info = False):
+    def get_channels(self):
       demarcation = self.account['demarcation']
-      if add_epg_info:
-        url = self.endpoints['guiaTV'].format(deviceType='webplayer', profile=self.account['platform'], preOffset=0, postOffset=0, mdrm='true', demarcation=demarcation)
-        url += '&filterQuality=UHD'
-        data = self.net.load_data(url)
+      cache_filename = 'channels_{}.json'.format(self.quality)
+      content = self.cache.load(cache_filename)
+      if content:
+        data = json.loads(content)
       else:
-        content = self.cache.load('channels2.json')
-        if content:
-          data = json.loads(content)
-        else:
-          url = self.endpoints['canales'].format(deviceType='webplayer', profile=self.account['platform'], mdrm='true', demarcation=demarcation)
-          url += '&filterQuality=UHD'
-          data = self.net.load_data(url)
-          self.cache.save_file('channels2.json', json.dumps(data, ensure_ascii=False))
+        url = self.endpoints['canales'].format(deviceType='webplayer', profile=self.account['platform'], mdrm='true', demarcation=demarcation)
+        if self.quality == 'UHD': url += '&filterQuality=UHD'
+        data = self.net.load_data(url)
+        self.cache.save_file(cache_filename, json.dumps(data, ensure_ascii=False))
 
       res = []
       for c in data:
@@ -567,26 +568,29 @@ class Movistar(object):
         t['channel_name'] = c['Nombre'].strip()
         t['info']['title'] = str(c['Dial']) +'. ' + t['channel_name']
         t['id'] = c['CodCadenaTv']
-        if add_epg_info:
-          t['desc1'] = c['Nombre']
-          t['desc2'] = ''
+        #if add_epg_info:
+        #  t['desc1'] = c['Nombre']
+        #  t['desc2'] = ''
         t['dial'] = c['Dial']
         t['url'] = c['PuntoReproduccion']
-        t['art']['icon'] = t['art']['thumb'] = t['art']['poster'] = c['Logo']
+        if 'Logo' in c:
+          t['art']['icon'] = t['art']['thumb'] = t['art']['poster'] = c['Logo']
+        elif 'Logos' in c:
+          t['art']['icon'] = t['art']['thumb'] = t['art']['poster'] = c['Logos'][0]['uri']
         t['session_request'] = '{"contentID":"'+ t['id'] +'", "streamType":"CHN"}'
         t['subscribed'] = self.is_subscribed_channel(c.get('tvProducts', []))
         t['info']['playcount'] = 1 # Set as watched
         # epg
-        if add_epg_info:
-          program = c['Pases'][0]
-          t['desc1'] = program['Titulo']
-          if 'TituloHorLinea2' in program:
-            t['desc2'] = program['TituloHorLinea2']
-          t['start'] = int(program['FechaHoraInicio'])
-          t['end'] = int(program['FechaHoraFin'])
-          t['start_str'] = timestamp2str(t['start'])
-          t['end_str'] = timestamp2str(t['end'])
-          t['info']['plot'] = '[B]{}-{}[/B] {}\n{}'.format(t['start_str'], t['end_str'], t['desc1'], t['desc2'])
+        #if add_epg_info:
+        #  program = c['Pases'][0]
+        #  t['desc1'] = program['Titulo']
+        #  if 'TituloHorLinea2' in program:
+        #    t['desc2'] = program['TituloHorLinea2']
+        #  t['start'] = int(program['FechaHoraInicio'])
+        #  t['end'] = int(program['FechaHoraFin'])
+        #  t['start_str'] = timestamp2str(t['start'])
+        #  t['end_str'] = timestamp2str(t['end'])
+        #  t['info']['plot'] = '[B]{}-{}[/B] {}\n{}'.format(t['start_str'], t['end_str'], t['desc1'], t['desc2'])
 
         res.append(t)
 
@@ -662,6 +666,7 @@ class Movistar(object):
                  texto=search_term,
                  distilledTvRights=','.join(self.entitlements['distilledTvRights']),
                  mdrm='true', demarcation=self.account['demarcation'])
+      if self.quality == 'UHD': url += '&filterQuality=UHD'
       return url
 
     def add_search(self, search_term):
@@ -688,6 +693,7 @@ class Movistar(object):
       #url = url.replace('state=&', '')
       e = 'https://ottcache.dof6.com/movistarplus/webplayer/contents/{id}/details?profile={profile}&mediaType=FOTOV&version=8&mode={mode}&catalog={catalog}&mdrm=true&tlsstream=true&demarcation={demarcation}'
       url = e.format(id=id, profile=self.account['platform'], mode=mode, catalog=catalog, demarcation=self.account['demarcation'])
+      if self.quality == 'UHD': url += '&filterQuality=UHD'
       #print(url)
       return url
 
@@ -747,6 +753,7 @@ class Movistar(object):
         t['subscribed'] = self.is_subscribed_vod(data.get('tvProducts', []))
       if 'DatosAccesoAnonimo' in data:
         da = data['DatosAccesoAnonimo']
+        t['video_format'] = da.get('FormatoVideo')
         if 'HoraInicio' in da and da['HoraInicio'] != None:
           t['start'] = int(da['HoraInicio'])
           t['start_str'] = timestamp2str(t['start'])
@@ -855,6 +862,7 @@ class Movistar(object):
         t['art']['poster'] = t['art']['thumb'] = data['Imagen']
         t['subscribed'] = self.is_subscribed_vod(data.get('tvProducts', []))
         if 'Seguible' in data: t['seguible'] = data['Seguible']
+        #t['video_format'] = data.get('FormatoVideo')
         c += 1
         res.append(t)
 
@@ -901,6 +909,7 @@ class Movistar(object):
           if 'ShowId' in video: t['show_id'] = video['ShowId']
         if 'DatosAccesoAnonimo' in d:
           da = d['DatosAccesoAnonimo']
+          t['video_format'] = da.get('FormatoVideo')
           if 'HoraInicio' in da and da['HoraInicio'] != None:
             t['start'] = int(da['HoraInicio'])
             t['start_str'] = timestamp2str(t['start'])
@@ -1029,6 +1038,7 @@ class Movistar(object):
         url += '&topic=DC'
       elif cat == 'kids':
         url += '&topic=IN'
+      if self.quality == 'UHD': url += '&filterQuality=UHD'
       #LOG('vod url: {}'.format(url))
       return url
 
@@ -1083,7 +1093,7 @@ class Movistar(object):
         from urllib.parse import urlencode
       else:
         from urllib import urlencode
-      channels = self.get_channels(False)
+      channels = self.get_channels()
       res = []
       for c in channels:
         if not c['subscribed']: continue
@@ -1116,7 +1126,7 @@ class Movistar(object):
       #now = time.time()*1000
       res = {}
       epg = self.get_epg()
-      channels = self.get_channels(False)
+      channels = self.get_channels()
       for channel in channels:
         id = channel['id']
         if not channel['subscribed'] or not id in epg: continue

@@ -3,12 +3,13 @@
         <setting label="30017" type="bool" id="only_subscribed" default="true"/>
         <setting label="30020" type="bool" id="channels_with_epg" default="false"/>
         <setting label="30021" type="bool" id="add_extra_info" default="false"/>
+        <setting label="30033" type="bool" id="uhd" default="false"/>
         <setting id="use_ttml2ssa" type="bool" label="$ADDON[script.module.ttml2ssa 32202]" default="false"/>
-        <setting id="ssa_settings" type="action" label="$ADDON[script.module.ttml2ssa 32201]" option="close" action="Addon.OpenSettings(script.module.ttml2ssa)" enable="eq(-1,true)" subsetting="true"/>
+        <setting id="ssa_settings" type="action" label="$ADDON[script.module.ttml2ssa 32201]" option="close" action="Addon.OpenSettings(script.module.ttml2ssa)" visible="eq(-1,true)" subsetting="true"/>
         <setting label="30019" type="action" id="is_settings" action="Addon.OpenSettings(inputstream.adaptive)" enable="System.HasAddon(inputstream.adaptive)" option="close"/>
         <setting id="reuse_devices" type="bool" label="30023" default="false" visible="true"/>
         <setting id="open_session" type="bool" label="30022" default="true" visible="true"/>
-        <setting id="profile_id" type="labelenum" label="Profile ID" values="Auto|OTT|NODTH"/>
+        <setting id="profile_id" type="labelenum" label="Profile ID" values="Auto|OTT|NODTH" visible="false"/>
         <setting type="sep"/>
         <setting label="30450" type="action" id="donation" action="RunPlugin(plugin://plugin.video.movistarplus?action=show_donation_dialog)" option="close"/>
     </category>

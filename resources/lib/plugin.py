@@ -28,6 +28,8 @@ from .movistar import *
 from .addon import *
 from .gui import *
 
+kodi_version= int(xbmc.getInfoLabel('System.BuildVersion')[:2])
+
 # Get the plugin url in plugin:// notation.
 _url = sys.argv[0]
 # Get the plugin handle as an integer number.
@@ -107,7 +109,7 @@ def play(params):
   manifest_headers = 'User-Agent=Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:88.0) Gecko/20100101 Firefox/88.0'
   if stype == 'tv':
     cdn_token = m.get_cdntoken()
-    LOG('cdn_token: {}'.format(cdn_token))
+    #LOG('cdn_token: {}'.format(cdn_token))
     manifest_headers += '&x-tcdn-token=' + cdn_token
 
   license_url = 'https://wv-ottlic-f3.imagenio.telefonica.net/TFAESP/wvls/contentlicenseservice/v1/licenses'
@@ -141,8 +143,12 @@ def play(params):
     play_item.setProperty('inputstream.adaptive.license_key', license_url)
   else:
     play_item.setProperty('inputstream.adaptive.license_key', '{}|{}&nv-authorizations={}|R{{SSM}}|'.format(license_url, headers, token))
-  play_item.setProperty('inputstream.adaptive.stream_headers', manifest_headers)
-  play_item.setProperty('inputstream.adaptive.manifest_headers', manifest_headers) # Kodi 21
+
+  if kodi_version < 20:
+    play_item.setProperty('inputstream.adaptive.stream_headers', manifest_headers)
+  else:
+    play_item.setProperty('inputstream.adaptive.manifest_headers', manifest_headers)
+
   play_item.setProperty('inputstream.adaptive.server_certificate', certificate)
   #play_item.setProperty('inputstream.adaptive.license_flags', 'persistent_storage')
   #play_item.setProperty('inputstream.adaptive.license_flags', 'force_secure_decoder')
@@ -150,7 +156,7 @@ def play(params):
   if stype == 'u7d':
     play_item.setProperty('inputstream.adaptive.play_timeshift_buffer', 'true')
 
-  if sys.version_info[0] < 3:
+  if kodi_version < 19:
     play_item.setProperty('inputstreamaddon', 'inputstream.adaptive')
   else:
     play_item.setProperty('inputstream', 'inputstream.adaptive')
@@ -679,6 +685,8 @@ def run():
   LOG('reuse_devices: {}'.format(reuse_devices))
   m = Movistar(profile_dir, reuse_devices=reuse_devices)
   m.add_extra_info = addon.getSettingBool('add_extra_info')
+  if addon.getSettingBool('uhd'):
+    m.quality = 'UHD'
 
   profile_id = addon.getSetting('profile_id')
   LOG('profile_id: {}'.format(profile_id))
