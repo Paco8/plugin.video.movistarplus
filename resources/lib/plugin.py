@@ -300,7 +300,7 @@ def add_videos(category, ctype, videos, ref=None, url_next=None, url_prev=None, 
 
       actions = []
       if t.get('stream_type') == 'u7d':
-        LOG(t)
+        #LOG(t)
         if 'show_id' in t and not t.get('aired', False):
           record_program_action = (addon.getLocalizedString(30171), "RunPlugin(" + get_url(action='add_recording', id=t['show_id']) + ")")
           actions.append(record_program_action)
@@ -316,7 +316,7 @@ def add_videos(category, ctype, videos, ref=None, url_next=None, url_prev=None, 
         actions.append(wishlist_action)
 
       if len(actions) > 0:
-        LOG(actions)
+        #LOG(actions)
         list_item.addContextMenuItems(actions)
 
       url = get_url(action='play', id=t['id'], url=t['url'], session_request=t['session_request'], stype=t['stream_type'])
