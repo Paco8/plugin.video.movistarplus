@@ -133,7 +133,7 @@ class Movistar(object):
       LOG('device_id: {}'. format(self.account['device_id']))
 
       # Tokens
-      content = self.cache.load('tokens.json', 3)
+      content = self.cache.load('tokens.json', 60*24)
       if content:
         data = json.loads(content)
       else:
@@ -296,7 +296,7 @@ class Movistar(object):
       self.cache.remove_file('tokens.json')
 
     def get_devices(self, use_cache=True):
-      content = self.cache.load('devices.json', 3)
+      content = self.cache.load('devices.json', 60)
       if use_cache and content:
         data = json.loads(content)
       else:
@@ -902,6 +902,8 @@ class Movistar(object):
         t['session_request'] = ''
         if len(d['VodItems']) > 0:
           video = d['VodItems'][0]
+          #if video.get('AssetType') == 'SOON': continue
+          if not 'UrlVideo' in video: continue
           t['subscribed'] = self.is_subscribed_vod(video.get('tvProducts', []))
           t['url'] = video['UrlVideo']
           if video['AssetType'] == 'VOD':
