@@ -454,6 +454,8 @@ class Movistar(object):
           if 'TituloHorLinea2' in p:
             pr['desc2'] = p['TituloHorLinea2']
           pr['show_id'] = p['ShowId']
+          if 'SerialId' in p:
+            pr['serie_id'] = p['SerialId']
           pr['id'] = p['Id']
           #if 'links' in p: pr['links'] = p['links']
           epg[id].append(pr)
@@ -566,12 +568,12 @@ class Movistar(object):
         t['stream_type'] = 'tv'
         t['info']['mediatype'] = 'movie'
         t['channel_name'] = c['Nombre'].strip()
-        t['info']['title'] = str(c['Dial']) +'. ' + t['channel_name']
+        t['info']['title'] = str(c.get('Dial', '0')) +'. ' + t['channel_name']
         t['id'] = c['CodCadenaTv']
         #if add_epg_info:
         #  t['desc1'] = c['Nombre']
         #  t['desc2'] = ''
-        t['dial'] = c['Dial']
+        t['dial'] = c.get('Dial', '0')
         t['url'] = c['PuntoReproduccion']
         if 'Logo' in c:
           t['art']['icon'] = t['art']['thumb'] = t['art']['poster'] = c['Logo']
@@ -648,6 +650,7 @@ class Movistar(object):
               deviceType='webplayer', DIGITALPLUSUSERIDC=self.account['encoded_user'], PROFILE=self.account['platform'],
               ACCOUNTNUMBER=self.account['id'], idsOnly='false', start=1, end=30, mdrm='true', demarcation=self.account['demarcation'])
       #url += '&filter=AD-SINX&topic=CN'
+      if self.quality == 'UHD': url += '&filterQuality=UHD'
       url += '&_='+ str(int(time.time()*1000))
       return url
 
@@ -942,6 +945,20 @@ class Movistar(object):
       except:
         return None
 
+    def order_recording_season(self, season_id):
+      headers = self.net.headers.copy()
+      headers['Content-Type'] = 'application/json'
+      headers['X-Hzid'] = self.account['session_token']
+      url = self.endpoints['grabartemporada']
+      data = '{"tvSeasonID":"' + str(season_id) +'"}'
+      response = self.net.session.post(url, data=data, headers=headers)
+      content = response.content.decode('utf-8')
+      try:
+        data = json.loads(content)
+        return data
+      except:
+        return None
+
     def delete_recording(self, program_id):
       headers = self.net.headers.copy()
       headers['Content-Type'] = 'application/json'
@@ -974,6 +991,8 @@ class Movistar(object):
         t['url'] = ''
         t['id'] = p['id']
         t['show_id'] = p['show_id']
+        if 'serie_id' in p:
+          t['serie_id'] = p['serie_id']
         t['session_request'] = '{"contentID":' + str(t['id']) +',"streamType":"CUTV"}'
         t['info']['playcount'] = 1 # Set as watched
         t['start'] = p['start']
@@ -1024,8 +1043,9 @@ class Movistar(object):
       return res
 
     def get_vod_list_url(self, cat='movies'):
-      #sort = 'FD'
+      #sort = 'FE'
       sort = 'MA'
+      #sort = 'AZ'
       url = self.endpoints['consultar'].format(deviceType='webplayer', profile=self.account['platform'], sort=sort, start=1, end=50, mdrm='true', demarcation=self.account['demarcation'])
       filter = '&filter=AC-OM,AC-MA,MA-GBLCICLO59,TD-CUP,RG-SINCAT,AC-PREPUB,' + self.entitlements['suscripcion']
       #filter = '&filter=AC-OM,AC-MA,MA-GBLCICLO59,TD-CUP,RG-SINCAT,AC-PREPUB'
@@ -1041,6 +1061,79 @@ class Movistar(object):
       if self.quality == 'UHD': url += '&filterQuality=UHD'
       #LOG('vod url: {}'.format(url))
       return url
+
+    def get_vod_sections(self):
+      from collections import OrderedDict
+
+      profile = self.account['platform']
+      #profile = 'OTT'
+      #profile = 'LITE'
+
+      content = self.cache.load('vod_sections.json')
+      if content:
+        data = json.loads(content)
+      else:
+        url = 'https://apps.dof6.com/feed/conf.php?id=justconfig&id_perfil={}&dispositivo=cell'.format(profile)
+        data = self.net.load_data(url)
+        self.cache.save_file('vod_sections.json', json.dumps(data, ensure_ascii=False))
+
+      submenu = data.get('YOMVIANDROID', {}).get('Menu', {}).get('Submenu', [])
+      res = OrderedDict()
+      for o in submenu:
+        #print_json(o)
+        menu = {}
+        menu['visible'] = (o.get('@visible') != 'false')
+        menu['id'] = o.get('@id')
+
+        if 'Modulo' in o:
+          section_name = o['@nombre'] if '@nombre' in o else o['@P']
+          modulo = o['Modulo']
+
+          section = []
+
+          if isinstance(modulo, dict):
+            modulo = [modulo]
+
+          if isinstance(modulo, list):
+            for m in modulo:
+              if 'consulta' in m and m['consulta'].get('@endpoint_ref', '') == 'consultar':
+                if not '@nombre' in m: continue
+                #print (menu['id'], m['@nombre'])
+                c = {}
+                c['name'] = m['@nombre']
+                pars = ''
+                sort = ''
+
+                parametros = m['consulta']['parametro']
+                if isinstance(parametros, dict):
+                  parametros = [parametros]
+
+                for par in parametros:
+                  #print_json(par)
+                  if par.get('@incluir', '') == 'true':
+                    pars += '&{}={}'.format(par['@id'], par['@value'])
+                  if par['@id'] == 'sort':
+                    sort = par['@value']
+
+                pars = pars.replace('{suscripcion}', self.entitlements['suscripcion'])
+                c['url'] = self.endpoints['consultar'].format(deviceType='webplayer', profile=profile, sort=sort, start=1, end=50, mdrm='true', demarcation=self.account['demarcation'])
+                c['url'] += pars
+                if self.quality == 'UHD': c['url'] += '&filterQuality=UHD'
+                section.append(c)
+          if len(section) > 0:
+            menu['name'] = section_name
+            menu['data'] = section
+            res[menu['id']] = menu
+
+      if 'portada_cine_destacados' in res:
+        res['portada_cine_destacados']['visible'] = True
+        res['portada_cine_destacados']['name'] = 'Cine - Géneros'
+
+      if 'portada_series_destacados' in res:
+        res['portada_series_destacados']['visible'] = True
+        res['portada_series_destacados']['name'] = 'Series - Géneros'
+
+      return res
 
     def install_key_file(self, filename):
       import shutil
@@ -1069,7 +1162,7 @@ class Movistar(object):
       self.cache.save_file('auth.key', json.dumps(data, ensure_ascii=False))
 
     def delete_session_files(self):
-      for f in ['access_token.conf', 'account.json', 'device_id.conf', 'devices.json', 'profile_id.conf', 'tokens.json', 'channels2.json', 'epg2.json']:
+      for f in ['access_token.conf', 'account.json', 'device_id.conf', 'devices.json', 'profile_id.conf', 'tokens.json', 'channels2.json', 'channels_UHD.json', 'channels_HD.json', 'epg2.json', 'epg_UHD.json', 'epg_HD.json']:
         self.cache.remove_file(f)
 
     def get_profile_image_url(self, img_id):
@@ -1215,3 +1308,16 @@ class Movistar(object):
       with io.open(filename, 'w', encoding='utf-8', newline='') as handle:
         handle.write(''.join(res))
 
+    def save_credentials(self, username, password):
+      from .b64 import encode_base64
+      data = {'username': username, 'password': encode_base64(password)}
+      self.cache.save_file('credentials.json', json.dumps(data, ensure_ascii=False))
+
+    def load_credentials(self):
+      from .b64 import decode_base64
+      content = self.cache.load_file('credentials.json')
+      if content:
+        data = json.loads(content)
+        return data['username'], decode_base64(data['password'])
+      else:
+        return '', ''

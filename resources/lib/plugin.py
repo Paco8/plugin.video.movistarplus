@@ -298,16 +298,26 @@ def add_videos(category, ctype, videos, ref=None, url_next=None, url_prev=None, 
       list_item.setInfo('video', t['info'])
       list_item.setArt(t['art'])
 
-      if t.get('stream_type') == 'u7d' and 'show_id' in t and not t.get('aired', False):
-        record_program_action = (addon.getLocalizedString(30171), "RunPlugin(" + get_url(action='add_recording', id=t['show_id']) + ")")
-        list_item.addContextMenuItems([record_program_action])
+      actions = []
+      if t.get('stream_type') == 'u7d':
+        LOG(t)
+        if 'show_id' in t and not t.get('aired', False):
+          record_program_action = (addon.getLocalizedString(30171), "RunPlugin(" + get_url(action='add_recording', id=t['show_id']) + ")")
+          actions.append(record_program_action)
+        if 'serie_id' in t:
+          record_season_action = (addon.getLocalizedString(30169), "RunPlugin(" + get_url(action='add_recording_season', id=t['serie_id']) + ")")
+          actions.append(record_season_action)
 
       if 'rec' in t:
         action = get_url(action='delete_recording', id=t['rec']['id'], name=t['rec']['name'])
-        list_item.addContextMenuItems([(addon.getLocalizedString(30173), "RunPlugin(" + action + ")")])
+        actions.append((addon.getLocalizedString(30173), "RunPlugin(" + action + ")"))
 
       if wishlist_action:
-        list_item.addContextMenuItems([wishlist_action])
+        actions.append(wishlist_action)
+
+      if len(actions) > 0:
+        LOG(actions)
+        list_item.addContextMenuItems(actions)
 
       url = get_url(action='play', id=t['id'], url=t['url'], session_request=t['session_request'], stype=t['stream_type'])
       if 'show_id' in t: url += '&show_id={}'.format(t['show_id'])
@@ -440,7 +450,7 @@ def listing_hz(name, url, from_wishlist=False):
     url_prev = data['prev']['href'] if isinstance(data['next'], dict) and 'prev' in data['next'] else None
   add_videos(name, 'movies', l, url_next=url_next, url_prev=url_prev, ref='listing_hz', from_wishlist=from_wishlist)
 
-def list_vod():
+def list_vod0():
   open_folder(addon.getLocalizedString(30111)) # VOD
   name = addon.getLocalizedString(30105).encode('utf-8')
   add_menu_option(name, get_url(action='listing', name=name, url=m.get_vod_list_url(cat='movies'))) # Movies
@@ -453,6 +463,31 @@ def list_vod():
 
   name = addon.getLocalizedString(30121).encode('utf-8')
   add_menu_option(name, get_url(action='listing', name=name, url=m.get_vod_list_url(cat='kids'))) # Kids
+
+  sections = m.get_vod_sections()
+
+  close_folder()
+
+def list_vod():
+  open_folder(addon.getLocalizedString(30111)) # VOD
+
+  sections = m.get_vod_sections()
+  for key, s in sections.items():
+    if not s['visible']: continue
+    name = s['name'].encode('utf-8')
+    add_menu_option(name, get_url(action='list_section', name=name, key=key))
+
+  close_folder()
+
+def list_section(key):
+  open_folder(addon.getLocalizedString(30111)) # VOD
+
+  sections = m.get_vod_sections()
+  items = sections[key]['data']
+  for item in items:
+    name = item['name'].encode('utf-8')
+    add_menu_option(name, get_url(action='listing', name=name, url=item['url']))
+
   close_folder()
 
 def search(params):
@@ -494,6 +529,13 @@ def order_recording(program_id):
   else:
     show_notification(addon.getLocalizedString(30172), xbmcgui.NOTIFICATION_INFO)
 
+def order_recording_season(season_id):
+  data = m.order_recording_season(season_id)
+  if data and 'resultText' in data:
+    show_notification(data['resultText'])
+  else:
+    show_notification(addon.getLocalizedString(30172), xbmcgui.NOTIFICATION_INFO)
+
 def delete_recording(id, name):
   if sys.version_info[0] < 3:
     name = name.decode('utf-8')
@@ -510,16 +552,24 @@ def logout():
   m.cache.remove_file('auth.key')
 
 def login():
-  def ask_credentials(username=''):
+  def ask_credentials(username='', password=''):
     username = input_window(addon.getLocalizedString(30163), username) # Username
     if username:
-      password = input_window(addon.getLocalizedString(30164), hidden=True) # Password
+      password = input_window(addon.getLocalizedString(30164), password, hidden=True) # Password
       if password:
         return username, password
     return None, None
 
-  username, password = ask_credentials()
+  store_credentials = addon.getSettingBool('store_credentials')
+  if store_credentials:
+    username, password = m.load_credentials()
+  else:
+    username, password = ('', '')
+
+  username, password = ask_credentials(username, password)
   if username:
+    if store_credentials:
+      m.save_credentials(username, password)
     success, _ = m.login(username, password)
     if success:
       clear_session()
@@ -627,6 +677,8 @@ def router(paramstring):
       order_recording(params['id'])
     elif params['action'] == 'delete_recording':
       delete_recording(params['id'], params['name'])
+    elif params['action'] == 'add_recording_season':
+      order_recording_season(params['id'])
     elif params['action'] == 'wishlist':
       # Wishlist
       listing_hz(addon.getLocalizedString(30102), m.get_wishlist_url(), from_wishlist=True)
@@ -643,6 +695,8 @@ def router(paramstring):
       add_videos(params['name'], 'episodes', m.get_episodes(params['id']))
     elif params['action'] == 'vod':
       list_vod()
+    elif params['action'] == 'list_section':
+      list_section(params['key'])
     elif params['action'] == 'search':
       search(params)
     elif params['action'] == 'export_epg_now':

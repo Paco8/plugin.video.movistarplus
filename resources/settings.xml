@@ -1,5 +1,6 @@
 <settings>
     <category label="30001">
+        <setting id="store_credentials" type="bool" label="30050" default="false"/>
         <setting label="30017" type="bool" id="only_subscribed" default="true"/>
         <setting label="30020" type="bool" id="channels_with_epg" default="false"/>
         <setting label="30021" type="bool" id="add_extra_info" default="false"/>
