@@ -139,6 +139,16 @@ msgid "Enable HDCP"
 msgstr ""
 
 # For SkyOTT only
+msgctxt "#30038"
+msgid "Include forced subtitles"
+msgstr ""
+
+# For SkyOTT only
+msgctxt "#30039"
+msgid "Include non forced subtitles"
+msgstr ""
+
+# For SkyOTT only
 msgctxt "#30040"
 msgid "Use for these languages (e.g.: es en pt):"
 msgstr ""

@@ -133,7 +133,7 @@ class Movistar(object):
       LOG('device_id: {}'. format(self.account['device_id']))
 
       # Tokens
-      content = self.cache.load('tokens.json', 60*24)
+      content = self.cache.load('tokens.json', 3)
       if content:
         data = json.loads(content)
       else:
@@ -296,7 +296,7 @@ class Movistar(object):
       self.cache.remove_file('tokens.json')
 
     def get_devices(self, use_cache=True):
-      content = self.cache.load('devices.json', 60)
+      content = self.cache.load('devices.json', 3)
       if use_cache and content:
         data = json.loads(content)
       else:
@@ -436,9 +436,12 @@ class Movistar(object):
         if self.quality == 'UHD': url += '&filterQuality=UHD'
         #print(url)
         data = self.net.load_data(url)
-        self.cache.save_file(cache_filename, json.dumps(data, ensure_ascii=False))
+        if not 'error' in data:
+          self.cache.save_file(cache_filename, json.dumps(data, ensure_ascii=False))
 
       epg = {}
+      if 'error' in data: return epg
+
       for ch in data:
         id = ch[0]['Canal']['CodCadenaTv']
         if not id in epg: epg[id] = []
@@ -557,9 +560,12 @@ class Movistar(object):
         url = self.endpoints['canales'].format(deviceType='webplayer', profile=self.account['platform'], mdrm='true', demarcation=demarcation)
         if self.quality == 'UHD': url += '&filterQuality=UHD'
         data = self.net.load_data(url)
-        self.cache.save_file(cache_filename, json.dumps(data, ensure_ascii=False))
+        if not 'error' in data:
+          self.cache.save_file(cache_filename, json.dumps(data, ensure_ascii=False))
 
       res = []
+      if 'error' in data: return res
+
       for c in data:
         t = {}
         t['info'] = {}

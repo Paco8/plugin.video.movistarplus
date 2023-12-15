@@ -78,7 +78,7 @@ def play(params):
     if 'resultData' in d and 'cToken' in d['resultData']:
       token = d['resultData']['cToken']
 
-    if not addon.getSettingBool('open_session'):
+    if stype == 'vod':
       d = m.delete_session()
       session_opened = False
       LOG('Delete session: d: {}'.format(d))

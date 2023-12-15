@@ -50,7 +50,7 @@ ttml = Ttml2SsaAddon()
 
 session = requests.Session()
 session.headers.update({'user-agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:88.0) Gecko/20100101 Firefox/88.0'})
-previous_token = ''
+previous_tokens = []
 
 reregister_needed = False
 
@@ -170,20 +170,24 @@ class RequestHandler(BaseHTTPRequestHandler):
             token = params['token']
             LOG('token: {}'.format(token))
 
-            global previous_token, reregister_needed
+            global previous_tokens, reregister_needed
             while True:
               LOG('reregister_needed: {}'.format(reregister_needed))
               if reregister_needed and xbmcaddon.Addon().getSettingBool('reregister'):
                 mvs().unregister_device()
                 mvs().register_device()
 
-              if previous_token == token and params['stype'] == 'vod':
+              if token in previous_tokens and params['stype'] == 'vod':
+                LOG('duplicated token')
+                LOG('previous_tokens: {}'.format(previous_tokens))
                 d = mvs().open_session(params['session_request'], params['session_token'])
-                LOG('open_session: d: {}'.format(d))
+                LOG('Open session (proxy): d: {}'.format(d))
                 if 'resultData' in d and 'cToken' in d['resultData']:
                   token = d['resultData']['cToken']
                   LOG('new token: {}'.format(token))
-              previous_token = token
+                session_response = mvs().delete_session()
+                LOG('Delete session (proxy): {}'.format(session_response))
+              previous_tokens.append(token)
 
               headers = {
               'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:88.0) Gecko/20100101 Firefox/88.0',
@@ -216,9 +220,10 @@ class RequestHandler(BaseHTTPRequestHandler):
             self.send_response(response.status_code)
             self.end_headers()
             self.wfile.write(license_data)
-        except Exception:
+        except Exception as e:
             self.send_response(500)
             self.end_headers()
+            LOG('Exception error: {}'.format(str(e)))
 
 
 HOST = '127.0.0.1'
