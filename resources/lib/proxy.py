@@ -143,9 +143,11 @@ class RequestHandler(BaseHTTPRequestHandler):
             else:
               self.send_response(404)
               self.end_headers()
-        except Exception:
+        except Exception as e:
             self.send_response(500)
             self.end_headers()
+            LOG('Exception error: {}'.format(str(e)))
+
 
     def do_POST(self):
         """Handle http post requests, used for license"""

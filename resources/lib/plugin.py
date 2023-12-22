@@ -69,6 +69,8 @@ def play(params):
 
   session_opened = False
   if addon.getSettingBool('open_session') or stype == 'vod':
+    hz_token = m.get_session_token()
+    if hz_token: session_token = hz_token
     d = m.open_session(params['session_request'], session_token)
     session_opened = True
     LOG('Open session: d: {}'.format(d))
@@ -105,8 +107,8 @@ def play(params):
   headers += '&Referer=https://ver.movistarplus.es/'
   headers += '&Origin=https://ver.movistarplus.es&Connection=keep-alive'
   headers += '&Host=wv-ottlic-f3.imagenio.telefonica.net'
-
   manifest_headers = 'User-Agent=Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:88.0) Gecko/20100101 Firefox/88.0'
+
   if stype == 'tv':
     cdn_token = m.get_cdntoken()
     #LOG('cdn_token: {}'.format(cdn_token))
@@ -144,10 +146,8 @@ def play(params):
   else:
     play_item.setProperty('inputstream.adaptive.license_key', '{}|{}&nv-authorizations={}|R{{SSM}}|'.format(license_url, headers, token))
 
-  if kodi_version < 20:
-    play_item.setProperty('inputstream.adaptive.stream_headers', manifest_headers)
-  else:
-    play_item.setProperty('inputstream.adaptive.manifest_headers', manifest_headers)
+  play_item.setProperty('inputstream.adaptive.stream_headers', manifest_headers)
+  play_item.setProperty('inputstream.adaptive.manifest_headers', manifest_headers)
 
   play_item.setProperty('inputstream.adaptive.server_certificate', certificate)
   #play_item.setProperty('inputstream.adaptive.license_flags', 'persistent_storage')
@@ -351,7 +351,7 @@ def add_videos(category, ctype, videos, ref=None, url_next=None, url_prev=None, 
 def list_devices(params):
   LOG('list_devices: params: {}'.format(params))
 
-  devices = m.get_devices(False)
+  devices = m.get_devices()
 
   if 'id' in params:
     if params['name'] == 'select':

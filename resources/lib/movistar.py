@@ -91,49 +91,37 @@ class Movistar(object):
       self.account['device_id'] = self.cache.load_file('device_id.conf')
       if self.account['device_id']:
         self.account['device_id'] = self.account['device_id'].strip('"')
-      if not reuse_devices:
-        LOG('not reusing devices')
-        if not self.account['device_id']:
-          self.account['device_id'] = self.new_device_id()
-          self.cache.save_file('device_id.conf', self.account['device_id'])
-
-        # Check if device is registered
-        device_list = self.get_devices()
-        found_device = False
-        for device in device_list:
-          if device['id'] == self.account['device_id']:
-            found_device = True
-            break
-        if not found_device:
-          LOG('device not found, trying to register device')
-          self.register_device()
-          device_list = self.get_devices(use_cache=False) # To store the updated list in cache
       else:
-        LOG('reusing devices')
-        # Check if device is registered
-        device_list = self.get_devices()
-        found_device = False
-        wp_device = None
-        for device in device_list:
-          if not wp_device and device['type_code'] == 'WP':
-            wp_device = device['id']
-          if device['id'] == self.account['device_id']:
-            found_device = True
-            break
-        if not found_device:
-          if wp_device:
-            LOG('device not found, using {}'.format(wp_device))
-            self.account['device_id'] = wp_device
-          else:
-            LOG('device not found, registering new device')
+        # Create new device
+        if not reuse_devices:
+          LOG('not reusing devices')
+          if not self.account['device_id']:
             self.account['device_id'] = self.new_device_id()
-            self.register_device()
-            device_list = self.get_devices(use_cache=False) # To store the updated list in cache
-          self.cache.save_file('device_id.conf', self.account['device_id'])
+            self.cache.save_file('device_id.conf', self.account['device_id'])
+        else:
+          LOG('reusing devices')
+          # Check if device is registered
+          device_list = self.get_devices()
+          found_device = False
+          wp_device = None
+          for device in device_list:
+            if not wp_device and device['type_code'] == 'WP':
+              wp_device = device['id']
+            if device['id'] == self.account['device_id']:
+              found_device = True
+              break
+          if not found_device:
+            if wp_device:
+              LOG('device not found, using {}'.format(wp_device))
+              self.account['device_id'] = wp_device
+            else:
+              LOG('device not found, registering new device')
+              self.account['device_id'] = self.new_device_id()
+            self.cache.save_file('device_id.conf', self.account['device_id'])
       LOG('device_id: {}'. format(self.account['device_id']))
 
       # Tokens
-      content = self.cache.load('tokens.json', 3)
+      content = self.cache.load('tokens.json', 60)
       if content:
         data = json.loads(content)
       else:
@@ -295,16 +283,11 @@ class Movistar(object):
       self.cache.save_file('device_id.conf', self.account['device_id'])
       self.cache.remove_file('tokens.json')
 
-    def get_devices(self, use_cache=True):
-      content = self.cache.load('devices.json', 3)
-      if use_cache and content:
-        data = json.loads(content)
-      else:
-        headers = self.net.headers.copy()
-        headers['Authorization'] = 'Bearer ' + self.account['access_token']
-        url = self.endpoints['obtenerdipositivos'].format(ACCOUNTNUMBER=self.account['id'])
-        data = self.net.load_data(url, headers)
-        self.cache.save_file('devices.json', json.dumps(data, ensure_ascii=False))
+    def get_devices(self):
+      headers = self.net.headers.copy()
+      headers['Authorization'] = 'Bearer ' + self.account['access_token']
+      url = self.endpoints['obtenerdipositivos'].format(ACCOUNTNUMBER=self.account['id'])
+      data = self.net.load_data(url, headers)
       #print_json(data)
       if not isinstance(data, list): return []
       res = []
@@ -403,13 +386,37 @@ class Movistar(object):
       data = self.net.post_data(url, None, headers)
       return data.get('access_token')
 
+    def get_session_token(self):
+      data = {"accountNumber": self.account['id'],
+              "sessionUserProfile": self.account['profile_id'],
+              "streamMiscellanea":"HTTPS",
+              "deviceType":"WP_OTT",
+              "deviceManufacturerProduct":"Firefox",
+              "streamDRM":"Widevine",
+              "streamFormat":"DASH",
+      }
+      headers = self.net.headers.copy()
+      headers['Content-Type'] = 'application/json'
+      headers['Authorization'] = 'Bearer ' + self.account['access_token']
+      url = self.endpoints['renovacion_hztoken'].format(deviceType='webplayer', DEVICEID=self.account['device_id'])
+      data = self.net.post_data(url, json.dumps(data), headers)
+      return data.get('homeZoneID')
+
+    def get_ssp_token(self):
+      headers = self.net.headers.copy()
+      headers['Content-Type'] = 'application/json'
+      headers['Authorization'] = 'Bearer ' + self.account['access_token']
+      url = self.endpoints['renovacion_ssptoken'].format(deviceType='webplayer', ACCOUNTNUMBER=self.account['id'], DEVICEID=self.account['device_id'])
+      data = self.net.post_data(url, '', headers)
+      return data.get('access_token')
+
     def get_profiles(self):
       headers = self.net.headers.copy()
       headers['X-HZId'] = self.account['session_token']
       url = self.endpoints['listaperfiles']
       data = self.net.load_data(url, headers=headers)
       res = []
-      for d in data['items']:
+      for d in data.get('items', []):
         p = {}
         p['id'] = d['id']
         p['name'] = d['name']
