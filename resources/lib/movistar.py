@@ -127,6 +127,10 @@ class Movistar(object):
       else:
         LOG('Loading tokens')
         data = self.get_token()
+        if 'error' in data and self.account['device_id']:
+          # Try registering the device
+          self.register_device()
+          data = self.get_token()
         #print_json(data)
         if 'accessToken' in data:
           self.cache.save_file('tokens.json', json.dumps(data, ensure_ascii=False))

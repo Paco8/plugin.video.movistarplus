@@ -105,8 +105,8 @@ def play(params):
   headers += '&User-Agent=Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:88.0) Gecko/20100101 Firefox/88.0'
   headers += '&Accept=*/*&Accept-Language=es-ES,es;q=0.8,en-US;q=0.5,en;q=0.3'
   headers += '&Referer=https://ver.movistarplus.es/'
-  headers += '&Origin=https://ver.movistarplus.es&Connection=keep-alive'
-  headers += '&Host=wv-ottlic-f3.imagenio.telefonica.net'
+  headers += '&Origin=https://ver.movistarplus.es'
+  #headers += '&Host=wv-ottlic-f3.imagenio.telefonica.net'
   manifest_headers = 'User-Agent=Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:88.0) Gecko/20100101 Firefox/88.0'
 
   if stype == 'tv':
@@ -184,7 +184,7 @@ def play(params):
     if not os.path.exists(subfolder):
       os.makedirs(subfolder)
 
-    sublist = m.get_subtitles(url)
+    sublist = m.get_subtitles(params['url'])
     LOG('sublist: {}'.format(sublist))
     subpaths = []
     for sub in sublist:
