@@ -33,6 +33,8 @@ class Movistar(object):
                'demarcation': 0}
 
     add_extra_info = True
+    #dplayer = 'webplayer'
+    dplayer = 'android.tv'
 
     def __init__(self, config_directory, reuse_devices=False):
       self.logged = False
@@ -664,7 +666,7 @@ class Movistar(object):
 
     def get_wishlist_url(self):
       url = self.endpoints['favoritos'].format(
-              deviceType='webplayer', DIGITALPLUSUSERIDC=self.account['encoded_user'], PROFILE=self.account['platform'],
+              deviceType=self.dplayer, DIGITALPLUSUSERIDC=self.account['encoded_user'], PROFILE=self.account['platform'],
               ACCOUNTNUMBER=self.account['id'], idsOnly='false', start=1, end=30, mdrm='true', demarcation=self.account['demarcation'])
       #url += '&filter=AD-SINX&topic=CN'
       if self.quality == 'UHD': url += '&filterQuality=UHD'
@@ -686,6 +688,7 @@ class Movistar(object):
                  texto=search_term,
                  distilledTvRights=','.join(self.entitlements['distilledTvRights']),
                  mdrm='true', demarcation=self.account['demarcation'])
+      url = url.replace('webplayer', self.dplayer)
       if self.quality == 'UHD': url += '&filterQuality=UHD'
       return url
 
@@ -709,10 +712,8 @@ class Movistar(object):
       return res
 
     def get_ficha_url(self, id, mode='GLOBAL', catalog=''):
-      #url = self.endpoints['ficha'].format(deviceType='webplayer', id=id, profile=self.account['platform'], mediatype='FOTOV', version='7.1', mode=mode, catalog=catalog, channels='', state='', mdrm='true', demarcation=self.account['demarcation'], legacyBoxOffice='')
-      #url = url.replace('state=&', '')
-      e = 'https://ottcache.dof6.com/movistarplus/webplayer/contents/{id}/details?profile={profile}&mediaType=FOTOV&version=8&mode={mode}&catalog={catalog}&mdrm=true&tlsstream=true&demarcation={demarcation}'
-      url = e.format(id=id, profile=self.account['platform'], mode=mode, catalog=catalog, demarcation=self.account['demarcation'])
+      url = self.endpoints['ficha'].format(deviceType='webplayer', id=id, profile=self.account['platform'], mediatype='FOTOV', version='7.1', mode=mode, catalog=catalog, channels='', state='', mdrm='true', demarcation=self.account['demarcation'], legacyBoxOffice='')
+      url = url.replace('state=&', '')
       if self.quality == 'UHD': url += '&filterQuality=UHD'
       #print(url)
       return url
@@ -1135,7 +1136,7 @@ class Movistar(object):
                     sort = par['@value']
 
                 pars = pars.replace('{suscripcion}', self.entitlements['suscripcion'])
-                c['url'] = self.endpoints['consultar'].format(deviceType='webplayer', profile=profile, sort=sort, start=1, end=50, mdrm='true', demarcation=self.account['demarcation'])
+                c['url'] = self.endpoints['consultar'].format(deviceType=self.dplayer, profile=profile, sort=sort, start=1, end=50, mdrm='true', demarcation=self.account['demarcation'])
                 c['url'] += pars
                 if self.quality == 'UHD': c['url'] += '&filterQuality=UHD'
                 section.append(c)
@@ -1164,7 +1165,13 @@ class Movistar(object):
       import shutil
       if sys.version_info[0] > 2:
         filename = bytes(filename, 'utf-8')
-      shutil.copyfile(self.cache.config_directory + 'auth.key', filename)
+      if self.account['access_token']:
+        data = {'timestamp': int(time.time()*1000),
+                'response':{'access_token': self.account['access_token'], 'token_type': 'bearer'}};
+        with io.open(filename, 'w', encoding='utf-8', newline='') as handle:
+         handle.write(json.dumps(data, ensure_ascii=False))
+      else:
+        shutil.copyfile(self.cache.config_directory + 'auth.key', filename)
 
     def load_key_file(self):
       content = self.cache.load_file('auth.key')
