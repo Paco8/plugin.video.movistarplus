@@ -682,6 +682,8 @@ def router(paramstring):
     elif params['action'] == 'wishlist':
       # Wishlist
       listing_hz(addon.getLocalizedString(30102), m.get_wishlist_url(), from_wishlist=True)
+    elif params['action'] == 'continue-watching':
+      listing_hz(addon.getLocalizedString(30102), m.get_viewings_url())
     elif params['action'] == 'recordings':
       # Recordings
       listing_hz(addon.getLocalizedString(30103), m.get_recordings_url())
@@ -714,6 +716,7 @@ def router(paramstring):
       add_menu_option(addon.getLocalizedString(30107), get_url(action='epg'), icon='epg.png') # EGP
       add_menu_option(addon.getLocalizedString(30102), get_url(action='wishlist'), icon='mylist.png') # My list
       add_menu_option(addon.getLocalizedString(30103), get_url(action='recordings'), icon='recording.png') # Recordings
+      add_menu_option(addon.getLocalizedString(30122), get_url(action='continue-watching'), icon='continue.png') # Continue
       add_menu_option(addon.getLocalizedString(30111), get_url(action='vod'), icon='vod.png') # VOD
       add_menu_option(addon.getLocalizedString(30112), get_url(action='search'), icon='search.png') # Search
       add_menu_option(addon.getLocalizedString(30180), get_url(action='profiles'), icon='profiles.png') # Profiles
@@ -742,10 +745,10 @@ def run():
   if addon.getSettingBool('uhd'):
     m.quality = 'UHD'
 
-  profile_id = addon.getSetting('profile_id')
+  profile_id = addon.getSetting('profile_id').upper()
   LOG('profile_id: {}'.format(profile_id))
-  if profile_id in ['OTT', 'NODTH']:
-    m.account['platform'] = addon.getSetting('profile_id')
+  if profile_id not in ['', 'AUTO']:
+    m.account['platform'] = profile_id
 
   # Clear cache
   LOG('Cleaning cache. {} files removed.'.format(m.cache.clear_cache()))

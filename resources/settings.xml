@@ -10,7 +10,7 @@
         <setting label="30019" type="action" id="is_settings" action="Addon.OpenSettings(inputstream.adaptive)" enable="System.HasAddon(inputstream.adaptive)" option="close"/>
         <setting id="reuse_devices" type="bool" label="30023" default="false" visible="true"/>
         <setting id="open_session" type="bool" label="30022" default="true" visible="true"/>
-        <setting id="profile_id" type="labelenum" label="Profile ID" values="Auto|OTT|NODTH" visible="false"/>
+        <setting id="profile_id" type="text" label="Profile ID" default="Auto" visible="false"/>
         <setting type="sep"/>
         <setting label="30450" type="action" id="donation" action="RunPlugin(plugin://plugin.video.movistarplus?action=show_donation_dialog)" option="close"/>
     </category>

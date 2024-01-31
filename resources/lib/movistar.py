@@ -565,13 +565,15 @@ class Movistar(object):
 
     def get_channels(self):
       demarcation = self.account['demarcation']
+      profile = self.account['platform']
       cache_filename = 'channels_{}.json'.format(self.quality)
       content = self.cache.load(cache_filename)
       if content:
         data = json.loads(content)
       else:
-        url = self.endpoints['canales'].format(deviceType='webplayer', profile=self.account['platform'], mdrm='true', demarcation=demarcation)
+        url = self.endpoints['canales'].format(deviceType='webplayer', profile=profile, mdrm='true', demarcation=demarcation)
         if self.quality == 'UHD': url += '&filterQuality=UHD'
+        #LOG(url)
         data = self.net.load_data(url)
         if not 'error' in data:
           self.cache.save_file(cache_filename, json.dumps(data, ensure_ascii=False))
@@ -678,6 +680,14 @@ class Movistar(object):
               deviceType='webplayer', DIGITALPLUSUSERIDC=self.account['encoded_user'], PROFILE=self.account['platform'],
               idsOnly='false', start=1, end=30, mdrm='true', demarcation=self.account['demarcation'])
       #url += '&state=Completed&_='+ str(int(time.time()*1000))
+      url += '&_='+ str(int(time.time()*1000))
+      return url
+
+    def get_viewings_url(self):
+      url = self.endpoints['ultimasreproducciones'].format(
+              deviceType=self.dplayer, DIGITALPLUSUSERIDC=self.account['encoded_user'], PROFILE=self.account['platform'],
+              ACCOUNTNUMBER=self.account['id'], idsOnly='false', start=1, end=30, mdrm='true', demarcation=self.account['demarcation'])
+      url += '&filter=AD-SINX'
       url += '&_='+ str(int(time.time()*1000))
       return url
 
