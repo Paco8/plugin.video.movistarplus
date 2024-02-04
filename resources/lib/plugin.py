@@ -53,7 +53,6 @@ def play(params):
   stype = params['stype']
 
   token = m.account['ssp_token']
-  session_token = m.account['session_token']
 
   import inputstreamhelper
   is_helper = inputstreamhelper.Helper('mpd', drm='com.widevine.alpha')
@@ -69,9 +68,7 @@ def play(params):
 
   session_opened = False
   if addon.getSettingBool('open_session') or stype == 'vod':
-    hz_token = m.get_session_token()
-    if hz_token: session_token = hz_token
-    d = m.open_session(params['session_request'], session_token)
+    d = m.open_session(params['session_request'])
     session_opened = True
     LOG('Open session: d: {}'.format(d))
     if d['resultCode'] != 0:
@@ -85,7 +82,7 @@ def play(params):
       session_opened = False
       LOG('Delete session: d: {}'.format(d))
 
-  LOG("token: {} session_token: {}".format(token, session_token))
+  LOG("token: {}".format(token))
 
   if stype in ['u7d', 'rec']:
     d = m.get_u7d_url(url)
@@ -140,7 +137,7 @@ def play(params):
 
   if addon.getSettingBool('use_proxy_for_license') and proxy:
     request_id = str(int(time.time()*1000))
-    license_url = '{}/license?token={}&stype={}&session_request={}&session_token={}&request_id={}||R{{SSM}}|'.format(proxy, quote_plus(token), stype, quote_plus(params['session_request']), quote_plus(session_token), request_id)
+    license_url = '{}/license?token={}&stype={}&session_request={}&request_id={}||R{{SSM}}|'.format(proxy, quote_plus(token), stype, quote_plus(params['session_request']), request_id)
     LOG('license_url: {}'.format(license_url))
     play_item.setProperty('inputstream.adaptive.license_key', license_url)
   else:

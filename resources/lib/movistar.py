@@ -123,7 +123,7 @@ class Movistar(object):
       LOG('device_id: {}'. format(self.account['device_id']))
 
       # Tokens
-      content = self.cache.load('tokens.json', 60)
+      content = self.cache.load('tokens.json', 5)
       if content:
         data = json.loads(content)
       else:
@@ -203,7 +203,9 @@ class Movistar(object):
       content = response.content.decode('utf-8')
       return content
 
-    def open_session(self, data, session_token, session_id = None):
+    def open_session(self, data, session_token=None, session_id=None):
+      if not session_token:
+        session_token = self.account['session_token']
       headers = self.net.headers.copy()
       headers['Content-Type'] = 'application/json'
       headers['X-Hzid'] = session_token
@@ -415,6 +417,12 @@ class Movistar(object):
       url = self.endpoints['renovacion_ssptoken'].format(deviceType='webplayer', ACCOUNTNUMBER=self.account['id'], DEVICEID=self.account['device_id'])
       data = self.net.post_data(url, '', headers)
       return data.get('access_token')
+
+    def update_session_token(self):
+      new_hz_token = self.get_session_token()
+      if new_hz_token:
+        self.account['session_token'] = new_hz_token
+      return
 
     def get_profiles(self):
       headers = self.net.headers.copy()
@@ -1357,3 +1365,15 @@ class Movistar(object):
         return data['username'], decode_base64(data['password'])
       else:
         return '', ''
+
+    def get_token_expire_date(self, token):
+      from .b64 import decode_base64
+      res = None
+      l = token.split('.')
+      if len(l) > 1:
+        padding = len(l[1]) % 4
+        l[1] += '=' * (4 - padding) if padding != 0 else ''
+        s = decode_base64(l[1])
+        data = json.loads(s)
+        res = data['exp']
+      return res

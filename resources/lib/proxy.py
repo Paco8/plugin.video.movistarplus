@@ -182,7 +182,7 @@ class RequestHandler(BaseHTTPRequestHandler):
               if token in previous_tokens and params['stype'] == 'vod':
                 LOG('duplicated token')
                 LOG('previous_tokens: {}'.format(previous_tokens))
-                d = mvs().open_session(params['session_request'], params['session_token'])
+                d = mvs().open_session(params['session_request'])
                 LOG('Open session (proxy): d: {}'.format(d))
                 if 'resultData' in d and 'cToken' in d['resultData']:
                   token = d['resultData']['cToken']
