@@ -44,12 +44,13 @@ import xbmcaddon
 from .b64 import encode_base64
 from .log import LOG
 from .addon import profile_dir
+from .useragent import useragent
 
 from ttml2ssa import Ttml2SsaAddon
 ttml = Ttml2SsaAddon()
 
 session = requests.Session()
-session.headers.update({'user-agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:88.0) Gecko/20100101 Firefox/88.0'})
+session.headers.update({'user-agent': useragent})
 previous_tokens = []
 
 reregister_needed = False
@@ -192,7 +193,7 @@ class RequestHandler(BaseHTTPRequestHandler):
               previous_tokens.append(token)
 
               headers = {
-              'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:88.0) Gecko/20100101 Firefox/88.0',
+              'User-Agent': useragent,
               'Accept': '*/*',
               'Accept-Language': 'es-ES,es;q=0.8,en-US;q=0.5,en;q=0.3',
               'Referer': 'https://ver.movistarplus.es/',

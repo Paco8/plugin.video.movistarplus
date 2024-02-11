@@ -27,6 +27,7 @@ from .log import LOG
 from .movistar import *
 from .addon import *
 from .gui import *
+from .useragent import useragent
 
 kodi_version= int(xbmc.getInfoLabel('System.BuildVersion')[:2])
 
@@ -99,12 +100,12 @@ def play(params):
   LOG("url: {}".format(url))
 
   headers = 'Content-Type=application/octet-stream'
-  headers += '&User-Agent=Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:88.0) Gecko/20100101 Firefox/88.0'
+  headers += '&User-Agent=' + useragent
   headers += '&Accept=*/*&Accept-Language=es-ES,es;q=0.8,en-US;q=0.5,en;q=0.3'
   headers += '&Referer=https://ver.movistarplus.es/'
   headers += '&Origin=https://ver.movistarplus.es'
   #headers += '&Host=wv-ottlic-f3.imagenio.telefonica.net'
-  manifest_headers = 'User-Agent=Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:88.0) Gecko/20100101 Firefox/88.0'
+  manifest_headers = 'User-Agent=' + useragent
 
   if stype == 'tv':
     cdn_token = m.get_cdntoken()
@@ -203,6 +204,10 @@ def play(params):
         ttml.write2file(filename_srt)
         subpaths.append(filename_srt)
     play_item.setSubtitles(subpaths)
+
+  if True:
+    m.unregister_device()
+    m.register_device()
 
   xbmcplugin.setResolvedUrl(_handle, True, listitem=play_item)
 

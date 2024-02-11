@@ -18,6 +18,7 @@ from .log import LOG, print_json
 from .network import Network
 from .cache import Cache
 from .timeconv import *
+from .useragent import useragent
 
 class Movistar(object):
     account = {'username': '', 'password': '',
@@ -45,7 +46,7 @@ class Movistar(object):
         'Accept-Language': 'es-ES,es;q=0.9',
         'Origin': 'https://ver.movistarplus.es',
         'Referer': 'https://ver.movistarplus.es/',
-        'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:88.0) Gecko/20100101 Firefox/88.0'
+        'User-Agent': useragent
       }
       self.net = Network()
       self.net.headers = headers
@@ -445,20 +446,34 @@ class Movistar(object):
       self.cache.save_file('profile_id.conf', self.account['profile_id'])
       self.cache.remove_file('tokens.json')
 
-    def get_epg(self):
-      cache_filename = 'epg_{}.json'.format(self.quality)
-      content = self.cache.load(cache_filename, 6*60)
-      if content:
-        data = json.loads(content)
+    def load_epg_data(self, date_str, duration=2, channels=''):
+      demarcation = self.account['demarcation']
+      url = self.endpoints['rejilla'].format(deviceType='webplayer', profile=self.account['platform'], UTCDATETIME=date_str, DURATION=duration, CHANNELS=channels, NETWORK='movistarplus', mdrm='true', demarcation=demarcation)
+      if self.quality == 'UHD': url += '&filterQuality=UHD'
+      #LOG(url)
+      data = self.net.load_data(url)
+      return data
+
+    def get_epg(self, date=None, duration=2, channels=None):
+      if channels:
+        if not date:
+          today = datetime.today()
+          date_str = today.strftime('%Y-%m-%dT00:00:00')
+        ch_data = self.load_epg_data(date_str, duration, channels)
+        if not ch_data: return []
+        data = []
+        data.append(ch_data)
       else:
-        today = datetime.today()
-        str_now = today.strftime('%Y-%m-%dT00:00:00')
-        url = self.endpoints['rejilla'].format(deviceType='webplayer', profile=self.account['platform'], UTCDATETIME=str_now, DURATION=2, CHANNELS='', NETWORK='movistarplus', mdrm='true', demarcation=self.account['demarcation'])
-        if self.quality == 'UHD': url += '&filterQuality=UHD'
-        #print(url)
-        data = self.net.load_data(url)
-        if not 'error' in data:
-          self.cache.save_file(cache_filename, json.dumps(data, ensure_ascii=False))
+        cache_filename = 'epg_{}.json'.format(self.quality)
+        content = self.cache.load(cache_filename, 6*60)
+        if content:
+          data = json.loads(content)
+        else:
+          today = datetime.today()
+          str_now = today.strftime('%Y-%m-%dT00:00:00')
+          data = self.load_epg_data(str_now)
+          if not 'error' in data:
+            self.cache.save_file(cache_filename, json.dumps(data, ensure_ascii=False))
 
       epg = {}
       if 'error' in data: return epg
@@ -1011,7 +1026,8 @@ class Movistar(object):
         return None
 
     def epg_to_movies(self, channel_id):
-      epg = self.get_epg()
+      LOG('epg_to_movies: {}'.format(channel_id))
+      epg = self.get_epg(channels=channel_id)
       res = []
       if not channel_id in epg: return res
       for p in epg[channel_id]:
