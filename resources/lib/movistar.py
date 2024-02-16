@@ -460,7 +460,7 @@ class Movistar(object):
           today = datetime.today()
           date = today.strftime('%Y-%m-%dT00:00:00')
         ch_data = self.load_epg_data(date, duration, channels)
-        if not ch_data: return []
+        if not ch_data or 'error' in ch_data: return {}
         data = []
         data.append(ch_data)
       else:
@@ -1025,9 +1025,9 @@ class Movistar(object):
       except:
         return None
 
-    def epg_to_movies(self, channel_id, date=None):
+    def epg_to_movies(self, channel_id, date=None, duration=2):
       LOG('epg_to_movies: {} {}'.format(channel_id, date))
-      epg = self.get_epg(channels=channel_id, date=date)
+      epg = self.get_epg(channels=channel_id, date=date, duration=duration)
       res = []
       if not channel_id in epg: return res
       for p in epg[channel_id]:

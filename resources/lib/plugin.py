@@ -421,15 +421,16 @@ def list_profiles(params):
 def list_epg(params):
   LOG('list_epg: {}'.format(params))
   from datetime import datetime, timedelta
+  from .timeconv import my_strftime
   if 'id' in params:
     if not 'date' in params:
       today = datetime.today()
-      for i in range(7, 1, -1):
+      for i in range(6, 0, -1):
         past_date = today - timedelta(days=i)
         date = past_date.strftime('%Y-%m-%dT00:00:00')
-        display_str = past_date.strftime('%a %d/%m').capitalize()
+        display_str = my_strftime(past_date, '%a %d')
         add_menu_option(display_str, get_url(action='epg', id=params['id'], name=params['name'], date=date))
-    add_videos(params['name'], 'movies', m.epg_to_movies(params['id'], params.get('date')))
+    add_videos(params['name'], 'movies', m.epg_to_movies(params['id'], params.get('date'), duration=1))
   else:
     channels = m.get_channels()
     open_folder(addon.getLocalizedString(30107)) # EPG

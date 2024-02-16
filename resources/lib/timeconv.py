@@ -9,14 +9,16 @@ from datetime import datetime
 import pytz
 from dateutil import parser
 
-weekdays = ['Dom', 'Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab']
-
-def timestamp2str(timestamp, format='%H:%M'):
-  time = datetime.fromtimestamp(timestamp / 1000)
+def my_strftime(time, format):
+  weekdays = ['Dom', 'Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab']
   if '%a' in format:
     w = int(time.strftime('%w'))
     format = format.replace('%a', weekdays[w])
-  return time.strftime(format).capitalize()
+  return time.strftime(format)
+
+def timestamp2str(timestamp, format='%H:%M'):
+  time = datetime.fromtimestamp(timestamp / 1000)
+  return my_strftime(time, format)
 
 def isodate2date(date_string):
   date_object = parser.parse(date_string)
