@@ -39,6 +39,7 @@ class Movistar(object):
 
     def __init__(self, config_directory, reuse_devices=False):
       self.logged = False
+      self.expired_access_token = False
 
       # Network
       headers = {
@@ -64,10 +65,24 @@ class Movistar(object):
 
       # Access token
       self.load_key_file() # Default access_token
+      if self.account['access_token']:
+        exp = self.get_token_expire_date(self.account['access_token'])
+        #LOG('auth.key: expiring date: {}'.format(exp))
+        if exp < time.time():
+          self.expired_access_token = True
+          self.account['access_token'] = None
+
       content = self.cache.load_file('access_token.conf')
       if content:
-        self.account['access_token'] = content
+        exp = self.get_token_expire_date(content)
+        #LOG('access_token.conf: expiring date: {}'.format(exp))
+        if exp < time.time():
+          self.expired_access_token = True
+        else:
+          self.account['access_token'] = content
       #LOG('access_token: {}'.format(self.account['access_token']))
+      LOG('expired_access_token: {}'.format(self.expired_access_token))
+
       if not self.account['access_token']: return
 
       # Account
@@ -393,7 +408,9 @@ class Movistar(object):
       headers['Authorization'] = 'Bearer ' + self.account['access_token']
       url = self.endpoints['renovacion_cdntoken2'].format(ACCOUNTNUMBER=self.account['id'])
       data = self.net.post_data(url, None, headers)
-      return data.get('access_token')
+      if isinstance(data, dict):
+        return data.get('access_token')
+      return ''
 
     def get_session_token(self):
       data = {"accountNumber": self.account['id'],
@@ -1384,12 +1401,15 @@ class Movistar(object):
 
     def get_token_expire_date(self, token):
       from .b64 import decode_base64
-      res = None
-      l = token.split('.')
-      if len(l) > 1:
-        padding = len(l[1]) % 4
-        l[1] += '=' * (4 - padding) if padding != 0 else ''
-        s = decode_base64(l[1])
-        data = json.loads(s)
-        res = data['exp']
+      res = 0
+      try:
+        l = token.split('.')
+        if len(l) > 1:
+          padding = len(l[1]) % 4
+          l[1] += '=' * (4 - padding) if padding != 0 else ''
+          s = decode_base64(l[1])
+          data = json.loads(s)
+          res = data['exp']
+      except:
+        pass
       return res

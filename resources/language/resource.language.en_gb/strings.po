@@ -429,6 +429,11 @@ msgctxt "#30207"
 msgid "No user token"
 msgstr ""
 
+# For Movistar only
+msgctxt "#30208"
+msgid "Session expired"
+msgstr ""
+
 # For Orange and Movistar only
 msgctxt "#30300"
 msgid "IPTV Manager"

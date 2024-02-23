@@ -732,6 +732,8 @@ def router(paramstring):
       add_menu_option(addon.getLocalizedString(30112), get_url(action='search'), icon='search.png') # Search
       add_menu_option(addon.getLocalizedString(30180), get_url(action='profiles'), icon='profiles.png') # Profiles
       add_menu_option(addon.getLocalizedString(30108), get_url(action='devices'), icon='devices.png') # Devices
+    elif m.expired_access_token:
+      show_notification(addon.getLocalizedString(30208))
 
     add_menu_option(addon.getLocalizedString(30160), get_url(action='user'), icon='account.png') # Accounts
     close_folder(cacheToDisc=False)
