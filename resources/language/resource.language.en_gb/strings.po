@@ -494,6 +494,21 @@ msgctxt "#30312"
 msgid "Export channels and EPG now"
 msgstr ""
 
+# For Movistar only
+msgctxt "#30313"
+msgid "The EPG export has finished."
+msgstr ""
+
+# For Movistar only
+msgctxt "#30314"
+msgid "Exporting {}"
+msgstr ""
+
+# For Movistar only
+msgctxt "#30315"
+msgid "Number of days"
+msgstr ""
+
 msgctxt "#30320"
 msgid "Rating: {}"
 msgstr ""

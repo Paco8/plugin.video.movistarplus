@@ -11,7 +11,7 @@ import io
 import os
 import time
 import re
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from .endpoints import endpoints
 from .log import LOG, print_json
@@ -472,14 +472,17 @@ class Movistar(object):
       return data
 
     def get_epg(self, date=None, duration=2, channels=None):
-      if channels:
+      if channels or date:
         if not date:
           today = datetime.today()
           date = today.strftime('%Y-%m-%dT00:00:00')
-        ch_data = self.load_epg_data(date, duration, channels)
-        if not ch_data or 'error' in ch_data: return {}
-        data = []
-        data.append(ch_data)
+        epg_data = self.load_epg_data(date, duration, channels if channels else '')
+        if not epg_data or 'error' in epg_data: return {}
+        if channels:
+          data = []
+          data.append(epg_data)
+        else:
+          data = epg_data
       else:
         cache_filename = 'epg_{}.json'.format(self.quality)
         content = self.cache.load(cache_filename, 6*60)
@@ -1288,14 +1291,15 @@ class Movistar(object):
       with io.open(filename, 'w', encoding='utf-8', newline='') as handle:
         handle.write(res)
 
-    def export_epg(self):
+    def export_epg(self, date=None, duration=2):
       if sys.version_info[0] >= 3:
         from urllib.parse import urlencode
       else:
         from urllib import urlencode
       #now = time.time()*1000
+
       res = {}
-      epg = self.get_epg()
+      epg = self.get_epg(date, duration)
       channels = self.get_channels()
       for channel in channels:
         id = channel['id']
@@ -1334,7 +1338,7 @@ class Movistar(object):
           res[id].append(t)
       return res
 
-    def export_epg_to_xml(self, filename):
+    def export_epg_to_xml(self, filename, ndays=3, report_func=None):
       if sys.version_info[0] < 3:
         # Python 2
         from cgi import escape as html_escape
@@ -1354,7 +1358,26 @@ class Movistar(object):
                   '  <icon src="{}"/>\n'.format(t['logo']) + 
                   '</channel>\n')
 
-      epg = self.export_epg()
+      if True:
+        epg = {}
+        today = datetime.today()
+        total_items = 0
+        for i in range(0, ndays, 1):
+          date = today + timedelta(days=i)
+          strdate = date.strftime('%Y-%m-%dT00:00:00')
+          LOG('epg: {}'.format(strdate))
+          if report_func:
+            report_func(strdate.split('T')[0])
+          e = self.export_epg(strdate, 1)
+          LOG('epg: channels: {}'.format(len(e)))
+          for ch in e:
+            if not ch in epg: epg[ch] = []
+            total_items += len(e[ch])
+            epg[ch].extend(e[ch])
+          LOG('epg: total items: {}'.format(total_items))
+      else:
+        epg = self.export_epg()
+
       for ch in channels:
         if not ch['id'] in epg: continue
         for e in epg[ch['id']]:

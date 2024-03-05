@@ -622,6 +622,9 @@ def iptv(params):
     #  pass
 
 def export_epg_now():
+  def report_progress(message):
+    show_notification(addon.getLocalizedString(30314).format(message), xbmcgui.NOTIFICATION_INFO)
+
   if not m.logged: return
   folder = addon.getSetting('epg_folder')
   if sys.version_info[0] > 2:
@@ -632,7 +635,8 @@ def export_epg_now():
   show_notification(addon.getLocalizedString(30310), xbmcgui.NOTIFICATION_INFO)
   m.export_channels_to_m3u8(channels_filename)
   show_notification(addon.getLocalizedString(30311), xbmcgui.NOTIFICATION_INFO)
-  m.export_epg_to_xml(epg_filename)
+  m.export_epg_to_xml(epg_filename, addon.getSettingInt('export_days'), report_progress)
+  show_notification(addon.getLocalizedString(30313), xbmcgui.NOTIFICATION_INFO)
 
 def to_wishlist(params):
   stype = params['stype']
