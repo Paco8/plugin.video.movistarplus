@@ -462,7 +462,7 @@ msgstr "Exportar los canales y la guía ahora"
 # For Movistar only
 msgctxt "#30313"
 msgid "The EPG export has finished."
-msgstr "Se ha terminado de exportar la EPG."
+msgstr "Se ha terminado de exportar la guía."
 
 # For Movistar only
 msgctxt "#30314"

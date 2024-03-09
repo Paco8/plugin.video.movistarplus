@@ -1367,7 +1367,7 @@ class Movistar(object):
           strdate = date.strftime('%Y-%m-%dT00:00:00')
           LOG('epg: {}'.format(strdate))
           if report_func:
-            report_func(strdate.split('T')[0])
+            report_func(date.strftime('%d/%m/%Y'))
           e = self.export_epg(strdate, 1)
           LOG('epg: channels: {}'.format(len(e)))
           for ch in e:
