@@ -212,15 +212,35 @@ def play(params):
   xbmcplugin.setResolvedUrl(_handle, True, listitem=play_item)
 
   LOG('**** session_opened: {}'.format(session_opened))
-  if session_opened:
+  is_sport_channel = (stype == 'tv' and channel_id in ['MLIGA', 'DAZNLI', 'MLIG1', 'CHAPIO', 'CHAP1', 'CHAP2', 'MLIGUH', 'CHAUHD', 'CHUHD1'])
+  if session_opened or is_sport_channel:
+    if is_sport_channel:
+      last_time = 0 #time.time()
+      window = xbmcgui.Window(12005)
+      label = xbmcgui.ControlLabel(0, 0, 400, 20, m.account['id'], textColor='0xFFFFFFFF', alignment=6)
     from .player import MyPlayer
     player = MyPlayer()
     monitor = xbmc.Monitor()
     while not monitor.abortRequested() and player.running:
       monitor.waitForAbort(10)
       #LOG('**** waiting')
-    d = m.delete_session()
-    LOG('Delete session: d: {}'.format(d))
+      if is_sport_channel and player.isPlaying():
+        now = time.time()
+        if now - last_time >= 15*60:
+          last_time = now
+          #show_notification(m.account['id'], xbmcgui.NOTIFICATION_INFO)
+          w = window.getWidth()
+          h = window.getHeight()
+          #LOG('window h: {} w: {}'.format(h, w))
+          pos_x = w-label.getWidth()-60
+          pos_y = h-200
+          label.setPosition(pos_x, pos_y)
+          window.addControl(label)
+          time.sleep(8)
+          window.removeControl(label)
+    if session_opened:
+      d = m.delete_session()
+      LOG('Delete session: d: {}'.format(d))
     LOG('Playback finished')
 
 
