@@ -33,6 +33,10 @@ msgctxt "#30004"
 msgid "Subtitles"
 msgstr "Subtítulos"
 
+msgctxt "#30005"
+msgid "Playback"
+msgstr "Reproducción"
+
 msgctxt "#30010"
 msgid "DRM type"
 msgstr "Tipo de DRM"
@@ -92,6 +96,14 @@ msgstr "Enviar progreso al servidor de la plataforma"
 msgctxt "#30026"
 msgid "Update interval (in seconds)"
 msgstr "Tiempo entre actualizaciones (en segundos)"
+
+msgctxt "#30027"
+msgid "Skip recaps"
+msgstr "Saltar resúmenes"
+
+msgctxt "#30028"
+msgid "Skip intros"
+msgstr "Saltar intros"
 
 msgctxt "#30031"
 msgid "Streaming service"
@@ -409,6 +421,11 @@ msgstr "No hay token de usuario"
 msgctxt "#30208"
 msgid "Session expired"
 msgstr "La sesión ha caducado"
+
+# For SkyOTT only
+msgctxt "#30209"
+msgid "The subscription with ads is not supported yet"
+msgstr "La subscripción con anuncios aún no está disponible en este addon"
 
 msgctxt "#30300"
 msgid "IPTV Manager"

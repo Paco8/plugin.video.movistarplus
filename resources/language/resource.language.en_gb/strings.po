@@ -33,6 +33,10 @@ msgctxt "#30004"
 msgid "Subtitles"
 msgstr ""
 
+msgctxt "#30005"
+msgid "Playback"
+msgstr ""
+
 # For Orange and Movistar only
 msgctxt "#30010"
 msgid "DRM type"
@@ -101,6 +105,14 @@ msgstr ""
 
 msgctxt "#30026"
 msgid "Update interval (in seconds)"
+msgstr ""
+
+msgctxt "#30027"
+msgid "Skip recaps"
+msgstr ""
+
+msgctxt "#30028"
+msgid "Skip intros"
 msgstr ""
 
 # For SkyOTT only
@@ -432,6 +444,11 @@ msgstr ""
 # For Movistar only
 msgctxt "#30208"
 msgid "Session expired"
+msgstr ""
+
+# For SkyOTT only
+msgctxt "#30209"
+msgid "The subscription with ads is not supported yet"
 msgstr ""
 
 # For Orange and Movistar only
