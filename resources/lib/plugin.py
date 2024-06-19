@@ -760,6 +760,7 @@ def router(paramstring):
       show_notification(addon.getLocalizedString(30208))
 
     add_menu_option(addon.getLocalizedString(30160), get_url(action='user'), icon='account.png') # Accounts
+    add_menu_option(addon.getLocalizedString(30450), get_url(action='show_donation_dialog'), icon='qr.png') # Donation
     close_folder(cacheToDisc=False)
 
 
