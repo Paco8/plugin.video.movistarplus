@@ -1143,24 +1143,33 @@ class Movistar(object):
       #profile = 'OTT'
       #profile = 'LITE'
 
-      content = self.cache.load('vod_sections.json')
+      content = self.cache.load('vod_sections2.json')
       if content:
         data = json.loads(content)
       else:
-        url = 'https://apps.dof6.com/feed/conf.php?id=justconfig&id_perfil={}&dispositivo=cell'.format(profile)
+        url = 'https://ottcache.dof6.com/movistarplus/yomvi/phone.android/{}/configuration/config_item?format=json&uisegment='.format(profile)
         data = self.net.load_data(url)
-        self.cache.save_file('vod_sections.json', json.dumps(data, ensure_ascii=False))
+        self.cache.save_file('vod_sections2.json', json.dumps(data, ensure_ascii=False))
 
-      submenu = data.get('YOMVIANDROID', {}).get('Menu', {}).get('Submenu', [])
+      main_menu_items = []
+      main_menu = data.get('VOD', {}).get('Menu', [])
+      for m in main_menu:
+        if m['@id'] == 'MENU-PRINCIPAL':
+          for i in m['Item']:
+            main_menu_items.append(i['@id'])
+
+      submenu = data.get('VOD', {}).get('Submenu', [])
       res = OrderedDict()
       for o in submenu:
         #print_json(o)
         menu = {}
-        menu['visible'] = (o.get('@visible') != 'false')
+        menu['visible'] = True
         menu['id'] = o.get('@id')
+        if menu['id'] not in main_menu_items: continue
 
         if 'Modulo' in o:
-          section_name = o['@nombre'] if '@nombre' in o else o['@P']
+          section_name = o['@nombre'] if '@nombre' in o else o['@P'] if '@P' in o else 'sin nombre'
+          #print(section_name)
           modulo = o['Modulo']
 
           section = []
@@ -1170,13 +1179,21 @@ class Movistar(object):
 
           if isinstance(modulo, list):
             for m in modulo:
+
+              sort = ''
+              if 'Modificador' in m:
+                #print(m['Modificador'])
+                for p in m['Modificador']:
+                  #print(p)
+                  #if p['@type'] == 'novisible': continue
+                  if p['@id'] == 'ordenacion': sort = p['@selected']
+
               if 'consulta' in m and m['consulta'].get('@endpoint_ref', '') == 'consultar':
                 if not '@nombre' in m: continue
                 #print (menu['id'], m['@nombre'])
                 c = {}
                 c['name'] = m['@nombre']
                 pars = ''
-                sort = ''
 
                 parametros = m['consulta']['parametro']
                 if isinstance(parametros, dict):
@@ -1184,28 +1201,18 @@ class Movistar(object):
 
                 for par in parametros:
                   #print_json(par)
-                  if par.get('@incluir', '') == 'true':
-                    pars += '&{}={}'.format(par['@id'], par['@value'])
-                  if par['@id'] == 'sort':
-                    sort = par['@value']
+                  pars += '&{}={}'.format(par['@id'], par['@value'])
 
                 pars = pars.replace('{suscripcion}', self.entitlements['suscripcion'])
                 c['url'] = self.endpoints['consultar'].format(deviceType=self.dplayer, profile=profile, sort=sort, start=1, end=50, mdrm='true', demarcation=self.account['demarcation'])
                 c['url'] += pars
+                #print(c['url'])
                 if self.quality == 'UHD': c['url'] += '&filterQuality=UHD'
                 section.append(c)
           if len(section) > 0:
             menu['name'] = section_name
             menu['data'] = section
             res[menu['id']] = menu
-
-      if 'portada_cine_destacados' in res:
-        res['portada_cine_destacados']['visible'] = True
-        res['portada_cine_destacados']['name'] = 'Cine - Géneros'
-
-      if 'portada_series_destacados' in res:
-        res['portada_series_destacados']['visible'] = True
-        res['portada_series_destacados']['name'] = 'Series - Géneros'
 
       return res
 
