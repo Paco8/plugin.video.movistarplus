@@ -11,6 +11,9 @@ import io
 import os
 import time
 import re
+import shutil
+import glob
+
 from datetime import datetime, timedelta
 
 from .endpoints import endpoints
@@ -36,6 +39,7 @@ class Movistar(object):
     add_extra_info = True
     #dplayer = 'webplayer'
     dplayer = 'android.tv'
+    account_dir = 'account_1'
 
     def __init__(self, config_directory, reuse_devices=False):
       self.logged = False
@@ -53,6 +57,27 @@ class Movistar(object):
       self.net.headers = headers
 
       self.quality = 'HD' # or UHD
+
+      # Account dir
+      content = Movistar.load_file_if_exists(config_directory + 'account.txt')
+      if content: self.account_dir = content
+      LOG('account_dir: {}'.format(self.account_dir))
+
+      account_dir = os.path.join(config_directory, self.account_dir)
+      if not os.path.exists(account_dir):
+        os.makedirs(account_dir)
+        # Migrate data
+        if self.account_dir == 'account_1':
+          for ext in ['*.conf', '*.json', '*.key']:
+            for f in glob.glob(os.path.join(config_directory, ext)):
+              #LOG(f)
+              shutil.move(f, account_dir)
+          if os.path.exists(config_directory + 'cache'):
+            #LOG(config_directory + 'cache')
+            shutil.move(config_directory + 'cache', account_dir)
+
+      self.config_dir = config_directory
+      config_directory = account_dir + '/'
 
       # Cache
       self.cache = Cache(config_directory)
@@ -1217,13 +1242,11 @@ class Movistar(object):
       return res
 
     def install_key_file(self, filename):
-      import shutil
       if sys.version_info[0] > 2:
         filename = bytes(filename, 'utf-8')
       shutil.copyfile(filename, self.cache.config_directory + 'auth.key')
 
     def export_key_file(self, filename):
-      import shutil
       if sys.version_info[0] > 2:
         filename = bytes(filename, 'utf-8')
       if self.account['access_token']:
@@ -1443,3 +1466,50 @@ class Movistar(object):
       except:
         pass
       return res
+
+    def get_accounts(self):
+      accounts = []
+      for d in os.listdir(self.config_dir):
+        if os.path.isdir(os.path.join(self.config_dir, d)) and d.startswith("account_"):
+          account = {'id': d, 'name': d.replace('account_', 'Cuenta ')}
+          content = Movistar.load_file_if_exists(os.path.join(self.config_dir, d, 'account.json'))
+          if content:
+            data = json.loads(content)
+            login = data.get('login')
+            if login:
+              if '@' in login:
+                p1, p2 = login.split('@')
+                account['login'] = p1[:3] +'...@'+ p2
+              else:
+                account['login'] = login[:3]
+          accounts.append(account)
+      return accounts
+
+    def switch_account(self, name):
+      Movistar.save_file(self.config_dir + 'account.txt', name)
+
+    def create_new_account(self):
+      accounts = self.get_accounts()
+      name = None
+      n = 1
+      while True:
+        name = 'account_' + str(n)
+        if not any(account.get("id") == name for account in accounts):
+          break;
+        n += 1
+      if name:
+        os.makedirs(self.config_dir + name)
+      return name
+
+    @staticmethod
+    def load_file_if_exists(filename):
+      content = None
+      if os.path.exists(filename):
+        with io.open(filename, 'r', encoding='utf-8') as handle:
+          content = handle.read()
+      return content
+
+    @staticmethod
+    def save_file(filename, content):
+      with io.open(filename, 'w', encoding='utf-8') as handle:
+        handle.write(content)

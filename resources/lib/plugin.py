@@ -6,10 +6,13 @@ from __future__ import unicode_literals, absolute_import, division
 
 import sys
 import json
+import io
+import os.path
 
 import xbmc
 import xbmcgui
 import xbmcplugin
+import xbmcaddon
 
 if sys.version_info[0] >= 3:
   import urllib.request as urllib2
@@ -19,9 +22,6 @@ else:
   import urllib2
   from urllib import urlencode, quote_plus
   from urlparse import parse_qsl
-
-import xbmcaddon
-import os.path
 
 from .log import LOG
 from .movistar import *
@@ -93,7 +93,10 @@ def play(params):
     else:
       url = d['url']
 
-  proxy = m.cache.load_file('proxy.conf')
+  # Read the proxy address
+  proxy = Movistar.load_file_if_exists(os.path.join(profile_dir, 'proxy.txt'))
+  LOG('proxy address: {}'.format(proxy))
+
   if addon.getSettingBool('manifest_modification') and proxy:
     url = '{}/?manifest={}'.format(proxy, url)
 
@@ -108,7 +111,10 @@ def play(params):
   manifest_headers = 'User-Agent=' + useragent
 
   if stype == 'tv':
-    cdn_token = m.get_cdntoken()
+    cdn_token = m.cache.load('cdn.conf')
+    if not cdn_token:
+      cdn_token = m.get_cdntoken()
+      m.cache.save_file('cdn.conf', cdn_token)
     #LOG('cdn_token: {}'.format(cdn_token))
     manifest_headers += '&x-tcdn-token=' + cdn_token
 
@@ -178,7 +184,7 @@ def play(params):
     #ttml.use_language_filter = False
     subtype = ttml.subtitle_type()
 
-    subfolder = profile_dir + os.sep +'subtitles/'
+    subfolder = os.path.join(profile_dir, 'subtitles')
     if not os.path.exists(subfolder):
       os.makedirs(subfolder)
 
@@ -186,7 +192,7 @@ def play(params):
     LOG('sublist: {}'.format(sublist))
     subpaths = []
     for sub in sublist:
-      filename =  subfolder + sub['lang']
+      filename = os.path.join(subfolder, sub['lang'])
       LOG('Converting {}'.format(sub['filename']))
       response = m.net.session.get(sub['url'], allow_redirects=True)
       content = response.content
@@ -618,14 +624,39 @@ def export_key():
   if directory:
     m.export_key_file(directory + 'movistarplus.key')
 
-def list_users():
-  open_folder(addon.getLocalizedString(30160)) # Change user
+def select_account(id, name):
+  m.switch_account(id)
+  open_folder(name)
   add_menu_option(addon.getLocalizedString(30183), get_url(action='login')) # Login with username
   add_menu_option(addon.getLocalizedString(30181), get_url(action='login_with_key')) # Login with key
-  if os.path.exists(profile_dir + 'auth.key'):
+  if os.path.exists(os.path.join(m.cache.config_directory, 'auth.key')):
     add_menu_option(addon.getLocalizedString(30184), get_url(action='export_key')) # Export key
   add_menu_option(addon.getLocalizedString(30150), get_url(action='logout')) # Close session
   close_folder()
+
+def list_accounts(params):
+  LOG('list_accounts: {}'.format(params))
+
+  if params.get('name') == 'new_account':
+    m.create_new_account()
+
+  accounts = m.get_accounts()
+  open_folder(addon.getLocalizedString(30160)) # Accounts
+  for account in accounts:
+    name = account['name']
+    login = account.get('login')
+    if login:
+      name += ' ({})'.format(login)
+    if account['id'] == m.account_dir:
+      display_name = '[B][COLOR blue]' + name + '[/COLOR][/B]'
+    else:
+      display_name = name
+    add_menu_option(display_name, get_url(action='select_account', id=account['id'], name=name))
+  add_menu_option(addon.getLocalizedString(30161), get_url(action='accounts', name='new_account')) # Add new
+  close_folder(cacheToDisc=False)
+
+  if params.get('name') == 'new_account':
+    xbmc.executebuiltin('Container.Update({},replace)'.format(xbmc.getInfoLabel('Container.FolderPath')))
 
 def iptv(params):
   LOG('iptv: params: {}'.format(params))
@@ -702,8 +733,10 @@ def router(paramstring):
       login()
     elif params['action'] == 'export_key':
       export_key()
-    elif params['action'] == 'user':
-      list_users()
+    elif params['action'] == 'select_account':
+      select_account(params['id'], params['name'])
+    elif params['action'] == 'accounts':
+      list_accounts(params)
     elif params['action'] == 'logout':
       logout()
     elif params['action'] == 'epg':
@@ -759,7 +792,7 @@ def router(paramstring):
     elif m.expired_access_token:
       show_notification(addon.getLocalizedString(30208))
 
-    add_menu_option(addon.getLocalizedString(30160), get_url(action='user'), icon='account.png') # Accounts
+    add_menu_option(addon.getLocalizedString(30160), get_url(action='accounts'), icon='account.png') # Accounts
     add_menu_option(addon.getLocalizedString(30450), get_url(action='show_donation_dialog'), icon='qr.png') # Donation
     close_folder(cacheToDisc=False)
 

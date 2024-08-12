@@ -54,7 +54,7 @@ if __name__ == '__main__':
   proxy.start()
   LOG('proxy_address: {}'.format(proxy.proxy_address))
   cache = Cache(profile_dir)
-  cache.save_file('proxy.conf', proxy.proxy_address)
+  cache.save_file('proxy.txt', proxy.proxy_address)
 
   if addon.getSettingBool('export_epg'):
     try:
