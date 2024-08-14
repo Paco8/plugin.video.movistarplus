@@ -681,12 +681,13 @@ def export_epg_now():
   if sys.version_info[0] > 2:
     folder = bytes(folder, 'utf-8')
   if not folder or not os.path.isdir(folder): return
+  only_subscribed = addon.getSettingBool('only_subscribed')
   channels_filename = os.path.join(folder, b"movistar-channels.m3u8")
   epg_filename = os.path.join(folder, b"movistar-epg.xml")
   show_notification(addon.getLocalizedString(30310), xbmcgui.NOTIFICATION_INFO)
-  m.export_channels_to_m3u8(channels_filename)
+  m.export_channels_to_m3u8(channels_filename, only_subscribed)
   show_notification(addon.getLocalizedString(30311), xbmcgui.NOTIFICATION_INFO)
-  m.export_epg_to_xml(epg_filename, addon.getSettingInt('export_days'), report_progress)
+  m.export_epg_to_xml(epg_filename, addon.getSettingInt('export_days'), report_progress, only_subscribed)
   show_notification(addon.getLocalizedString(30313), xbmcgui.NOTIFICATION_INFO)
 
 def to_wishlist(params):

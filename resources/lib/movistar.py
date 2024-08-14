@@ -1299,8 +1299,8 @@ class Movistar(object):
       channels = self.get_channels()
       res = []
       for c in channels:
-        if not c['subscribed']: continue
         t = {}
+        t['subscribed'] = c['subscribed']
         t['name'] = c['channel_name']
         t['id'] = c['id']
         t['logo'] = c['art']['icon']
@@ -1310,10 +1310,11 @@ class Movistar(object):
         res.append(t)
       return res
 
-    def export_channels_to_m3u8(self, filename):
+    def export_channels_to_m3u8(self, filename, only_subscribed=False):
       channels = self.export_channels()
       items = []
       for t in channels:
+        if only_subscribed and not t['subscribed']: continue
         item = '#EXTINF:-1 tvg-name="{name}" tvg-id="{id}" tvg-logo="{logo}" tvg-chno="{preset}" group-title="Movistar+" catchup="vod",{name}\n{stream}\n\n'.format(
             name=t['name'], id=t['id'], logo=t['logo'], preset=t['preset'], stream=t['stream'])
         items.append(item)
@@ -1326,14 +1327,13 @@ class Movistar(object):
         from urllib.parse import urlencode
       else:
         from urllib import urlencode
-      #now = time.time()*1000
 
       res = {}
       epg = self.get_epg(date, duration)
       channels = self.get_channels()
       for channel in channels:
         id = channel['id']
-        if not channel['subscribed'] or not id in epg: continue
+        if not id in epg: continue
         res[id] = []
         for e in epg[id]:
           t = {}
@@ -1342,8 +1342,6 @@ class Movistar(object):
           t['start'] = datetime.utcfromtimestamp(e['start']/1000).strftime('%Y-%m-%dT%H:%M:%SZ')
           t['stop'] = datetime.utcfromtimestamp(e['end']/1000).strftime('%Y-%m-%dT%H:%M:%SZ')
 
-          #aired = (e['end'] <= now)
-          #if aired:
           if True:
             program_id = str(e['show_id'])
             url = 'https://grmovistar.imagenio.telefonica.net/asfe/rest/tvMediaURLs?tvProgram.id='+ program_id +'&svc=startover'
@@ -1351,8 +1349,7 @@ class Movistar(object):
             args = urlencode({'action': 'play', 'stype': 'u7d', 'id': program_id, 'url': url, 'session_request': session_request})
             t['stream'] = 'plugin://plugin.video.movistarplus/?' + args
 
-          """
-          if self.add_extra_info and id in ['HOLLYW', 'TCM', 'AMC', 'MV3', 'MV2', 'CPSER', 'FOXGE', 'TNT']:
+          if False and self.add_extra_info and id in ['HOLLYW', 'TCM', 'AMC', 'MV3', 'MV2', 'CPSER', 'FOXGE', 'TNT']:
             i = {'id': e['id'], 'show_id': e['show_id']}
             self.add_video_extra_info(i)
             #print(i)
@@ -1363,12 +1360,11 @@ class Movistar(object):
               t['credits'].append({'type': 'director', 'name': text})
             for text in i['info'].get('cast', []):
               t['credits'].append({'type': 'actor', 'name': text})
-          """
 
           res[id].append(t)
       return res
 
-    def export_epg_to_xml(self, filename, ndays=3, report_func=None):
+    def export_epg_to_xml(self, filename, ndays=3, report_func=None, only_subscribed=False):
       if sys.version_info[0] < 3:
         # Python 2
         from cgi import escape as html_escape
@@ -1383,6 +1379,7 @@ class Movistar(object):
                  '<tv>\n')
 
       for t in channels:
+        if only_subscribed and not t['subscribed']: continue
         res.append('<channel id="{}">\n'.format(t['id']) + 
                   '  <display-name>{}</display-name>\n'.format(t['name']) + 
                   '  <icon src="{}"/>\n'.format(t['logo']) + 
@@ -1410,7 +1407,9 @@ class Movistar(object):
 
       for ch in channels:
         if not ch['id'] in epg: continue
+        if only_subscribed and not ch['subscribed']: continue
         for e in epg[ch['id']]:
+          #LOG('* e:{}'.format(e))
           start = datetime.strptime(e['start'], "%Y-%m-%dT%H:%M:%SZ").strftime("%Y%m%d%H%M%S +0000")
           stop = datetime.strptime(e['stop'], "%Y-%m-%dT%H:%M:%SZ").strftime("%Y%m%d%H%M%S +0000")
           url = e.get('stream', None)

@@ -41,12 +41,23 @@ def export_epg():
     reuse_devices = addon.getSettingBool('reuse_devices')
     m = Movistar(profile_dir, reuse_devices)
     if not m.logged: return
+
+    if addon.getSettingBool('uhd'):
+      m.quality = 'UHD'
+
+    profile_id = addon.getSetting('profile_id').upper()
+    LOG('profile_id: {}'.format(profile_id))
+    if profile_id not in ['', 'AUTO']:
+      m.account['platform'] = profile_id
+
+    only_subscribed = addon.getSettingBool('only_subscribed')
+    LOG('service: only_subscribed: {}'.format(only_subscribed))
     if channels_needs_update:
       show_notification(addon.getLocalizedString(30310), xbmcgui.NOTIFICATION_INFO)
-      m.export_channels_to_m3u8(channels_filename)
+      m.export_channels_to_m3u8(channels_filename, only_subscribed)
     if epg_needs_update:
       show_notification(addon.getLocalizedString(30311), xbmcgui.NOTIFICATION_INFO)
-      m.export_epg_to_xml(epg_filename)
+      m.export_epg_to_xml(epg_filename, only_subscribed=only_subscribed)
 
 if __name__ == '__main__':
   LOG('Service started')
