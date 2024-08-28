@@ -176,6 +176,9 @@ class RequestHandler(BaseHTTPRequestHandler):
             global previous_tokens, reregister_needed
             while True:
               LOG('reregister_needed: {}'.format(reregister_needed))
+              # Discard previous mvs_o, it may have expired tokens
+              global mvs_o
+              mvs_o = None
               if reregister_needed and xbmcaddon.Addon().getSettingBool('reregister'):
                 mvs().unregister_device()
                 mvs().register_device()

@@ -659,6 +659,7 @@ class Movistar(object):
         t['channel_name'] = c['Nombre'].strip()
         t['info']['title'] = str(c.get('Dial', '0')) +'. ' + t['channel_name']
         t['id'] = c['CodCadenaTv']
+        t['cas_id'] = c.get('CasId')
         #if add_epg_info:
         #  t['desc1'] = c['Nombre']
         #  t['desc2'] = ''
