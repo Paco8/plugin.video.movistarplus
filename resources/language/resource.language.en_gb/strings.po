@@ -57,6 +57,11 @@ msgid "Fix freezes in VOD content"
 msgstr ""
 
 # For Orange only
+msgctxt "#30014"
+msgid "Try to fix freezes"
+msgstr ""
+
+# For Orange only
 msgctxt "#30016"
 msgid "Proxy timeout (ms)"
 msgstr ""
@@ -526,12 +531,49 @@ msgctxt "#30315"
 msgid "Number of days"
 msgstr ""
 
+# For Orange and Movistar only
+msgctxt "#30316"
+msgid "Create settings for IPTV Simple"
+msgstr ""
+
+# For Orange and Movistar only
+msgctxt "#30317"
+msgid "Use external EPG"
+msgstr ""
+
+# For Orange and Movistar only
+msgctxt "#30318"
+msgid "URL:"
+msgstr ""
+
+# For Orange and Movistar only
+msgctxt "#30319"
+msgid "Creating settings"
+msgstr ""
+
+# For Orange only
 msgctxt "#30320"
 msgid "Rating: {}"
 msgstr ""
 
+# For Orange only
 msgctxt "#30321"
 msgid "Show age rating before playback"
+msgstr ""
+
+# For Orange and Movistar only
+msgctxt "#30322"
+msgid "Confirm overwrite"
+msgstr ""
+
+# For Orange and Movistar only
+msgctxt "#30323"
+msgid "There are already settings for IPTV Simple.\nDo you want to overwrite them?"
+msgstr ""
+
+# For Orange and Movistar only
+msgctxt "#30324"
+msgid "IPTV Simple is not found"
 msgstr ""
 
 msgctxt "#30400"

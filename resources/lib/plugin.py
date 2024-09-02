@@ -672,23 +672,44 @@ def iptv(params):
     #except:
     #  pass
 
+def create_iptv_settings():
+  from .iptv import save_iptv_settings
+  show_notification(addon.getLocalizedString(30319), xbmcgui.NOTIFICATION_INFO)
+  output_file = 'instance-settings-91.xml' if kodi_version > 19 else 'settings.xml'
+  epg_url = None
+  if addon.getSettingBool('use_external_epg'):
+    epg_url = addon.getSetting('epg_url')
+  try:
+    pvr_addon = xbmcaddon.Addon('pvr.iptvsimple')
+    pvr_dir = translatePath(pvr_addon.getAddonInfo('profile'))
+    LOG('pvr_dir: {}'.format(pvr_dir))
+    filename = os.path.join(pvr_dir, output_file)
+    if os.path.exists(filename):
+      res = xbmcgui.Dialog().yesno(addon.getLocalizedString(30322), addon.getLocalizedString(30323))
+      if res == False: return
+    save_iptv_settings(filename, 'Movistarplus', 'movistarplus', epg_url)
+    export_epg_now()
+  except:
+    show_notification(addon.getLocalizedString(30324))
+
 def export_epg_now():
   def report_progress(message):
     show_notification(addon.getLocalizedString(30314).format(message), xbmcgui.NOTIFICATION_INFO)
 
   if not m.logged: return
-  folder = addon.getSetting('epg_folder')
-  if sys.version_info[0] > 2:
-    folder = bytes(folder, 'utf-8')
-  if not folder or not os.path.isdir(folder): return
+
   only_subscribed = addon.getSettingBool('only_subscribed')
-  channels_filename = os.path.join(folder, b"movistar-channels.m3u8")
-  epg_filename = os.path.join(folder, b"movistar-epg.xml")
+  channels_filename = os.path.join(profile_dir, 'channels.m3u8')
+  epg_filename = os.path.join(profile_dir, 'epg.xml')
   show_notification(addon.getLocalizedString(30310), xbmcgui.NOTIFICATION_INFO)
   m.export_channels_to_m3u8(channels_filename, only_subscribed)
-  show_notification(addon.getLocalizedString(30311), xbmcgui.NOTIFICATION_INFO)
-  m.export_epg_to_xml(epg_filename, addon.getSettingInt('export_days'), report_progress, only_subscribed)
+
+  if not addon.getSettingBool('use_external_epg'):
+    show_notification(addon.getLocalizedString(30311), xbmcgui.NOTIFICATION_INFO)
+    m.export_epg_to_xml(epg_filename, addon.getSettingInt('export_days'), report_progress, only_subscribed)
+
   show_notification(addon.getLocalizedString(30313), xbmcgui.NOTIFICATION_INFO)
+
 
 def to_wishlist(params):
   stype = params['stype']
@@ -770,6 +791,8 @@ def router(paramstring):
       list_section(params['key'])
     elif params['action'] == 'search':
       search(params)
+    elif params['action'] == 'create_iptv_settings':
+      create_iptv_settings()
     elif params['action'] == 'export_epg_now':
       export_epg_now()
     elif params['action'] == 'to_wishlist':

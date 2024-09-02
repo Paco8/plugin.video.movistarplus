@@ -53,6 +53,10 @@ msgctxt "#30013"
 msgid "Fix freezes in VOD content"
 msgstr "Solucionar parones en TV a la carta"
 
+msgctxt "#30014"
+msgid "Try to fix freezes"
+msgstr "Tratar de solucionar parones"
+
 msgctxt "#30016"
 msgid "Proxy timeout (ms)"
 msgstr "Tiempo de espera (ms)"
@@ -491,6 +495,26 @@ msgctxt "#30315"
 msgid "Number of days"
 msgstr "Número de días"
 
+# For Orange and Movistar only
+msgctxt "#30316"
+msgid "Create settings for IPTV Simple"
+msgstr "Crear configuración para IPTV Simple"
+
+# For Orange and Movistar only
+msgctxt "#30317"
+msgid "Use external EPG"
+msgstr "Usar EPG externa"
+
+# For Orange and Movistar only
+msgctxt "#30318"
+msgid "URL:"
+msgstr "URL:"
+
+# For Orange and Movistar only
+msgctxt "#30319"
+msgid "Creating settings"
+msgstr "Creando configuración"
+
 msgctxt "#30320"
 msgid "Rating: {}"
 msgstr "Calificación: {}"
@@ -498,6 +522,21 @@ msgstr "Calificación: {}"
 msgctxt "#30321"
 msgid "Show age rating before playback"
 msgstr "Mostrar la calificación de edades al empezar la reproducción"
+
+# For Orange and Movistar only
+msgctxt "#30322"
+msgid "Confirm overwrite"
+msgstr "Confirmar"
+
+# For Orange and Movistar only
+msgctxt "#30323"
+msgid "There are already settings for IPTV Simple.\nDo you want to overwrite them?"
+msgstr "Ya existe una configuración para IPTV Simple.\n¿Quieres sobreescribirla?"
+
+# For Orange and Movistar only
+msgctxt "#30324"
+msgid "IPTV Simple is not found"
+msgstr "No se encuentra IPTV Simple"
 
 msgctxt "#30400"
 msgid "{} days remaining"

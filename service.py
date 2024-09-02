@@ -13,7 +13,6 @@ from resources.lib.cache import Cache
 
 def export_epg():
   from datetime import datetime, timedelta
-  from resources.lib.gui import show_notification
 
   def needs_update(filename):
     if os.path.exists(filename):
@@ -21,14 +20,8 @@ def export_epg():
       return datetime.now() - file_modification_time > timedelta(hours=6)
     return True
 
-  folder = addon.getSetting('epg_folder')
-  if sys.version_info[0] > 2:
-    folder = bytes(folder, 'utf-8')
-  LOG('folder for channels and epg: {}'.format(folder))
-  if not folder or not os.path.isdir(folder): return
-
-  channels_filename = os.path.join(folder, b"movistar-channels.m3u8")
-  epg_filename = os.path.join(folder, b"movistar-epg.xml")
+  channels_filename = os.path.join(profile_dir, 'channels.m3u8')
+  epg_filename = os.path.join(profile_dir, 'epg.xml')
   LOG('channels filename: {}'.format(channels_filename))
   LOG('epg filename: {}'.format(epg_filename))
 
@@ -37,27 +30,7 @@ def export_epg():
   LOG('channels_needs_update: {} epg_needs_update: {}'.format(channels_needs_update, epg_needs_update))
 
   if channels_needs_update or epg_needs_update:
-    from resources.lib.movistar import Movistar
-    reuse_devices = addon.getSettingBool('reuse_devices')
-    m = Movistar(profile_dir, reuse_devices)
-    if not m.logged: return
-
-    if addon.getSettingBool('uhd'):
-      m.quality = 'UHD'
-
-    profile_id = addon.getSetting('profile_id').upper()
-    LOG('profile_id: {}'.format(profile_id))
-    if profile_id not in ['', 'AUTO']:
-      m.account['platform'] = profile_id
-
-    only_subscribed = addon.getSettingBool('only_subscribed')
-    LOG('service: only_subscribed: {}'.format(only_subscribed))
-    if channels_needs_update:
-      show_notification(addon.getLocalizedString(30310), xbmcgui.NOTIFICATION_INFO)
-      m.export_channels_to_m3u8(channels_filename, only_subscribed)
-    if epg_needs_update:
-      show_notification(addon.getLocalizedString(30311), xbmcgui.NOTIFICATION_INFO)
-      m.export_epg_to_xml(epg_filename, only_subscribed=only_subscribed)
+    xbmc.executebuiltin('RunPlugin(plugin://plugin.video.movistarplus/?action=export_epg_now)')
 
 if __name__ == '__main__':
   LOG('Service started')
