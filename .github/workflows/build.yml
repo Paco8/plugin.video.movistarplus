@@ -19,7 +19,7 @@ jobs:
           wget https://github.com/Paco8/plugin.video.orange.spain/releases/download/v0.4.0/script.module.ttml2ssa-0.3.8.zip
 
       - name: Create artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: package
           path: ./*.zip
