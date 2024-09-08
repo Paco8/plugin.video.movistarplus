@@ -39,11 +39,10 @@ import requests
 import threading
 import socket
 from contextlib import closing
-import xbmcaddon
 
 from .b64 import encode_base64
 from .log import LOG
-from .addon import profile_dir
+from .addon import profile_dir, addon
 from .useragent import useragent
 
 from ttml2ssa import Ttml2SsaAddon
@@ -72,7 +71,7 @@ def mvs():
   global mvs_o
   if not mvs_o:
     from .movistar import Movistar
-    reuse_devices = xbmcaddon.Addon().getSettingBool('reuse_devices')
+    reuse_devices = addon.getSettingBool('reuse_devices')
     mvs_o = Movistar(profile_dir, reuse_devices)
   return mvs_o
 
@@ -99,17 +98,19 @@ class RequestHandler(BaseHTTPRequestHandler):
               baseurl = os.path.dirname(response.url)
               LOG('baseurl: {}'.format(baseurl))
               content = response.content.decode('utf-8')
-              if not xbmcaddon.Addon().getSettingBool('use_ttml2ssa'):
+
+              if addon.getSettingBool('proxy_process_subs'):
                 LOG(self.headers.get('Host'))
                 my_address = 'http://' + self.headers.get('Host')
                 LOG('my_address: {}'.format(my_address))
                 content = content.replace('mimeType="application/ttml+xml"', 'mimeType="text/vtt"')
                 content = re.sub(r'<BaseURL>(.*?)\.ttml<\/BaseURL>', r'<BaseURL>{}/?subtitle={}/\1.ttml</BaseURL>'.format(my_address, baseurl), content)
+
               pos = content.find('<Period id')
               if pos > -1:
                 content = content[:pos] + '<BaseURL>' + baseurl + '/</BaseURL>' + content[pos:]
 
-              if xbmcaddon.Addon().getSettingBool('fix_languages'):
+              if addon.getSettingBool('fix_languages'):
                 replacements = {'qaa': 'eng', 'srd': 'es-[CC]', 'ads': 'es-[ADS]'}
                 for key, value in replacements.items():
                   content = content.replace('lang="{}"'.format(key), 'lang="{}"'.format(value))
@@ -179,7 +180,7 @@ class RequestHandler(BaseHTTPRequestHandler):
               # Discard previous mvs_o, it may have expired tokens
               global mvs_o
               mvs_o = None
-              if reregister_needed and xbmcaddon.Addon().getSettingBool('reregister'):
+              if reregister_needed and addon.getSettingBool('reregister'):
                 mvs().unregister_device()
                 mvs().register_device()
 
@@ -214,7 +215,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                 d = try_load_json(license_data)
                 if d and 'errorCode' in d:
                   if d['errorCode'] == 4027:
-                    if not reregister_needed and xbmcaddon.Addon().getSettingBool('reregister'):
+                    if not reregister_needed and addon.getSettingBool('reregister'):
                       reregister_needed = True
                       continue
                   from .gui import show_notification

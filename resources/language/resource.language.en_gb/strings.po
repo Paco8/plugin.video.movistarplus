@@ -37,6 +37,10 @@ msgctxt "#30005"
 msgid "Playback"
 msgstr ""
 
+msgctxt "#30006"
+msgid "Advanced"
+msgstr ""
+
 # For Orange and Movistar only
 msgctxt "#30010"
 msgid "DRM type"
@@ -135,7 +139,6 @@ msgctxt "#30033"
 msgid "Enable 4K"
 msgstr ""
 
-# For SkyOTT only
 msgctxt "#30034"
 msgid "Fix audio and subtitle language names"
 msgstr ""
@@ -175,9 +178,12 @@ msgctxt "#30041"
 msgid "Subscription country (two letter code):"
 msgstr ""
 
-# For SkyOTT only
 msgctxt "#30050"
 msgid "Remember username and password"
+msgstr ""
+
+msgctxt "#30051"
+msgid "Process subtitles"
 msgstr ""
 
 msgctxt "#30101"

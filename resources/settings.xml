@@ -19,6 +19,7 @@
     <category label="30002">
         <setting label="30011" type="bool" id="manifest_modification" default="true"/>
         <setting label="30034" type="bool" id="fix_languages" default="true" enable="eq(-1,true)" subsetting="true"/>
+        <setting label="30051" type="bool" id="proxy_process_subs" default="true" enable="eq(-2,true)" subsetting="true"/>
         <setting label="30012" type="bool" id="use_proxy_for_license" default="true"/>
         <setting id="reregister" type="bool" label="30024" default="true" enable="eq(-1,true)" visible="false" subsetting="true"/>
     </category>
@@ -37,6 +38,11 @@
         <setting id="iptv.epg_uri" default="plugin://plugin.video.movistarplus/iptv/epg" visible="false"/>
     </category>
     -->
+
+    <category label="30006">
+        <setting id="reuse_devices" type="bool" label="30023" default="false" visible="true"/>
+    </category>
+
     <category label="30304">
         <setting label="30316" type="action" id="create_iptv_settings" action="RunPlugin(plugin://plugin.video.movistarplus/?action=create_iptv_settings)" option="close"/>
 

@@ -37,6 +37,10 @@ msgctxt "#30005"
 msgid "Playback"
 msgstr "Reproducción"
 
+msgctxt "#30006"
+msgid "Advanced"
+msgstr "Avanzado"
+
 msgctxt "#30010"
 msgid "DRM type"
 msgstr "Tipo de DRM"
@@ -158,10 +162,13 @@ msgctxt "#30041"
 msgid "Subscription country (two letter code):"
 msgstr "País de la suscripción (código de dos letras):"
 
-# For SkyOTT only
 msgctxt "#30050"
 msgid "Remember username and password"
 msgstr "Recordar usuario y clave"
+
+msgctxt "#30051"
+msgid "Process subtitles"
+msgstr "Procesar subtítulos"
 
 msgctxt "#30101"
 msgid "Menu"
