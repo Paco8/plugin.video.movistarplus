@@ -65,19 +65,7 @@ Este plugin lo puedes encontrar en Addons, Instalar desde repositorio, Kodi addo
 
 Una vez instalado IPTV Simple Client vamos a los ajustes de Movistarplus.
 
-- En la sección **IPTV** activamos la opción **Exportar automáticamente canales y guía para IPTV**.
-- En la opción **Guardar en esta carpeta** tenemos que seleccionar una carpeta donde se guardará esa información. Puedes usar la carpeta `download` o cualquier otra, o crear una nueva.
-- Seleccionamos la opción **Exportar los canales y la guía ahora** y esperamos unos segundos hasta que aparezca una notificación en la parte superior izquierda indicando que se han exportado los canales y la guía.
-- Entramos otra vez en los ajustes de Movistarplus.
-- En la sección **IPTV** seleccionamos **Abrir la configuración de IPTV Simple**.
-- (**Kodi 20**) Seleccionamos "Añadir configuración de Addon". En la nueva ventana, en nombre le ponemos por ejemplo `Movistarplus`.
-- En la nueva ventana que se abre seleccionamos en Ubicación "Local path".
-- En "Ruta a la lista M3U" nos vamos a la carpeta que habíamos elegido para exportar los datos de Movistarplus y seleccionamos el fichero `movistar-channels.m3u8`
-- Ahora vamos a la sección **EPG**, y en Ubicación seleccionamos "Local path".
-- En "Ruta XMLTV" nos vamos a la carpeta que habíamos elegido para exportar los datos de Movistarplus y seleccionamos el fichero `movistar-epg.xml`
-- (Opcionalmente) En la sección **Catchup** activamos la opción "Enable catchup". Esta opción nos permite ver programas ya emitidos.
-- Aceptamos los cambios.
-- (**Kodi 20**) Cuando vuelva a salir otra vez la ventana "Ajustes y configuraciones de Addon" pulsamos en Cancelar.
+- En la sección **IPTV** pulsamos en la opción **Crear configuración para IPTV Simple**.
 - Reiniciamos Kodi.
 
 Si todo ha ido bien ahora en la sección TV de Kodi podrás acceder a los canales y a la guía de Movistarplus.
