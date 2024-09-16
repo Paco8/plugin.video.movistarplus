@@ -628,9 +628,9 @@ def select_account(id, name):
   m.switch_account(id)
   open_folder(name)
   add_menu_option(addon.getLocalizedString(30183), get_url(action='login')) # Login with username
-  add_menu_option(addon.getLocalizedString(30181), get_url(action='login_with_key')) # Login with key
-  if os.path.exists(os.path.join(m.cache.config_directory, 'auth.key')):
-    add_menu_option(addon.getLocalizedString(30184), get_url(action='export_key')) # Export key
+  #add_menu_option(addon.getLocalizedString(30181), get_url(action='login_with_key')) # Login with key
+  #if os.path.exists(os.path.join(m.cache.config_directory, 'auth.key')):
+  #  add_menu_option(addon.getLocalizedString(30184), get_url(action='export_key')) # Export key
   add_menu_option(addon.getLocalizedString(30150), get_url(action='logout')) # Close session
   close_folder()
 

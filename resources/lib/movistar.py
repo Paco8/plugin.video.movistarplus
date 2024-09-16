@@ -210,22 +210,24 @@ class Movistar(object):
       data = {"accountNumber": self.account['id'],
               "userProfile": self.account['profile_id'],
               "streamMiscellanea":"HTTPS",
-              "deviceType":"WP_OTT",
-              "deviceManufacturerProduct":"Firefox",
+              #"deviceType":"WP_OTT",
+              #"deviceManufacturerProduct":"Firefox",
+              "deviceType":"SMARTTV_OTT",
+              "deviceManufacturerProduct":"LG",
               "streamDRM":"Widevine",
               "streamFormat":"DASH",
       }
 
       headers = self.net.headers.copy()
       headers['Content-Type'] = 'application/json'
-      headers['X-Movistarplus-Ui'] = '2.36.30'
-      headers['X-Movistarplus-Os'] = 'Linux88'
+      #headers['X-Movistarplus-Ui'] = '2.36.30'
+      #headers['X-Movistarplus-Os'] = 'Linux88'
       headers['X-Movistarplus-Deviceid'] = self.account['device_id']
       headers['Authorization'] = 'Bearer ' + self.account['access_token']
       #print_json(data)
       #print_json(headers)
 
-      url = self.endpoints['initdata'].format(deviceType='webplayer', DEVICEID=self.account['device_id'])
+      url = self.endpoints['initdata'].format(deviceType=self.dplayer, DEVICEID=self.account['device_id'])
       response = self.net.session.post(url, data=json.dumps(data), headers=headers)
       content = response.content.decode('utf-8')
       #LOG('get_token response: {}'.format(content))
@@ -239,7 +241,7 @@ class Movistar(object):
       headers = self.net.headers.copy()
       headers['Access-Control-Request-Method'] = 'POST'
       headers['Access-Control-Request-Headers'] = 'content-type,x-hzid'
-      url = self.endpoints['setUpStream'].format(PID=self.account['pid'], deviceCode='WP_OTT', PLAYREADYID=self.account['device_id'])
+      url = self.endpoints['setUpStream'].format(PID=self.account['pid'], deviceCode='SMARTTV_OTT', PLAYREADYID=self.account['device_id'])
       response = self.net.session.options(url, headers=headers)
       content = response.content.decode('utf-8')
       return content
@@ -250,7 +252,7 @@ class Movistar(object):
       headers = self.net.headers.copy()
       headers['Content-Type'] = 'application/json'
       headers['X-Hzid'] = session_token
-      url = self.endpoints['setUpStream'].format(PID=self.account['pid'], deviceCode='WP_OTT', PLAYREADYID=self.account['device_id'])
+      url = self.endpoints['setUpStream'].format(PID=self.account['pid'], deviceCode='SMARTTV_OTT', PLAYREADYID=self.account['device_id'])
       if session_id != None:
          url += '/' + session_id
       #LOG('open_session: url: {}'.format(url))
@@ -405,7 +407,7 @@ class Movistar(object):
       headers = self.net.headers.copy()
       headers['Content-Type'] = 'text/plain;charset=UTF-8'
       data = '{"X-HZId":"' + session_token +'","X-Content-Type":"application/json","X-Operation":"DELETE"}'
-      url = self.endpoints['tearDownStream'].format(PID=self.account['pid'], deviceCode='WP_OTT', PLAYREADYID=self.account['device_id'], SessionID=id)
+      url = self.endpoints['tearDownStream'].format(PID=self.account['pid'], deviceCode='SMARTTV_OTT', PLAYREADYID=self.account['device_id'], SessionID=id)
       response = self.net.session.post(url, headers=headers, data=data)
       content = response.content.decode('utf-8')
       return content
@@ -441,15 +443,17 @@ class Movistar(object):
       data = {"accountNumber": self.account['id'],
               "sessionUserProfile": self.account['profile_id'],
               "streamMiscellanea":"HTTPS",
-              "deviceType":"WP_OTT",
-              "deviceManufacturerProduct":"Firefox",
+              #"deviceType":"WP_OTT",
+              #"deviceManufacturerProduct":"Firefox",
+              "deviceType":"SMARTTV_OTT",
+              "deviceManufacturerProduct":"LG",
               "streamDRM":"Widevine",
               "streamFormat":"DASH",
       }
       headers = self.net.headers.copy()
       headers['Content-Type'] = 'application/json'
       headers['Authorization'] = 'Bearer ' + self.account['access_token']
-      url = self.endpoints['renovacion_hztoken'].format(deviceType='webplayer', DEVICEID=self.account['device_id'])
+      url = self.endpoints['renovacion_hztoken'].format(deviceType=self.dplayer, DEVICEID=self.account['device_id'])
       data = self.net.post_data(url, json.dumps(data), headers)
       return data.get('homeZoneID')
 
