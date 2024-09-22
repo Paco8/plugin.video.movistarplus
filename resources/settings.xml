@@ -38,6 +38,7 @@
 
     <category label="30006">
         <setting id="reuse_devices" type="bool" label="30023" default="false" visible="true"/>
+        <setting id="enable_key_login" type="bool" label="Activar inicio de sesión con fichero key" default="false" visible="true"/>
         <setting id="open_session" type="bool" label="30022" default="true" visible="false"/>
         <setting id="profile_id" type="text" label="Profile ID" default="Auto" visible="false"/>
     </category>

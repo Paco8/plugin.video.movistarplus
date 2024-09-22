@@ -582,6 +582,10 @@ msgctxt "#30324"
 msgid "IPTV Simple is not found"
 msgstr ""
 
+msgctxt "#30325"
+msgid "Downloading subtitle '{}'"
+msgstr ""
+
 msgctxt "#30400"
 msgid "{} days remaining"
 msgstr ""

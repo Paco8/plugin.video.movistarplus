@@ -38,7 +38,11 @@ class Movistar(object):
 
     add_extra_info = True
     #dplayer = 'webplayer'
+    #device_code = 'WP_OTT'
+    #manufacturer = 'Firefox'
     dplayer = 'android.tv'
+    device_code = 'SMARTTV_OTT'
+    manufacturer = 'LG'
     account_dir = 'account_1'
 
     def __init__(self, config_directory, reuse_devices=False):
@@ -210,10 +214,8 @@ class Movistar(object):
       data = {"accountNumber": self.account['id'],
               "userProfile": self.account['profile_id'],
               "streamMiscellanea":"HTTPS",
-              #"deviceType":"WP_OTT",
-              #"deviceManufacturerProduct":"Firefox",
-              "deviceType":"SMARTTV_OTT",
-              "deviceManufacturerProduct":"LG",
+              "deviceType": self.device_code,
+              "deviceManufacturerProduct": self.manufacturer,
               "streamDRM":"Widevine",
               "streamFormat":"DASH",
       }
@@ -241,7 +243,7 @@ class Movistar(object):
       headers = self.net.headers.copy()
       headers['Access-Control-Request-Method'] = 'POST'
       headers['Access-Control-Request-Headers'] = 'content-type,x-hzid'
-      url = self.endpoints['setUpStream'].format(PID=self.account['pid'], deviceCode='SMARTTV_OTT', PLAYREADYID=self.account['device_id'])
+      url = self.endpoints['setUpStream'].format(PID=self.account['pid'], deviceCode=self.device_code, PLAYREADYID=self.account['device_id'])
       response = self.net.session.options(url, headers=headers)
       content = response.content.decode('utf-8')
       return content
@@ -252,7 +254,7 @@ class Movistar(object):
       headers = self.net.headers.copy()
       headers['Content-Type'] = 'application/json'
       headers['X-Hzid'] = session_token
-      url = self.endpoints['setUpStream'].format(PID=self.account['pid'], deviceCode='SMARTTV_OTT', PLAYREADYID=self.account['device_id'])
+      url = self.endpoints['setUpStream'].format(PID=self.account['pid'], deviceCode=self.device_code, PLAYREADYID=self.account['device_id'])
       if session_id != None:
          url += '/' + session_id
       #LOG('open_session: url: {}'.format(url))
@@ -407,7 +409,7 @@ class Movistar(object):
       headers = self.net.headers.copy()
       headers['Content-Type'] = 'text/plain;charset=UTF-8'
       data = '{"X-HZId":"' + session_token +'","X-Content-Type":"application/json","X-Operation":"DELETE"}'
-      url = self.endpoints['tearDownStream'].format(PID=self.account['pid'], deviceCode='SMARTTV_OTT', PLAYREADYID=self.account['device_id'], SessionID=id)
+      url = self.endpoints['tearDownStream'].format(PID=self.account['pid'], deviceCode=self.device_code, PLAYREADYID=self.account['device_id'], SessionID=id)
       response = self.net.session.post(url, headers=headers, data=data)
       content = response.content.decode('utf-8')
       return content
@@ -443,10 +445,8 @@ class Movistar(object):
       data = {"accountNumber": self.account['id'],
               "sessionUserProfile": self.account['profile_id'],
               "streamMiscellanea":"HTTPS",
-              #"deviceType":"WP_OTT",
-              #"deviceManufacturerProduct":"Firefox",
-              "deviceType":"SMARTTV_OTT",
-              "deviceManufacturerProduct":"LG",
+              "deviceType": self.device_code,
+              "deviceManufacturerProduct": self.manufacturer,
               "streamDRM":"Widevine",
               "streamFormat":"DASH",
       }
