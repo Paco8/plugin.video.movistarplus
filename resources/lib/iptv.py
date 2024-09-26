@@ -80,17 +80,13 @@ def save_iptv_settings(filename, name, addon_id, epg_url=None):
         <setting id="timeshiftEnabledUdp" default="true">true</setting>
         <setting id="timeshiftEnabledCustom" default="true">false</setting>'''
 
-  if epg_url:
-   content += '''
-        <setting id="catchupEnabled" default="true">false</setting>'''
-  else:
-    content += '''
-        <setting id="catchupEnabled">true</setting>'''
+  content += '''
+        <setting id="catchupEnabled">true</setting>
+        <setting id="catchupQueryFormat">&start_time={utc}&end_time={utcend}</setting>
+        <setting id="allChannelsCatchupMode">2</setting>'''
 
   content += '''
-        <setting id="catchupQueryFormat" default="true" />
         <setting id="catchupDays" default="true">5</setting>
-        <setting id="allChannelsCatchupMode" default="true">0</setting>
         <setting id="catchupOverrideMode" default="true">0</setting>
         <setting id="catchupCorrection" default="true">0</setting>
         <setting id="catchupPlayEpgAsLive" default="true">false</setting>

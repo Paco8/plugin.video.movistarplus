@@ -809,6 +809,10 @@ class Movistar(object):
       t['id'] = ed['Id']
       t['info']['title'] = ed['Titulo']
       t['art']['poster'] = ed.get('Imagen', '').replace('ywcatalogov', 'dispficha')
+      if 'Imagenes' in ed:
+        for i in ed['Imagenes']:
+          if i['id'] == 'detail':
+            t['art']['poster'] = i['uri']
       t['art']['thumb'] = t['art']['poster']
       t['info']['genre'] = ed['GeneroComAntena']
       if ed.get('TipoComercial') == 'Impulsivo': return None # Alquiler
@@ -1312,6 +1316,7 @@ class Movistar(object):
         t['preset'] = c['dial']
         args = urlencode({'action': 'play', 'stype': 'tv', 'id': c['id'], 'url': c['url'], 'session_request': c['session_request']})
         t['stream'] = 'plugin://plugin.video.movistarplus/?' + args
+        if 'cas_id' in c: t['cas_id'] = c['cas_id']
         res.append(t)
       return res
 
@@ -1320,8 +1325,10 @@ class Movistar(object):
       items = []
       for t in channels:
         if only_subscribed and not t['subscribed']: continue
-        item = '#EXTINF:-1 tvg-name="{name}" tvg-id="{id}" tvg-logo="{logo}" tvg-chno="{preset}" group-title="Movistar+" catchup="vod",{name}\n{stream}\n\n'.format(
-            name=t['name'], id=t['id'], logo=t['logo'], preset=t['preset'], stream=t['stream'])
+        url = t['stream']
+        if 'cas_id' in t: url += '&cas_id=' + t['cas_id']
+        item = '#EXTINF:-1 tvg-name="{name}" tvg-id="{id}" tvg-logo="{logo}" tvg-chno="{preset}" group-title="Movistar+",{name}\n{stream}\n\n'.format(
+            name=t['name'], id=t['id'], logo=t['logo'], preset=t['preset'], stream=url)
         items.append(item)
       res = '#EXTM3U\n## Movistar+\n{}'.format(''.join(items))
       with io.open(filename, 'w', encoding='utf-8', newline='') as handle:
@@ -1421,7 +1428,7 @@ class Movistar(object):
           if url:
             url = url.replace('&', '&amp;')
           res.append('<programme start="{}" stop="{}" channel="{}"'.format(start, stop, ch['id']) +
-                    (' catchup-id="{}"'.format(url) if url else "") +
+                    #(' catchup-id="{}"'.format(url) if url else "") +
                     '>\n' +
                     '  <title>{}</title>\n'.format(html_escape(e['title'])) +
                     '  <sub-title>{}</sub-title>\n'.format(html_escape(e['subtitle'])))
