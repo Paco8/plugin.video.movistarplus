@@ -116,6 +116,9 @@ class RequestHandler(BaseHTTPRequestHandler):
                   content = content.replace('lang="{}"'.format(key), 'lang="{}"'.format(value))
                 content = re.sub(r'lang="q([^"]*)"', r'lang="es-[q\1]"', content)
 
+              # For U7D
+              content = content.replace('timeShiftBufferDepth="PT3600S"', 'timeShiftBufferDepth="PT10800S"')
+
               #LOG('content: {}'.format(content))
               manifest_data = content
               self.send_response(200)
