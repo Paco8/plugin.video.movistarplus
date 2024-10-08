@@ -162,6 +162,10 @@ msgctxt "#30041"
 msgid "Subscription country (two letter code):"
 msgstr "País de la suscripción (código de dos letras):"
 
+msgctxt "#30042"
+msgid "Warn when a title is removed in less than these days:"
+msgstr "Avisar cuando se elimine un título en menos de estos días:"
+
 msgctxt "#30050"
 msgid "Remember username and password"
 msgstr "Recordar usuario y clave"

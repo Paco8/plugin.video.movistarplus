@@ -178,6 +178,10 @@ msgctxt "#30041"
 msgid "Subscription country (two letter code):"
 msgstr ""
 
+msgctxt "#30042"
+msgid "Warn when a title is removed in less than these days:"
+msgstr ""
+
 msgctxt "#30050"
 msgid "Remember username and password"
 msgstr ""

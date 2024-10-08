@@ -5,6 +5,7 @@
         <setting label="30020" type="bool" id="channels_with_epg" default="false"/>
         <setting label="30021" type="bool" id="add_extra_info" default="false"/>
         <setting label="30033" type="bool" id="uhd" default="false"/>
+        <setting label="30042" type="number" id="expdays" default="30"/>
         <setting id="use_ttml2ssa" type="bool" label="$ADDON[script.module.ttml2ssa 32202]" default="false"/>
         <setting id="ssa_settings" type="action" label="$ADDON[script.module.ttml2ssa 32201]" option="close" action="Addon.OpenSettings(script.module.ttml2ssa)" visible="eq(-1,true)" subsetting="true"/>
         <setting label="30019" type="action" id="is_settings" action="Addon.OpenSettings(inputstream.adaptive)" enable="System.HasAddon(inputstream.adaptive)" option="close"/>

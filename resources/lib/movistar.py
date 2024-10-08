@@ -832,6 +832,7 @@ class Movistar(object):
           t['subscribed'] = self.is_subscribed_vod(video.get('tvProducts', []))
           if not 'UrlVideo' in video: return None
           t['url'] = video['UrlVideo']
+          t['availability'] = {'start': video.get('FechaInicioPublicacion'), 'end': video.get('FechaFinPublicacion')}
           if video['AssetType'] == 'VOD':
             t['session_request'] = '{"contentID":' + str(t['id']) + ',"drmMediaID":"' + video['CasId'] +'", "streamType":"AST"}'
           elif video['AssetType'] == 'U7D':
@@ -1011,6 +1012,7 @@ class Movistar(object):
           if not 'UrlVideo' in video: continue
           t['subscribed'] = self.is_subscribed_vod(video.get('tvProducts', []))
           t['url'] = video['UrlVideo']
+          t['availability'] = {'start': video.get('FechaInicioPublicacion'), 'end': video.get('FechaFinPublicacion')}
           if video['AssetType'] == 'VOD':
             t['session_request'] = '{"contentID":' + str(t['id']) + ',"drmMediaID":"' + video['CasId'] +'", "streamType":"AST"}'
           elif video['AssetType'] == 'U7D':
