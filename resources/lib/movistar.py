@@ -37,12 +37,9 @@ class Movistar(object):
                'demarcation': 0}
 
     add_extra_info = True
-    #dplayer = 'webplayer'
-    #device_code = 'WP_OTT'
-    #manufacturer = 'Firefox'
-    dplayer = 'android.tv'
-    device_code = 'SMARTTV_OTT'
-    manufacturer = 'LG'
+    dplayer = 'webplayer'
+    device_code = 'WP_OTT'
+    manufacturer = 'Firefox'
     account_dir = 'account_1'
 
     def __init__(self, config_directory, reuse_devices=False):
@@ -89,7 +86,6 @@ class Movistar(object):
         os.makedirs(config_directory + 'cache')
 
       # Endpoints
-      #self.endpoints = self.get_endpoints()
       self.endpoints = endpoints
 
       # Access token
@@ -272,17 +268,18 @@ class Movistar(object):
       headers = self.net.headers.copy()
       if self.account['device_id']:
         headers['x-movistarplus-deviceid'] = self.account['device_id']
-      headers['x-movistarplus-ui'] = '2.36.30'
-      headers['x-movistarplus-os'] = 'Linux88'
+      #headers['x-movistarplus-ui'] = '2.36.30'
+      #headers['x-movistarplus-os'] = 'Linux88'
 
       data = {
           'grant_type': 'password',
-          'deviceClass': 'webplayer',
+          'deviceClass': self.dplayer,
           'username': username,
           'password': password,
       }
 
-      url = self.endpoints['token']
+      url = self.endpoints['token'].format(deviceType=self.dplayer)
+      #LOG(url)
       response = self.net.session.post(url, headers=headers, data=data)
       content = response.content.decode('utf-8')
       LOG(content)
@@ -300,36 +297,15 @@ class Movistar(object):
       headers = self.net.headers.copy()
       headers['Content-Type'] = 'application/x-www-form-urlencoded'
       #headers['x-movistarplus-deviceid'] = self.account['device_id']
-      headers['x-movistarplus-ui'] = '2.36.30'
-      headers['x-movistarplus-os'] = 'Linux88'
+      #headers['x-movistarplus-ui'] = '2.36.30'
+      #headers['x-movistarplus-os'] = 'Linux88'
       headers['Authorization'] = 'Bearer ' + self.account['access_token']
-      url = self.endpoints['autenticacion_tk'] + '?_=' + str(int(time.time()*1000))
+      url = self.endpoints['autenticacion_tk'].format(deviceType=self.dplayer) + '?_=' + str(int(time.time()*1000))
+      #LOG(url)
       #LOG('authenticate: headers: {}'.format(headers))
       data = self.net.load_data(url, headers)
       #LOG('authenticate: data: {}'.format(data))
       return data
-
-    def load_service_directory(self):
-      url = 'https://homeservicedirectory.dof6.com/VoD/vod.svc/webplayer/environments/prod/ws-directory?format=json'
-      return self.net.load_data(url)
-
-    def get_endpoints(self):
-      endpoints = {}
-      content = self.cache.load('endpoints.json')
-      if content:
-        data = json.loads(content)
-      else:
-        data = self.load_service_directory()
-        self.cache.save_file('endpoints.json', json.dumps(data, ensure_ascii=False))
-
-      for services in data['services']['service']:
-        if isinstance(services['endpoint'], list):
-          for endpoint in services['endpoint']:
-            endpoints[endpoint['@name']] = endpoint['@address']
-        else:
-          endpoint = services['endpoint']
-          endpoints[endpoint['@name']] = endpoint['@address']
-      return endpoints
 
     def change_device(self, id):
       self.account['device_id'] = id
@@ -361,10 +337,10 @@ class Movistar(object):
       headers = self.net.headers.copy()
       headers['Content-Type'] = 'application/json'
       headers['x-movistarplus-deviceid'] = self.account['device_id']
-      headers['x-movistarplus-ui'] = '2.36.30'
-      headers['x-movistarplus-os'] = 'Linux88'
+      #headers['x-movistarplus-ui'] = '2.36.30'
+      #headers['x-movistarplus-os'] = 'Linux88'
       headers['Authorization'] = 'Bearer ' + self.account['access_token']
-      url = self.endpoints['activacion_dispositivo_cuenta_tk'].format(ACCOUNTNUMBER=self.account['id'], DEVICEID=self.account['device_id'])
+      url = self.endpoints['activacion_dispositivo_cuenta_tk'].format(deviceType=self.dplayer, ACCOUNTNUMBER=self.account['id'], DEVICEID=self.account['device_id'])
       response = self.net.session.post(url, headers=headers)
       content = response.content.decode('utf-8')
       return content
@@ -375,10 +351,12 @@ class Movistar(object):
     def new_device_id(self):
       headers = self.net.headers.copy()
       headers['Content-Type'] = 'application/json'
-      headers['x-movistarplus-ui'] = '2.36.30'
-      headers['x-movistarplus-os'] = 'Linux88'
+      #headers['x-movistarplus-ui'] = '2.36.30'
+      #headers['x-movistarplus-os'] = 'Linux88'
       headers['Authorization'] = 'Bearer ' + self.account['access_token']
-      url = 'https://auth.dof6.com/movistarplus/webplayer/accounts/'+ self.account['id'] + '/devices/?qspVersion=ssp'
+      url = 'https://auth.dof6.com/movistarplus/{deviceType}/accounts/{ACCOUNTNUMBER}/devices/?qspVersion=ssp'
+      url = url.format(deviceType=self.dplayer, ACCOUNTNUMBER=self.account['id'])
+      #LOG(url)
       response = self.net.session.post(url, headers=headers)
       content = response.content.decode('utf-8')
       return content.strip('"')
@@ -435,7 +413,7 @@ class Movistar(object):
     def get_cdntoken(self):
       headers = self.net.headers.copy()
       headers['Authorization'] = 'Bearer ' + self.account['access_token']
-      url = self.endpoints['renovacion_cdntoken2'].format(ACCOUNTNUMBER=self.account['id'])
+      url = self.endpoints['renovacion_cdntoken2'].format(deviceType=self.dplayer, ACCOUNTNUMBER=self.account['id'])
       data = self.net.post_data(url, None, headers)
       if isinstance(data, dict):
         return data.get('access_token')
@@ -461,7 +439,7 @@ class Movistar(object):
       headers = self.net.headers.copy()
       headers['Content-Type'] = 'application/json'
       headers['Authorization'] = 'Bearer ' + self.account['access_token']
-      url = self.endpoints['renovacion_ssptoken'].format(deviceType='webplayer', ACCOUNTNUMBER=self.account['id'], DEVICEID=self.account['device_id'])
+      url = self.endpoints['renovacion_ssptoken'].format(deviceType=self.dplayer, ACCOUNTNUMBER=self.account['id'], DEVICEID=self.account['device_id'])
       data = self.net.post_data(url, '', headers)
       return data.get('access_token')
 
@@ -494,7 +472,7 @@ class Movistar(object):
 
     def load_epg_data(self, date_str, duration=2, channels=''):
       demarcation = self.account['demarcation']
-      url = self.endpoints['rejilla'].format(deviceType='webplayer', profile=self.account['platform'], UTCDATETIME=date_str, DURATION=duration, CHANNELS=channels, NETWORK='movistarplus', mdrm='true', demarcation=demarcation)
+      url = self.endpoints['rejilla'].format(deviceType=self.dplayer, profile=self.account['platform'], UTCDATETIME=date_str, DURATION=duration, CHANNELS=channels, NETWORK='movistarplus', mdrm='true', demarcation=demarcation)
       if self.quality == 'UHD': url += '&filterQuality=UHD'
       #LOG(url)
       data = self.net.load_data(url)
@@ -643,7 +621,7 @@ class Movistar(object):
       if content:
         data = json.loads(content)
       else:
-        url = self.endpoints['canales'].format(deviceType='webplayer', profile=profile, mdrm='true', demarcation=demarcation)
+        url = self.endpoints['canales'].format(deviceType=self.dplayer, profile=profile, mdrm='true', demarcation=demarcation)
         if self.quality == 'UHD': url += '&filterQuality=UHD'
         #LOG(url)
         data = self.net.load_data(url)
@@ -750,7 +728,7 @@ class Movistar(object):
 
     def get_recordings_url(self):
       url = self.endpoints['grabaciones'].format(
-              deviceType='webplayer', DIGITALPLUSUSERIDC=self.account['encoded_user'], PROFILE=self.account['platform'],
+              deviceType=self.dplayer, DIGITALPLUSUSERIDC=self.account['encoded_user'], PROFILE=self.account['platform'],
               idsOnly='false', start=1, end=30, mdrm='true', demarcation=self.account['demarcation'])
       #url += '&state=Completed&_='+ str(int(time.time()*1000))
       url += '&_='+ str(int(time.time()*1000))
@@ -766,12 +744,12 @@ class Movistar(object):
 
     def get_search_url(self, search_term):
       url = self.endpoints['buscar_best'].format(
+                 deviceType=self.dplayer,
                  ACCOUNTNUMBER=self.account['id'],
                  profile=self.account['platform'],
                  texto=search_term,
                  distilledTvRights=','.join(self.entitlements['distilledTvRights']),
                  mdrm='true', demarcation=self.account['demarcation'])
-      url = url.replace('webplayer', self.dplayer)
       if self.quality == 'UHD': url += '&filterQuality=UHD'
       return url
 
@@ -795,7 +773,7 @@ class Movistar(object):
       return res
 
     def get_ficha_url(self, id, mode='GLOBAL', catalog=''):
-      url = self.endpoints['ficha'].format(deviceType='webplayer', id=id, profile=self.account['platform'], mediatype='FOTOV', version='7.1', mode=mode, catalog=catalog, channels='', state='', mdrm='true', demarcation=self.account['demarcation'], legacyBoxOffice='')
+      url = self.endpoints['ficha'].format(deviceType=self.dplayer, id=id, profile=self.account['platform'], mediatype='FOTOV', version='7.1', mode=mode, catalog=catalog, channels='', state='', mdrm='true', demarcation=self.account['demarcation'], legacyBoxOffice='')
       url = url.replace('state=&', '')
       if self.quality == 'UHD': url += '&filterQuality=UHD'
       #print(url)
@@ -844,6 +822,27 @@ class Movistar(object):
           if 'ShowId' in video: t['show_id'] = video['ShowId']
           if self.add_extra_info:
             self.add_video_extra_info(t)
+        elif 'Pases' in data and len(data['Pases']) > 0:
+          video = data['Pases'][0]
+          t['subscribed'] = self.is_subscribed_vod(video.get('tvProducts', []))
+          if 'ShowId' in video: t['show_id'] = video['ShowId']
+          stype = None
+          if 'catalog=catchup' in ed['Ficha']:
+            stype = 'catch-up'
+            t['stream_type'] = 'u7d'
+            t['session_request'] = '{"contentID":' + str(t['id']) + ', "streamType":"CUTV"}'
+          elif 'catalog=npvr' in ed['Ficha']:
+            stype = 'npvr'
+            t['stream_type'] = 'rec'
+            t['session_request'] = '{"contentID":' + str(t['id']) + ', "streamType":"NPVR"}'
+          if 'UrlVideo' in video:
+            t['url'] = video['UrlVideo']
+          else:
+            if stype:
+              for l in video['links']:
+                if l['rel'] == stype:
+                  t['url'] = l['href']
+                  break
         if 'Recording' in data:
           t['stream_type'] = 'rec'
           t['rec'] = {'id': data['Recording']['id'],
@@ -1156,7 +1155,7 @@ class Movistar(object):
       #sort = 'FE'
       sort = 'MA'
       #sort = 'AZ'
-      url = self.endpoints['consultar'].format(deviceType='webplayer', profile=self.account['platform'], sort=sort, start=1, end=50, mdrm='true', demarcation=self.account['demarcation'])
+      url = self.endpoints['consultar'].format(deviceType=self.dplayer, profile=self.account['platform'], sort=sort, start=1, end=50, mdrm='true', demarcation=self.account['demarcation'])
       filter = '&filter=AC-OM,AC-MA,MA-GBLCICLO59,TD-CUP,RG-SINCAT,AC-PREPUB,' + self.entitlements['suscripcion']
       #filter = '&filter=AC-OM,AC-MA,MA-GBLCICLO59,TD-CUP,RG-SINCAT,AC-PREPUB'
       url += '&mode=VOD' + filter
@@ -1524,5 +1523,8 @@ class Movistar(object):
 
     @staticmethod
     def save_file(filename, content):
+      if sys.version_info[0] < 3:
+        if not isinstance(content, unicode):
+          content = unicode(content, 'utf-8')
       with io.open(filename, 'w', encoding='utf-8') as handle:
         handle.write(content)
