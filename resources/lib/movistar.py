@@ -116,7 +116,7 @@ class Movistar(object):
       if content:
         data = json.loads(content)
       if not data or 'ofertas' not in data:
-        data = self.authenticate()
+        data = self.get_account_info()
         if not data or 'ofertas' not in data: return
         self.cache.save_file('account.json', json.dumps(data, ensure_ascii=False))
       self.account['id'] = data['ofertas'][0]['accountNumber']
@@ -139,7 +139,7 @@ class Movistar(object):
         if not reuse_devices:
           LOG('not reusing devices')
           if not self.account['device_id']:
-            self.account['device_id'] = self.new_device_id()
+            self.account['device_id'] = self.request_device_id()
             self.cache.save_file('device_id.conf', self.account['device_id'])
         else:
           LOG('reusing devices')
@@ -159,7 +159,7 @@ class Movistar(object):
               self.account['device_id'] = wp_device
             else:
               LOG('device not found, registering new device')
-              self.account['device_id'] = self.new_device_id()
+              self.account['device_id'] = self.request_device_id()
             self.cache.save_file('device_id.conf', self.account['device_id'])
       LOG('device_id: {}'. format(self.account['device_id']))
 
@@ -293,7 +293,7 @@ class Movistar(object):
         pass
       return success, content
 
-    def authenticate(self):
+    def get_account_info(self):
       headers = self.net.headers.copy()
       headers['Content-Type'] = 'application/x-www-form-urlencoded'
       #headers['x-movistarplus-deviceid'] = self.account['device_id']
@@ -302,9 +302,9 @@ class Movistar(object):
       headers['Authorization'] = 'Bearer ' + self.account['access_token']
       url = self.endpoints['autenticacion_tk'].format(deviceType=self.dplayer) + '?_=' + str(int(time.time()*1000))
       #LOG(url)
-      #LOG('authenticate: headers: {}'.format(headers))
+      #LOG('get_account_info: headers: {}'.format(headers))
       data = self.net.load_data(url, headers)
-      #LOG('authenticate: data: {}'.format(data))
+      #LOG('get_account_info: data: {}'.format(data))
       return data
 
     def change_device(self, id):
@@ -348,7 +348,7 @@ class Movistar(object):
     def unregister_device(self):
       return self.delete_device(self.account['device_id'])
 
-    def new_device_id(self):
+    def request_device_id(self):
       headers = self.net.headers.copy()
       headers['Content-Type'] = 'application/json'
       #headers['x-movistarplus-ui'] = '2.36.30'
@@ -361,10 +361,11 @@ class Movistar(object):
       content = response.content.decode('utf-8')
       return content.strip('"')
 
-      #import random
-      #s = ''
-      #for _ in range(0, 32): s += random.choice('abcdef0123456789')
-      #return s
+    #def generate_device_id(self):
+    #  import random
+    #  s = ''
+    #  for _ in range(0, 32): s += random.choice('abcdef0123456789')
+    #  return s
 
     def delete_device(self, device_id):
       headers = self.net.headers.copy()
@@ -1281,6 +1282,16 @@ class Movistar(object):
       data = {'timestamp': int(time.time()*1000), 'response': d}
       self.cache.save_file('auth.key', json.dumps(data, ensure_ascii=False))
 
+    def import_credentials(self, filename):
+      if sys.version_info[0] > 2:
+        filename = bytes(filename, 'utf-8')
+      shutil.copyfile(filename, self.cache.config_directory + 'credentials.json')
+
+    def export_credentials(self, filename):
+      if sys.version_info[0] > 2:
+        filename = bytes(filename, 'utf-8')
+      shutil.copyfile(self.cache.config_directory + 'credentials.json', filename)
+
     def delete_session_files(self):
       for f in ['access_token.conf', 'account.json', 'device_id.conf', 'devices.json', 'profile_id.conf', 'tokens.json', 'channels2.json', 'channels_UHD.json', 'channels_HD.json', 'epg2.json', 'epg_UHD.json', 'epg_HD.json']:
         self.cache.remove_file(f)
@@ -1464,9 +1475,11 @@ class Movistar(object):
       else:
         return '', ''
 
-    def get_token_expire_date(self, token):
+    def get_token_properties(self, token=None):
       from .b64 import decode_base64
-      res = 0
+      if not token:
+        token = self.account['access_token']
+      data = None
       try:
         l = token.split('.')
         if len(l) > 1:
@@ -1474,10 +1487,13 @@ class Movistar(object):
           l[1] += '=' * (4 - padding) if padding != 0 else ''
           s = decode_base64(l[1])
           data = json.loads(s)
-          res = data['exp']
       except:
         pass
-      return res
+      return data
+
+    def get_token_expire_date(self, token):
+      data = self.get_token_properties(token)
+      return data.get('exp', 0)
 
     def get_accounts(self):
       accounts = []

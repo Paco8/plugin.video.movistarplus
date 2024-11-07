@@ -422,6 +422,22 @@ msgctxt "#30192"
 msgid "Use a {} account"
 msgstr ""
 
+msgctxt "#30193"
+msgid "Select the credentials file"
+msgstr ""
+
+msgctxt "#30194"
+msgid "Select a folder to save the credentials file"
+msgstr ""
+
+msgctxt "#30195"
+msgid "Export credentials"
+msgstr ""
+
+msgctxt "#30196"
+msgid "Import credentials"
+msgstr ""
+
 msgctxt "#30200"
 msgid "Error"
 msgstr ""

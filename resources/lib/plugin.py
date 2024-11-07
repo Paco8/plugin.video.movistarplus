@@ -221,9 +221,9 @@ def play(params):
         subpaths.append(filename_srt)
     play_item.setSubtitles(subpaths)
 
-  if True:
-    m.unregister_device()
-    m.register_device()
+  #if True:
+  #  m.unregister_device()
+  #  m.register_device()
 
   xbmcplugin.setResolvedUrl(_handle, True, listitem=play_item)
 
@@ -647,6 +647,16 @@ def export_key():
   if directory:
     m.export_key_file(directory + 'movistarplus.key')
 
+def import_credentials():
+  filename = xbmcgui.Dialog().browseSingle(1, addon.getLocalizedString(30193), '', '.json')
+  if filename:
+    m.import_credentials(filename)
+
+def export_credentials():
+  directory = xbmcgui.Dialog().browseSingle(0, addon.getLocalizedString(30194), '')
+  if directory:
+    m.export_credentials(os.path.join(directory, 'credenciales.json'))
+
 def select_account(id, name):
   m.switch_account(id)
   open_folder(name)
@@ -656,7 +666,10 @@ def select_account(id, name):
     if os.path.exists(os.path.join(m.cache.config_directory, 'auth.key')):
       add_menu_option(addon.getLocalizedString(30184), get_url(action='export_key')) # Export key
   add_menu_option(addon.getLocalizedString(30150), get_url(action='logout')) # Close session
-  close_folder()
+  add_menu_option(addon.getLocalizedString(30196), get_url(action='import_credentials'))
+  if os.path.exists(os.path.join(m.cache.config_directory, 'credentials.json')):
+    add_menu_option(addon.getLocalizedString(30195), get_url(action='export_credentials'))
+  close_folder(cacheToDisc=False)
 
 def list_accounts(params):
   LOG('list_accounts: {}'.format(params))
@@ -779,6 +792,10 @@ def router(paramstring):
       login()
     elif params['action'] == 'export_key':
       export_key()
+    elif params['action'] == 'export_credentials':
+      export_credentials()
+    elif params['action'] == 'import_credentials':
+      import_credentials()
     elif params['action'] == 'select_account':
       select_account(params['id'], params['name'])
     elif params['action'] == 'accounts':
