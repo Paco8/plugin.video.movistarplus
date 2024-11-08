@@ -721,7 +721,7 @@ class Movistar(object):
     def get_wishlist_url(self):
       url = self.endpoints['favoritos'].format(
               deviceType=self.dplayer, DIGITALPLUSUSERIDC=self.account['encoded_user'], PROFILE=self.account['platform'],
-              ACCOUNTNUMBER=self.account['id'], idsOnly='false', start=1, end=30, mdrm='true', demarcation=self.account['demarcation'])
+              ACCOUNTNUMBER=self.account['id'], idsOnly='false', start=1, end=50, mdrm='true', demarcation=self.account['demarcation'])
       #url += '&filter=AD-SINX&topic=CN'
       if self.quality == 'UHD': url += '&filterQuality=UHD'
       url += '&_='+ str(int(time.time()*1000))
@@ -730,7 +730,7 @@ class Movistar(object):
     def get_recordings_url(self):
       url = self.endpoints['grabaciones'].format(
               deviceType=self.dplayer, DIGITALPLUSUSERIDC=self.account['encoded_user'], PROFILE=self.account['platform'],
-              idsOnly='false', start=1, end=30, mdrm='true', demarcation=self.account['demarcation'])
+              idsOnly='false', start=1, end=50, mdrm='true', demarcation=self.account['demarcation'])
       #url += '&state=Completed&_='+ str(int(time.time()*1000))
       url += '&_='+ str(int(time.time()*1000))
       return url
@@ -738,7 +738,7 @@ class Movistar(object):
     def get_viewings_url(self):
       url = self.endpoints['ultimasreproducciones'].format(
               deviceType=self.dplayer, DIGITALPLUSUSERIDC=self.account['encoded_user'], PROFILE=self.account['platform'],
-              ACCOUNTNUMBER=self.account['id'], idsOnly='false', start=1, end=30, mdrm='true', demarcation=self.account['demarcation'])
+              ACCOUNTNUMBER=self.account['id'], idsOnly='false', start=1, end=50, mdrm='true', demarcation=self.account['demarcation'])
       url += '&filter=AD-SINX'
       url += '&_='+ str(int(time.time()*1000))
       return url
