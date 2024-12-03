@@ -577,7 +577,7 @@ def search(params):
   open_folder(addon.getLocalizedString(30113)) # Search
   add_menu_option(addon.getLocalizedString(30113), get_url(action='search', name='new')) # New search
 
-  for i in m.search_list:
+  for i in reversed(m.search_list):
     remove_action = get_url(action='search', search_term=i, name='delete')
     cm = [(addon.getLocalizedString(30114), "RunPlugin(" + remove_action + ")")]
     add_menu_option(i.encode('utf-8'), get_url(action='search', search_term=i), cm)
