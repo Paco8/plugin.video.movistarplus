@@ -720,7 +720,7 @@ class Movistar(object):
 
     def get_wishlist_url(self):
       url = self.endpoints['favoritos'].format(
-              deviceType=self.dplayer, DIGITALPLUSUSERIDC=self.account['encoded_user'], PROFILE=self.account['platform'],
+              deviceType='android.tv', DIGITALPLUSUSERIDC=self.account['encoded_user'], PROFILE=self.account['platform'],
               ACCOUNTNUMBER=self.account['id'], idsOnly='false', start=1, end=50, mdrm='true', demarcation=self.account['demarcation'])
       #url += '&filter=AD-SINX&topic=CN'
       if self.quality == 'UHD': url += '&filterQuality=UHD'
@@ -745,7 +745,7 @@ class Movistar(object):
 
     def get_search_url(self, search_term):
       url = self.endpoints['buscar_best'].format(
-                 deviceType=self.dplayer,
+                 deviceType='android.tv',
                  ACCOUNTNUMBER=self.account['id'],
                  profile=self.account['platform'],
                  texto=search_term,
@@ -774,7 +774,7 @@ class Movistar(object):
       return res
 
     def get_ficha_url(self, id, mode='GLOBAL', catalog=''):
-      url = self.endpoints['ficha'].format(deviceType=self.dplayer, id=id, profile=self.account['platform'], mediatype='FOTOV', version='7.1', mode=mode, catalog=catalog, channels='', state='', mdrm='true', demarcation=self.account['demarcation'], legacyBoxOffice='')
+      url = self.endpoints['ficha'].format(deviceType='android.tv', id=id, profile=self.account['platform'], mediatype='FOTOV', version='7.1', mode=mode, catalog=catalog, channels='', state='', mdrm='true', demarcation=self.account['demarcation'], legacyBoxOffice='')
       url = url.replace('state=&', '')
       if self.quality == 'UHD': url += '&filterQuality=UHD'
       #print(url)
@@ -968,7 +968,11 @@ class Movistar(object):
         t['info']['tvshowtitle'] = data['TituloSerie']
         t['info']['plot'] = data['Descripcion']
         t['info']['season'] = c
-        t['art']['poster'] = t['art']['thumb'] = data['Imagen']
+        if 'Imagen' in data:
+          t['art']['poster'] = t['art']['thumb'] = data['Imagen']
+        elif 'Imagenes' in data:
+          for im in data['Imagenes']:
+            if im['id'] == 'ver-details': t['art']['poster'] = im['uri']
         t['subscribed'] = self.is_subscribed_vod(data.get('tvProducts', []))
         if 'Seguible' in data: t['seguible'] = data['Seguible']
         #t['video_format'] = data.get('FormatoVideo')
@@ -982,7 +986,7 @@ class Movistar(object):
       #print(url)
       data = self.net.load_data(url)
       #print_json(data)
-      #self.cache.save_file('episodes.json', json.dumps(data, ensure_ascii=False))
+      #Movistar.save_file('/tmp/episodes.json', json.dumps(data, ensure_ascii=False))
       res = []
       for d in data['Episodios']:
         ed = d['DatosEditoriales']
@@ -997,7 +1001,11 @@ class Movistar(object):
         t['info']['episode'] = ed['NumeroEpisodio']
         t['info']['duration'] = ed['DuracionEnSegundos']
         t['info']['tvshowtitle'] = data.get('TituloSerie', '')
-        t['art']['poster'] = data['Imagen']
+        if 'Imagen' in data:
+          t['art']['poster'] = data['Imagen']
+        elif 'Imagenes' in data:
+          for im in data['Imagenes']:
+            if im['id'] == 'ver-details': t['art']['poster'] = im['uri']
         for im in ed['Imagenes']:
           if im['id'] == 'horizontal': t['art']['thumb'] = im['uri']
         t['info']['season'] = '0'
@@ -1240,7 +1248,7 @@ class Movistar(object):
                   pars += '&{}={}'.format(par['@id'], par['@value'])
 
                 pars = pars.replace('{suscripcion}', self.entitlements['suscripcion'])
-                c['url'] = self.endpoints['consultar'].format(deviceType=self.dplayer, profile=profile, sort=sort, start=1, end=50, mdrm='true', demarcation=self.account['demarcation'])
+                c['url'] = self.endpoints['consultar'].format(deviceType='android.tv', profile=profile, sort=sort, start=1, end=50, mdrm='true', demarcation=self.account['demarcation'])
                 c['url'] += pars
                 #print(c['url'])
                 if self.quality == 'UHD': c['url'] += '&filterQuality=UHD'
