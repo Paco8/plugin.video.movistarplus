@@ -827,6 +827,8 @@ class Movistar(object):
           video = data['Pases'][0]
           t['subscribed'] = self.is_subscribed_vod(video.get('tvProducts', []))
           if 'ShowId' in video: t['show_id'] = video['ShowId']
+          if 'Canal' in video and 'CasId' in video['Canal']:
+            t['cas_id'] = video['Canal']['CasId']
           stype = None
           if 'catalog=catchup' in ed['Ficha']:
             stype = 'catch-up'

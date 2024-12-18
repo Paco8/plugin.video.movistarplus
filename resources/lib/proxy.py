@@ -116,6 +116,13 @@ class RequestHandler(BaseHTTPRequestHandler):
                   content = content.replace('lang="{}"'.format(key), 'lang="{}"'.format(value))
                 content = re.sub(r'lang="q([^"]*)"', r'lang="es-[q\1]"', content)
 
+              if addon.getSettingBool('delete_ec3_audio'):
+                pattern = re.compile(r'<AdaptationSet[^>]*contentType="audio"[^>]*>.*?</AdaptationSet>', re.DOTALL)
+                matches = pattern.findall(content)
+                for match in matches:
+                  if 'codecs="ec-3"' in match:
+                    content = content.replace(match, "<!-- Deleted ec-3 audio track -->\n")
+
               # For U7D
               content = content.replace('timeShiftBufferDepth="PT3600S"', 'timeShiftBufferDepth="PT10800S"')
 
