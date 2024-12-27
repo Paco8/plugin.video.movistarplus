@@ -37,9 +37,12 @@ class Movistar(object):
                'demarcation': 0}
 
     add_extra_info = True
-    dplayer = 'webplayer'
-    device_code = 'WP_OTT'
-    manufacturer = 'Firefox'
+    #dplayer = 'webplayer'
+    #device_code = 'WP_OTT'
+    #manufacturer = 'Firefox'
+    dplayer = 'android.tv'
+    device_code = 'SMARTTV_OTT'
+    manufacturer = 'LG'
     account_dir = 'account_1'
 
     def __init__(self, config_directory, reuse_devices=False):
@@ -228,7 +231,7 @@ class Movistar(object):
       url = self.endpoints['initdata'].format(deviceType=self.dplayer, DEVICEID=self.account['device_id'])
       response = self.net.session.post(url, data=json.dumps(data), headers=headers)
       content = response.content.decode('utf-8')
-      #LOG('get_token response: {}'.format(content))
+      LOG('get_token response: {}'.format(content))
       try:
         d = json.loads(content)
       except:
@@ -473,7 +476,7 @@ class Movistar(object):
 
     def load_epg_data(self, date_str, duration=2, channels=''):
       demarcation = self.account['demarcation']
-      url = self.endpoints['rejilla'].format(deviceType=self.dplayer, profile=self.account['platform'], UTCDATETIME=date_str, DURATION=duration, CHANNELS=channels, NETWORK='movistarplus', mdrm='true', demarcation=demarcation)
+      url = self.endpoints['rejilla'].format(deviceType='webplayer', profile=self.account['platform'], UTCDATETIME=date_str, DURATION=duration, CHANNELS=channels, NETWORK='movistarplus', mdrm='true', demarcation=demarcation)
       if self.quality == 'UHD': url += '&filterQuality=UHD'
       #LOG(url)
       data = self.net.load_data(url)
@@ -622,7 +625,7 @@ class Movistar(object):
       if content:
         data = json.loads(content)
       else:
-        url = self.endpoints['canales'].format(deviceType=self.dplayer, profile=profile, mdrm='true', demarcation=demarcation)
+        url = self.endpoints['canales'].format(deviceType='webplayer', profile=profile, mdrm='true', demarcation=demarcation)
         if self.quality == 'UHD': url += '&filterQuality=UHD'
         #LOG(url)
         data = self.net.load_data(url)
@@ -720,7 +723,7 @@ class Movistar(object):
 
     def get_wishlist_url(self):
       url = self.endpoints['favoritos'].format(
-              deviceType='android.tv', DIGITALPLUSUSERIDC=self.account['encoded_user'], PROFILE=self.account['platform'],
+              deviceType=self.dplayer, DIGITALPLUSUSERIDC=self.account['encoded_user'], PROFILE=self.account['platform'],
               ACCOUNTNUMBER=self.account['id'], idsOnly='false', start=1, end=50, mdrm='true', demarcation=self.account['demarcation'])
       #url += '&filter=AD-SINX&topic=CN'
       if self.quality == 'UHD': url += '&filterQuality=UHD'
@@ -745,7 +748,7 @@ class Movistar(object):
 
     def get_search_url(self, search_term):
       url = self.endpoints['buscar_best'].format(
-                 deviceType='android.tv',
+                 deviceType=self.dplayer,
                  ACCOUNTNUMBER=self.account['id'],
                  profile=self.account['platform'],
                  texto=search_term,
@@ -774,7 +777,7 @@ class Movistar(object):
       return res
 
     def get_ficha_url(self, id, mode='GLOBAL', catalog=''):
-      url = self.endpoints['ficha'].format(deviceType='android.tv', id=id, profile=self.account['platform'], mediatype='FOTOV', version='7.1', mode=mode, catalog=catalog, channels='', state='', mdrm='true', demarcation=self.account['demarcation'], legacyBoxOffice='')
+      url = self.endpoints['ficha'].format(deviceType=self.dplayer, id=id, profile=self.account['platform'], mediatype='FOTOV', version='7.1', mode=mode, catalog=catalog, channels='', state='', mdrm='true', demarcation=self.account['demarcation'], legacyBoxOffice='')
       url = url.replace('state=&', '')
       if self.quality == 'UHD': url += '&filterQuality=UHD'
       #print(url)
@@ -1250,7 +1253,7 @@ class Movistar(object):
                   pars += '&{}={}'.format(par['@id'], par['@value'])
 
                 pars = pars.replace('{suscripcion}', self.entitlements['suscripcion'])
-                c['url'] = self.endpoints['consultar'].format(deviceType='android.tv', profile=profile, sort=sort, start=1, end=50, mdrm='true', demarcation=self.account['demarcation'])
+                c['url'] = self.endpoints['consultar'].format(deviceType=self.dplayer, profile=profile, sort=sort, start=1, end=50, mdrm='true', demarcation=self.account['demarcation'])
                 c['url'] += pars
                 #print(c['url'])
                 if self.quality == 'UHD': c['url'] += '&filterQuality=UHD'

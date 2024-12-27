@@ -92,8 +92,8 @@ def play(params):
       return
     else:
       url = d['url']
-      if True:
-        url = url.replace('DASH_WPC_WIDEVINE', 'DASH_TV_WIDEVINE')
+      #if True:
+      #  url = url.replace('DASH_WPC_WIDEVINE', 'DASH_TV_WIDEVINE')
 
   # U7D from start and end times
   if stype == 'tv' and all(param in params for param in ['cas_id', 'start_time', 'end_time']):
