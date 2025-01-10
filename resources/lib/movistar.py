@@ -151,7 +151,7 @@ class Movistar(object):
           found_device = False
           wp_device = None
           for device in device_list:
-            if not wp_device and device['type_code'] == 'WP':
+            if not wp_device: # and device['type_code'] == 'WP':
               wp_device = device['id']
             if device['id'] == self.account['device_id']:
               found_device = True
@@ -273,6 +273,7 @@ class Movistar(object):
         headers['x-movistarplus-deviceid'] = self.account['device_id']
       #headers['x-movistarplus-ui'] = '2.36.30'
       #headers['x-movistarplus-os'] = 'Linux88'
+      #LOG(headers)
 
       data = {
           'grant_type': 'password',
@@ -280,9 +281,11 @@ class Movistar(object):
           'username': username,
           'password': password,
       }
+      #LOG(data)
 
       url = self.endpoints['token'].format(deviceType=self.dplayer)
       #LOG(url)
+
       response = self.net.session.post(url, headers=headers, data=data)
       content = response.content.decode('utf-8')
       LOG(content)
@@ -495,14 +498,14 @@ class Movistar(object):
         else:
           data = epg_data
       else:
-        cache_filename = 'epg_{}.json'.format(self.quality)
+        cache_filename = 'epg_{}_{}.json'.format(self.quality, duration)
         content = self.cache.load(cache_filename, 6*60)
         if content:
           data = json.loads(content)
         else:
           today = datetime.today()
           str_now = today.strftime('%Y-%m-%dT00:00:00')
-          data = self.load_epg_data(str_now)
+          data = self.load_epg_data(str_now, duration=duration)
           if not 'error' in data:
             self.cache.save_file(cache_filename, json.dumps(data, ensure_ascii=False))
 
@@ -676,7 +679,7 @@ class Movistar(object):
 
     def get_channels_with_epg(self):
       channels = self.get_channels()
-      epg = self.get_epg()
+      epg = self.get_epg(duration=1)
       import time
       now = int(time.time() * 1000)
       self.add_epg_info(channels, epg, now)
