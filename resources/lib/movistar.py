@@ -40,7 +40,7 @@ class Movistar(object):
     #dplayer = 'webplayer'
     #device_code = 'WP_OTT'
     #manufacturer = 'Firefox'
-    dplayer = 'android.tv'
+    dplayer = 'amazon.tv'
     device_code = 'SMARTTV_OTT'
     manufacturer = 'LG'
     account_dir = 'account_1'
