@@ -100,7 +100,7 @@ def play(params):
     from datetime import datetime
     start = datetime.utcfromtimestamp(int(params['start_time']))
     end = datetime.utcfromtimestamp(int(params['end_time']))
-    catchup_url = 'https://stover-wp21.cdn.telefonica.com/{cas_id}/vxfmt=dp/Manifest.mpd?device_profile=DASH_TV_WIDEVINE&start_time={start_time}&end_time={end_time}'
+    catchup_url = 'https://stover-wp0.cdn.telefonica.com/{cas_id}/vxfmt=dp/Manifest.mpd?device_profile=DASH_TV_WIDEVINE&start_time={start_time}&end_time={end_time}'
     url = catchup_url.format(cas_id=params['cas_id'], start_time=start.strftime('%Y-%m-%dT%H:%M:%SZ'), end_time=end.strftime('%Y-%m-%dT%H:%M:%SZ'))
     LOG('url from capchup: {}'.format(url))
 
