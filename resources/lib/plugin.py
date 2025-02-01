@@ -122,7 +122,7 @@ def play(params):
   #headers += '&Host=wv-ottlic-f3.imagenio.telefonica.net'
   manifest_headers = 'User-Agent=' + useragent
 
-  if stype == 'tv':
+  if stype in ['tv', 'u7d', 'rec']:
     cdn_token = m.cache.load('cdn.conf')
     if not cdn_token:
       cdn_token = m.get_cdntoken()
@@ -254,7 +254,7 @@ def play(params):
           pos_y = h-200
           label.setPosition(pos_x, pos_y)
           window.addControl(label)
-          time.sleep(8)
+          time.sleep(20)
           window.removeControl(label)
     if session_opened:
       d = m.delete_session()
