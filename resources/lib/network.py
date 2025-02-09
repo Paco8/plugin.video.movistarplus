@@ -7,11 +7,12 @@ from __future__ import unicode_literals, absolute_import, division
 import json
 import requests
 
+from .mysession import MySession
 from .log import LOG, print_json
 
 class Network(object):
   headers = {}
-  session = requests.Session()
+  session = MySession()
 
   def load_url(self, url, headers = None):
     if headers is None: headers = self.headers

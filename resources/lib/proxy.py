@@ -42,13 +42,14 @@ from contextlib import closing
 
 from .b64 import encode_base64
 from .log import LOG
+from .mysession import MySession
 from .addon import profile_dir, addon
 from .useragent import useragent
 
 from ttml2ssa import Ttml2SsaAddon
 ttml = Ttml2SsaAddon()
 
-session = requests.Session()
+session = MySession()
 session.headers.update({'user-agent': useragent})
 previous_tokens = []
 
