@@ -106,7 +106,7 @@ def play(params):
 
 
   # Read the proxy address
-  proxy = Movistar.load_file_if_exists(os.path.join(profile_dir, 'proxy.txt'))
+  proxy = addon.getSetting('proxy_address')
   LOG('proxy address: {}'.format(proxy))
 
   if addon.getSettingBool('manifest_modification') and proxy:
@@ -122,7 +122,7 @@ def play(params):
   #headers += '&Host=wv-ottlic-f3.imagenio.telefonica.net'
   manifest_headers = 'User-Agent=' + useragent
 
-  if stype in ['tv', 'u7d', 'rec']:
+  if True: #stype in ['tv', 'u7d', 'rec']:
     cdn_token = m.cache.load('cdn.conf')
     if not cdn_token:
       cdn_token = m.get_cdntoken()

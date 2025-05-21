@@ -9,7 +9,6 @@ import xbmcgui
 from resources.lib.proxy import Proxy
 from resources.lib.addon import *
 from resources.lib.log import LOG
-from resources.lib.cache import Cache
 
 def export_epg():
   from datetime import datetime, timedelta
@@ -37,8 +36,6 @@ if __name__ == '__main__':
   proxy = Proxy()
   proxy.start()
   LOG('proxy_address: {}'.format(proxy.proxy_address))
-  cache = Cache(profile_dir)
-  cache.save_file('proxy.txt', proxy.proxy_address)
 
   if addon.getSettingBool('export_epg'):
     try:

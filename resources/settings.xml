@@ -13,6 +13,7 @@
         <setting type="sep"/>
         <setting label="30450" type="action" id="donation" action="RunPlugin(plugin://plugin.video.movistarplus?action=show_donation_dialog)" option="close"/>
         -->
+        <setting id="proxy_address" type="text" label="" value="" default="" visible="false"/>
     </category>
     <category label="30002">
         <setting label="30011" type="bool" id="manifest_modification" default="true"/>
