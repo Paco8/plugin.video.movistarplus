@@ -11,18 +11,18 @@ from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.poolmanager import PoolManager
 
 class CustomAdapter(HTTPAdapter, object):
-  if sys.version_info[0] == 3:
-    def init_poolmanager(self, connections, maxsize, block=False):
-      ctx = ssl.create_default_context()
-      self.poolmanager = PoolManager(
-          num_pools=connections,
-          maxsize=maxsize,
-          block=block,
-          ssl_context=ctx
-      )
+  def init_poolmanager(self, connections, maxsize, block=False):
+    ctx = ssl.create_default_context()
+    ctx.options |= 0x4 # OP_LEGACY_SERVER_CONNECT
+    self.poolmanager = PoolManager(
+        num_pools=connections,
+        maxsize=maxsize,
+        block=block,
+        ssl_context=ctx
+    )
 
 class MySession(requests.Session, object):
   def __init__(self, *args, **kwargs):
     super(MySession, self).__init__(*args, **kwargs)
-    if sys.platform.startswith("linux") and sys.version_info[0] == 3:
+    if sys.platform.startswith("linux"):
       self.mount('https://', CustomAdapter())

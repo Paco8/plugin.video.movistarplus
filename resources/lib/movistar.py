@@ -1139,7 +1139,9 @@ class Movistar(object):
 
     def get_subtitles(self, manifest_url):
       base_url = os.path.dirname(manifest_url)
-      content = self.net.load_url(manifest_url)
+      headers = self.net.headers.copy()
+      headers['x-tcdn-token'] = self.get_cdntoken()
+      content = self.net.load_url(manifest_url, headers)
       rx = r'<AdaptationSet id="\d+" contentType="text" mimeType="application\/ttml\+xml" lang="(.*?)">.*?<BaseURL>(.*?)<\/BaseURL>'
       matches = re.findall(rx, content, flags=re.MULTILINE | re.DOTALL)
       res = []
@@ -1158,11 +1160,13 @@ class Movistar(object):
       #LOG('output_dir: {}'.format(output_dir))
       if not os.path.exists(output_dir):
         os.makedirs(output_dir)
+      headers = self.net.headers.copy()
+      headers['x-tcdn-token'] = self.get_cdntoken()
       res = []
       for s in sublist:
         filename = output_dir + os.sep + s['lang'] + '.ttml'
         LOG('filename: {}'.format(filename))
-        content = self.net.load_url(s['url'])
+        content = self.net.load_url(s['url'], headers)
         with io.open(filename, 'w', encoding='utf-8', newline='') as handle:
           handle.write(content)
         res.append(filename)
