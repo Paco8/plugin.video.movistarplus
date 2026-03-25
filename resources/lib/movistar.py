@@ -1035,6 +1035,25 @@ class Movistar(object):
             t['stream_type'] = 'u7d'
             t['session_request'] = '{"contentID":' + str(t['id']) + ', "streamType":"CUTV"}'
           if 'ShowId' in video: t['show_id'] = video['ShowId']
+        elif 'Pases' in d and len(d['Pases']) > 0:
+          video = d['Pases'][0]
+          t['subscribed'] = self.is_subscribed_vod(video.get('tvProducts', []))
+          if 'ShowId' in video: t['show_id'] = video['ShowId']
+          if 'Canal' in video and 'CasId' in video['Canal']:
+            t['cas_id'] = video['Canal']['CasId']
+          stype = None
+          if 'VODRU7D' in ed['Ficha']:
+            stype = 'catch-up'
+            t['stream_type'] = 'u7d'
+            t['session_request'] = '{"contentID":' + str(t['id']) + ', "streamType":"CUTV"}'
+          if 'UrlVideo' in video:
+            t['url'] = video['UrlVideo']
+          else:
+            if stype:
+              for l in video['links']:
+                if l['rel'] == stype:
+                  t['url'] = l['href']
+                  break
         if 'DatosAccesoAnonimo' in d:
           da = d['DatosAccesoAnonimo']
           t['video_format'] = da.get('FormatoVideo')
@@ -1548,6 +1567,12 @@ class Movistar(object):
       if name:
         os.makedirs(self.config_dir + name)
       return name
+
+    def download_manifest(self, manifest_url):
+      headers = self.net.headers.copy()
+      headers['x-tcdn-token'] = self.get_cdntoken()
+      content = self.net.load_url(manifest_url, headers)
+      return content
 
     @staticmethod
     def load_file_if_exists(filename):

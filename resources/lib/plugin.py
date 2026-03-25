@@ -147,20 +147,27 @@ def play(params):
      '8huDxwWFd7OHMs3avGpr7RP7DUnTikXrh6X0')
 
   play_item = xbmcgui.ListItem(path= url)
-  play_item.setProperty('inputstream.adaptive.manifest_type', 'mpd')
-  #play_item.setProperty('inputstream.adaptive.manifest_type', 'hls')
+  license_type = 'com.widevine.alpha'
+  license_key = ''
+
   if format(addon.getSetting('drm_type')) == 'Playready':
-    play_item.setProperty('inputstream.adaptive.license_type', 'com.microsoft.playready')
-  else:
-    play_item.setProperty('inputstream.adaptive.license_type', 'com.widevine.alpha')
+    license_type = 'com.microsoft.playready'
 
   if addon.getSettingBool('use_proxy_for_license') and proxy:
     request_id = str(int(time.time()*1000))
-    license_url = '{}/license?token={}&stype={}&session_request={}&request_id={}||R{{SSM}}|'.format(proxy, quote_plus(token), stype, quote_plus(params['session_request']), request_id)
-    LOG('license_url: {}'.format(license_url))
-    play_item.setProperty('inputstream.adaptive.license_key', license_url)
+    license_key = '{}/license?token={}&stype={}&session_request={}&request_id={}'.format(proxy, quote_plus(token), stype, quote_plus(params['session_request']), request_id)
+    LOG('license_key: {}'.format(license_key))
   else:
-    play_item.setProperty('inputstream.adaptive.license_key', '{}|{}&nv-authorizations={}|R{{SSM}}|'.format(license_url, headers, token))
+    license_key = license_url
+    headers += '&nv-authorizations={}'.format(token)
+
+  if kodi_version > 20:
+    play_item.setProperty('inputstream.adaptive.drm_legacy', '{}|{}|{}'.format(license_type, license_key, headers))
+  else:
+    play_item.setProperty('inputstream.adaptive.license_type', license_type)
+    play_item.setProperty('inputstream.adaptive.license_key', '{}|{}|R{{SSM}}|'.format(license_key, headers))
+    play_item.setProperty('inputstream.adaptive.manifest_type', 'mpd')
+    #play_item.setProperty('inputstream.adaptive.manifest_type', 'hls')
 
   play_item.setProperty('inputstream.adaptive.stream_headers', manifest_headers)
   play_item.setProperty('inputstream.adaptive.manifest_headers', manifest_headers)
@@ -206,7 +213,9 @@ def play(params):
     for sub in sublist:
       filename = os.path.join(subfolder, sub['lang'])
       LOG('Converting {}'.format(sub['filename']))
-      response = m.net.session.get(sub['url'], allow_redirects=True)
+      subheaders = m.net.headers.copy()
+      subheaders['x-tcdn-token'] = cdn_token
+      response = m.net.session.get(sub['url'], allow_redirects=True, headers=subheaders)
       content = response.content
       with io.open(filename + '.ttml', 'w', encoding='utf-8', newline='') as handle:
         handle.write(content.decode('utf-8'))
