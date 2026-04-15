@@ -123,7 +123,7 @@ def play(params):
   manifest_headers = 'User-Agent=' + useragent
 
   if True: #stype in ['tv', 'u7d', 'rec']:
-    cdn_token = m.cache.load('cdn.conf')
+    cdn_token = m.cache.load('cdn.conf', 60)
     if not cdn_token:
       cdn_token = m.get_cdntoken()
       m.cache.save_file('cdn.conf', cdn_token)

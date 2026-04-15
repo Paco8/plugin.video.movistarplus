@@ -14,6 +14,7 @@ class CustomAdapter(HTTPAdapter, object):
   def init_poolmanager(self, connections, maxsize, block=False):
     ctx = ssl.create_default_context()
     ctx.options |= 0x4 # OP_LEGACY_SERVER_CONNECT
+    ctx.set_ciphers('DEFAULT:!BRAINPOOL')
     self.poolmanager = PoolManager(
         num_pools=connections,
         maxsize=maxsize,

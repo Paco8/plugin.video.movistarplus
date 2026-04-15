@@ -1332,7 +1332,7 @@ class Movistar(object):
       shutil.copyfile(self.cache.config_directory + 'credentials.json', filename)
 
     def delete_session_files(self):
-      for f in ['access_token.conf', 'account.json', 'device_id.conf', 'devices.json', 'profile_id.conf', 'tokens.json', 'channels2.json', 'channels_UHD.json', 'channels_HD.json', 'epg2.json', 'epg_UHD.json', 'epg_HD.json']:
+      for f in ['access_token.conf', 'account.json', 'device_id.conf', 'devices.json', 'profile_id.conf', 'tokens.json', 'channels2.json', 'channels_UHD.json', 'channels_HD.json', 'epg2.json', 'epg_UHD.json', 'epg_HD.json', 'cdn.conf']:
         self.cache.remove_file(f)
 
     def get_profile_image_url(self, img_id):
