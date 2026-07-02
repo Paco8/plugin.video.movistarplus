@@ -32,5 +32,6 @@ endpoints = {
     "setUpStream": "https://alkasvaspub.imagenio.telefonica.net/asvas/ccs/{PID}/{deviceCode}/{PLAYREADYID}/Session",
     "tearDownStream": "https://alkasvaspub.imagenio.telefonica.net/asvas/ccs/{PID}/{deviceCode}/{PLAYREADYID}/Session/{SessionID}",
     "token": "https://auth.dof6.com/auth/oauth2/token?deviceClass={deviceType}",
-    "ultimasreproducciones": "https://perso.dof6.com/movistarplus/{deviceType}/users/{DIGITALPLUSUSERIDC}/viewings?profile={PROFILE}&container=trackedseries&mediaType=FOTOH&idsOnly={idsOnly}&accountNumber={ACCOUNTNUMBER}&version=8&start={start}&end={end}&mdrm={mdrm}&tlsstream=true&demarcation={demarcation}"
+    "ultimasreproducciones": "https://perso.dof6.com/movistarplus/{deviceType}/users/{DIGITALPLUSUSERIDC}/viewings?profile={PROFILE}&container=trackedseries&mediaType=FOTOH&idsOnly={idsOnly}&accountNumber={ACCOUNTNUMBER}&version=8&start={start}&end={end}&mdrm={mdrm}&tlsstream=true&demarcation={demarcation}",
+    "watermarks": "https://ottcache.dof6.com/movistarplus/{deviceType}/channels/{uid}/watermarks?profile={profile}&mdrm=true"
 }

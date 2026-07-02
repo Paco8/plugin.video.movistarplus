@@ -50,9 +50,11 @@
         <setting label="30316" type="action" id="create_iptv_settings" action="RunPlugin(plugin://plugin.video.movistarplus/?action=create_iptv_settings)" option="close"/>
 
         <setting type="sep"/>
+        <!--
         <setting label="30317" type="bool" id="use_external_epg" default="true"/>
         <setting label="30318" id="epg_url" type="text" default="https://raw.githubusercontent.com/davidmuma/EPG_dobleM/master/guiafanart_color.xml.gz" enable="eq(-1,true)"/>
         <setting type="sep"/>
+        -->
 
         <setting label="30305" type="bool" id="export_epg" default="false"/>
         <setting label="30315" type="number" id="export_days" default="2" enable="eq(-1,true)"/>

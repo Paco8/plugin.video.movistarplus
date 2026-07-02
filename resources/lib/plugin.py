@@ -8,6 +8,8 @@ import sys
 import json
 import io
 import os.path
+from datetime import datetime, timedelta
+from .timeconv import isodate2date
 
 import xbmc
 import xbmcgui
@@ -96,13 +98,12 @@ def play(params):
       #  url = url.replace('DASH_WPC_WIDEVINE', 'DASH_TV_WIDEVINE')
 
   # U7D from start and end times
-  if stype == 'tv' and all(param in params for param in ['cas_id', 'start_time', 'end_time']):
-    from datetime import datetime
-    start = datetime.utcfromtimestamp(int(params['start_time']))
-    end = datetime.utcfromtimestamp(int(params['end_time']))
-    catchup_url = 'https://stover-wp0.cdn.telefonica.com/{cas_id}/vxfmt=dp/Manifest.mpd?device_profile=DASH_TV_WIDEVINE&start_time={start_time}&end_time={end_time}'
-    url = catchup_url.format(cas_id=params['cas_id'], start_time=start.strftime('%Y-%m-%dT%H:%M:%SZ'), end_time=end.strftime('%Y-%m-%dT%H:%M:%SZ'))
-    LOG('url from capchup: {}'.format(url))
+  #if stype == 'tv' and all(param in params for param in ['cas_id', 'start_time', 'end_time']):
+  #  start = datetime.utcfromtimestamp(int(params['start_time']))
+  #  end = datetime.utcfromtimestamp(int(params['end_time']))
+  #  catchup_url = 'https://stover-wp0.cdn.telefonica.com/{cas_id}/vxfmt=dp/Manifest.mpd?device_profile=DASH_TV_WIDEVINE&start_time={start_time}&end_time={end_time}'
+  #  url = catchup_url.format(cas_id=params['cas_id'], start_time=start.strftime('%Y-%m-%dT%H:%M:%SZ'), end_time=end.strftime('%Y-%m-%dT%H:%M:%SZ'))
+  #  LOG('url from capchup: {}'.format(url))
 
 
   # Read the proxy address
@@ -126,7 +127,14 @@ def play(params):
     cdn_token = m.cache.load('cdn.conf', 60)
     if not cdn_token:
       cdn_token = m.get_cdntoken()
-      m.cache.save_file('cdn.conf', cdn_token)
+      if not cdn_token:
+        time.sleep(2)
+        cdn_token = m.get_cdntoken()
+      if cdn_token:
+         m.cache.save_file('cdn.conf', cdn_token)
+      else:
+        show_notification('Ha pasado algo')
+        return
     #LOG('cdn_token: {}'.format(cdn_token))
     manifest_headers += '&x-tcdn-token=' + cdn_token
 
@@ -239,32 +247,39 @@ def play(params):
   xbmcplugin.setResolvedUrl(_handle, True, listitem=play_item)
 
   LOG('**** session_opened: {}'.format(session_opened))
-  is_sport_channel = (stype == 'tv' and channel_id in ['MLIGA', 'DAZNLI', 'MLIG1', 'CHAPIO', 'CHAP1', 'CHAP2', 'MLIGUH', 'CHAUHD', 'CHUHD1'])
-  if session_opened or is_sport_channel:
-    if is_sport_channel:
-      last_time = 0 #time.time()
-      window = xbmcgui.Window(12005)
-      label = xbmcgui.ControlLabel(0, 0, 400, 20, m.account['id'], textColor='0xFFFFFFFF', alignment=6)
+  watermarks = []
+  if stype == 'tv' and 'uid' in params:
+    watermarks = m.get_watermarks(params['uid'])
+    LOG('watermarks: {}'.format(watermarks))
+
+  if session_opened or watermarks:
+    window = xbmcgui.Window(12005)
+    label = xbmcgui.ControlLabel(0, 0, 400, 20, m.account['id'], textColor='0xFFFFFFFF', alignment=6)
     from .player import MyPlayer
     player = MyPlayer()
     monitor = xbmc.Monitor()
     while not monitor.abortRequested() and player.running:
       monitor.waitForAbort(10)
       #LOG('**** waiting')
-      if is_sport_channel and player.isPlaying():
-        now = time.time()
-        if now - last_time >= 15*60:
-          last_time = now
-          #show_notification(m.account['id'], xbmcgui.NOTIFICATION_INFO)
-          w = window.getWidth()
-          h = window.getHeight()
-          #LOG('window h: {} w: {}'.format(h, w))
-          pos_x = w-label.getWidth()-60
-          pos_y = h-200
-          label.setPosition(pos_x, pos_y)
-          window.addControl(label)
-          time.sleep(20)
-          window.removeControl(label)
+      if player.isPlaying() and watermarks:
+        now = isodate2date(datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'))
+        for wm in list(watermarks):
+          start = isodate2date(wm['start'])
+          stop = isodate2date(wm['stop'])
+          if now >= start:
+            watermarks.remove(wm)
+            if now < stop:
+               duration = (stop - start).total_seconds()
+               #show_notification(m.account['id'], xbmcgui.NOTIFICATION_INFO)
+               w = window.getWidth()
+               h = window.getHeight()
+               #LOG('window h: {} w: {}'.format(h, w))
+               pos_x = w-label.getWidth()-60
+               pos_y = h-200
+               label.setPosition(pos_x, pos_y)
+               window.addControl(label)
+               time.sleep(duration)
+               window.removeControl(label)
     if session_opened:
       d = m.delete_session()
       LOG('Delete session: d: {}'.format(d))
@@ -383,6 +398,7 @@ def add_videos(category, ctype, videos, ref=None, url_next=None, url_prev=None, 
 
       url = get_url(action='play', id=t['id'], url=t['url'], session_request=t['session_request'], stype=t['stream_type'])
       if 'show_id' in t: url += '&show_id={}'.format(t['show_id'])
+      if 'uid' in t: url += '&uid={}'.format(t['uid'])
       xbmcplugin.addDirectoryItem(_handle, url, list_item, False)
     elif t['type'] == 'series':
       list_item = xbmcgui.ListItem(label = title_name)
@@ -480,7 +496,6 @@ def list_profiles(params):
 
 def list_epg(params):
   LOG('list_epg: {}'.format(params))
-  from datetime import datetime, timedelta
   from .timeconv import my_strftime
   if 'id' in params:
     if not 'date' in params:
@@ -725,7 +740,7 @@ def create_iptv_settings():
   show_notification(addon.getLocalizedString(30319), xbmcgui.NOTIFICATION_INFO)
   output_file = 'instance-settings-91.xml' if kodi_version > 19 else 'settings.xml'
   epg_url = None
-  if addon.getSettingBool('use_external_epg'):
+  if False: #addon.getSettingBool('use_external_epg'):
     epg_url = addon.getSetting('epg_url')
   try:
     pvr_addon = xbmcaddon.Addon('pvr.iptvsimple')
@@ -752,7 +767,7 @@ def export_epg_now():
   show_notification(addon.getLocalizedString(30310), xbmcgui.NOTIFICATION_INFO)
   m.export_channels_to_m3u8(channels_filename, only_subscribed)
 
-  if not addon.getSettingBool('use_external_epg'):
+  if True: #not addon.getSettingBool('use_external_epg'):
     show_notification(addon.getLocalizedString(30311), xbmcgui.NOTIFICATION_INFO)
     m.export_epg_to_xml(epg_filename, addon.getSettingInt('export_days'), report_progress, only_subscribed)
 

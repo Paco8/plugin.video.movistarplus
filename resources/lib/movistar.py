@@ -661,6 +661,11 @@ class Movistar(object):
         t['session_request'] = '{"contentID":"'+ t['id'] +'", "streamType":"CHN"}'
         t['subscribed'] = self.is_subscribed_channel(c.get('tvProducts', []))
         t['info']['playcount'] = 1 # Set as watched
+        t['uid'] = c.get('Uid')
+        if False and 'links' in c:
+          for l in c['links']:
+            if l['rel'] == 'watermarks':
+              t['watermark_url'] = l['href']
         # epg
         #if add_epg_info:
         #  program = c['Pases'][0]
@@ -1378,8 +1383,8 @@ class Movistar(object):
         if only_subscribed and not t['subscribed']: continue
         url = t['stream']
         if 'cas_id' in t: url += '&cas_id=' + t['cas_id']
-        item = '#EXTINF:-1 tvg-name="{name}" tvg-id="{id}" tvg-logo="{logo}" tvg-chno="{preset}" group-title="Movistar+",{name}\n{stream}\n\n'.format(
-            name=t['name'], id=t['id'], logo=t['logo'], preset=t['preset'], stream=url)
+        item = '#EXTINF:-1 tvg-name="{name}" tvg-id="{id}" tvg-logo="{logo}" tvg-chno="{preset}" {catchup} group-title="Movistar+",{name}\n{stream}\n\n'.format(
+            name=t['name'], id=t['id'], logo=t['logo'], preset=t['preset'], stream=url, catchup='catchup="default" catchup-source="{catchup-id}" catchup-days="7"')
         items.append(item)
       res = '#EXTM3U\n## Movistar+\n{}'.format(''.join(items))
       with io.open(filename, 'w', encoding='utf-8', newline='') as handle:
@@ -1479,7 +1484,7 @@ class Movistar(object):
           if url:
             url = url.replace('&', '&amp;')
           res.append('<programme start="{}" stop="{}" channel="{}"'.format(start, stop, ch['id']) +
-                    #(' catchup-id="{}"'.format(url) if url else "") +
+                    (' catchup-id="{}"'.format(url) if url else "") +
                     '>\n' +
                     '  <title>{}</title>\n'.format(html_escape(e['title'])) +
                     '  <sub-title>{}</sub-title>\n'.format(html_escape(e['subtitle'])))
@@ -1589,3 +1594,21 @@ class Movistar(object):
           content = unicode(content, 'utf-8')
       with io.open(filename, 'w', encoding='utf-8') as handle:
         handle.write(content)
+
+    def get_watermarks(self, uid, test=False):
+      if test:
+        now = datetime.utcnow()
+        watermarks = []
+        start = now + timedelta(seconds=20)
+        for i in range(5):
+          stop = start + timedelta(seconds=18)
+          watermarks.append({
+            'start': start.strftime('%Y-%m-%dT%H:%M:%SZ'),
+            'stop': stop.strftime('%Y-%m-%dT%H:%M:%SZ')
+          })
+          start = start + timedelta(minutes=1)
+        return watermarks
+      else:
+        url = self.endpoints['watermarks'].format(deviceType='webplayer', uid=uid, profile='OTT')
+        data = self.net.load_data(url)
+        return data.get('watermarks', [])
