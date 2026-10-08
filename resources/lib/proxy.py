@@ -38,6 +38,7 @@ import json
 import requests
 import threading
 import socket
+import time
 from contextlib import closing
 
 from .b64 import encode_base64
@@ -54,6 +55,10 @@ session.headers.update({'user-agent': useragent})
 previous_tokens = []
 
 reregister_needed = False
+
+# (connect_timeout, read_timeout) in seconds for requests to upstream (CDN) servers.
+MANIFEST_TIMEOUT = (2, 3)
+
 
 def is_ascii(s):
   try:
@@ -94,7 +99,10 @@ class RequestHandler(BaseHTTPRequestHandler):
               if 'x-tcdn-token' in self.headers:
                 additional_headers['x-tcdn-token'] = self.headers['x-tcdn-token']
               #LOG('additional_headers: {}'.format(additional_headers))
-              response = session.get(url, allow_redirects=True, headers=additional_headers)
+              t0 = time.time()
+              response = session.get(url, allow_redirects=True, headers=additional_headers, timeout=MANIFEST_TIMEOUT)
+              t1 = time.time()
+              LOG('manifest fetch took {:.2f}s'.format(t1 - t0))
               LOG('headers: {}'.format(response.headers))
               baseurl = os.path.dirname(response.url)
               LOG('baseurl: {}'.format(baseurl))
@@ -129,6 +137,8 @@ class RequestHandler(BaseHTTPRequestHandler):
 
               #LOG('content: {}'.format(content))
               manifest_data = content
+              t2 = time.time()
+              LOG('manifest processing took {:.2f}s'.format(t2 - t1))
               self.send_response(200)
               #self.send_header('Content-type', 'application/xml')
               self.send_header('Content-type', 'text/plain')
@@ -138,7 +148,7 @@ class RequestHandler(BaseHTTPRequestHandler):
               pos = path.find('=')
               url = path[pos+1:]
               LOG('subtitle url: {}'.format(url))
-              response = session.get(url, allow_redirects=True)
+              response = session.get(url, allow_redirects=True, timeout=MANIFEST_TIMEOUT)
               content = response.content
               ttml.parse_ttml_from_string(content)
               sub_data = ttml.generate_vtt()
@@ -156,6 +166,10 @@ class RequestHandler(BaseHTTPRequestHandler):
             else:
               self.send_response(404)
               self.end_headers()
+        except (requests.exceptions.Timeout, requests.exceptions.ConnectionError) as e:
+            self.send_response(504)
+            self.end_headers()
+            LOG('Upstream timeout/connection error: {}'.format(str(e)))
         except Exception as e:
             self.send_response(500)
             self.end_headers()
@@ -238,6 +252,10 @@ class RequestHandler(BaseHTTPRequestHandler):
             self.send_response(response.status_code)
             self.end_headers()
             self.wfile.write(license_data)
+        except (requests.exceptions.Timeout, requests.exceptions.ConnectionError) as e:
+            self.send_response(504)
+            self.end_headers()
+            LOG('Upstream timeout/connection error: {}'.format(str(e)))
         except Exception as e:
             self.send_response(500)
             self.end_headers()
